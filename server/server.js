@@ -12,3 +12,11 @@ app.use('/api', router);
 
 const port = 5000;
 server.listen(port, () => `Server running on port ${port}`);
+
+
+const db = require("./config/keys").mongoURI;
+const mongoose = require("mongoose");
+mongoose
+.connect(db, { useNewUrlParser: true })
+.then(() => console.log("MongoDB successfully connected"))
+.catch(err => console.log(err));

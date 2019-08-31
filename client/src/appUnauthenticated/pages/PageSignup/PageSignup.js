@@ -167,11 +167,11 @@ export default function PageSignup(props) {
   };
 
   const handleBlur = name => event => {
-    // if (valueIsOk(name, event.target.value)) {
+    if (valueIsOk(name, event.target.value)) {
       valueIsSet(name, event.target.value)
-    // } else {
-    //   valueError([name]);
-    // }
+    } else {
+      valueError([name]);
+    }
   };
 
   const handleChange = name => event => {
