@@ -185,19 +185,16 @@ export default function PageSignup(props) {
   const handleSubmit = async event => {
     event.preventDefault();
     try {
-      const res = await axios.get(`http://ip-api.com/json`);
       const newUser = { 
         email: values.email,
         firstName: values.firstName,
         lastName: values.lastName,
         username: values.username,
         password: values.password,
-        city: res.data.city,
-        latLng: [res.data.lat, res.data.lon],
       };
       const emptyFields = Object.keys(newUser).filter(key => !newUser[key]);
       if (emptyFields.length === 0) {
-        axios.post(`/users/create`, newUser)
+        axios.post(`/auth/signup`, newUser)
           .then(res => { if (res.status === 200) props.history.push('/login'); })
           .catch(error => {
             const res = error.response.data;
