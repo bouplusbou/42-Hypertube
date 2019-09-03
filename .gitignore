@@ -5,4 +5,4 @@
 
 # Connect keys #
 ######################
-./server/config/keys.js
+server/config/keys.js
