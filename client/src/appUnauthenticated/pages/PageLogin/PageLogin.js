@@ -71,6 +71,20 @@ const SubmitButton = styled.button`
   font-family: Roboto;
   font-size: 1em;
 `;
+const Login42 = styled.a`
+  text-decoration: none;
+  border: none;
+  display: block;
+  margin: 0 auto;
+  margin-top: 40px;
+  background-color: ${props => props.theme.color.red};
+  width: 50%;
+  text-align: center;
+  border-radius: ${props => props.theme.borderRadius};
+  color: ${props => props.theme.color.white};
+  font-family: Roboto;
+  font-size: 1em;
+`;
 const Redirect = styled.section`
   margin-top: 100px;
   color: ${props => props.theme.color.textGrey};
@@ -154,6 +168,7 @@ const StyledInput = styled(Input) `
   }
 `;
 
+
 export default function PageLogin(props) {
 
   const appState = useContext(AppContext);
@@ -226,6 +241,14 @@ export default function PageLogin(props) {
       setValues({ ...values, resetPasswordError: true, resetPasswordHelper: 'Enter a proper email' });
     }
   };
+
+
+  const connectVia42 = async () => {
+    console.log(42);
+    const res = await axios.get(`/auth/42`);
+    console.log(res);
+  }
+
 
   return (
     <Hero>
@@ -314,6 +337,11 @@ export default function PageLogin(props) {
             <SubmitButton type="submit">
               <p>Login</p>
             </SubmitButton>
+            <Login42
+              href="http://localhost:5000/api/auth/42"
+            >
+              42
+            </Login42>
           </Form>
           <Redirect>
             <p>Forgot your password ? <ResetButton onClick={handleOpen}>Reset via your email</ResetButton></p>
