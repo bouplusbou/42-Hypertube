@@ -40,6 +40,7 @@ const Form = styled.form`
 `;
 const SubmitButton = styled.button`
   text-decoration: none;
+  cursor: pointer;
   border: none;
   display: block;
   margin: 0 auto;
@@ -50,7 +51,74 @@ const SubmitButton = styled.button`
   border-radius: ${props => props.theme.borderRadius};
   color: ${props => props.theme.color.white};
   font-family: Roboto;
+  font-size: 1.1em;
+  font-weight: medium;
+  &:hover {
+    background-color: #C50C15;
+  }
+`;
+const LineBreak = styled.div`
+  margin: 0 auto;
+  margin-top: 20px;
+  border: inset 1px rgb(0,0,0,0.2);
+`;
+const Login42 = styled.a`
+  cursor: pointer;
+  padding: 3px;
+  text-decoration: none;
+  border: none;
+  display: grid;
+  grid-template-columns: 2fr 8fr;
+  align-items: center;
+  height: 60px;
+  margin: 0 auto;
+  margin-top: 40px;
+  background-color: #DBDBDB;
+  width: 280px;
+  text-align: center;
+  border-radius: ${props => props.theme.borderRadius};
+  color: black;
+  font-family: Roboto;
   font-size: 1em;
+  font-weight: 500;
+  &:hover {
+    background-color: #BFBFBF;
+  }
+`;
+const TextButton = styled.p`
+  text-align: left;
+  margin-left: 20px;
+`;
+const LoginGoogle = styled.a`
+  cursor: pointer;
+  padding: 3px;
+  text-decoration: none;
+  border: none;
+  display: grid;
+  grid-template-columns: 2fr 8fr;
+  align-items: center;
+  height: 60px;
+  margin: 0 auto;
+  margin-top: 20px;
+  background-color: #4081EC;
+  width: 280px;
+  text-align: center;
+  border-radius: ${props => props.theme.borderRadius};
+  color: ${props => props.theme.color.white};
+  font-family: Roboto;
+  font-size: 1em;
+  font-weight: 500;
+  &:hover {
+    background-color: #1F62CF;
+  }
+`;
+const Logo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: ${props => props.theme.color.white};
+  border-radius: 3px;
+  height: 100%;
 `;
 const Redirect = styled.section`
   margin-top: 100px;
@@ -64,6 +132,9 @@ const Redirect = styled.section`
     font-style: normal;
     font-weight: 500;
     text-decoration: underline;
+    &:hover {
+      color: ${props => props.theme.color.red};
+    }
   }
 `;
 const StyledTextField = styled(TextField) `
@@ -265,12 +336,25 @@ export default function PageSignup(props) {
                   </InputAdornment>
                 }
               />
-              <FormHelperText style={{color: 'red'}} id="password-helper-text">{values.passwordHelper}</FormHelperText>
+              <FormHelperText style={{color: '#ef3a2d'}} id="password-helper-text">{values.passwordHelper}</FormHelperText>
             </FormControl>
             <SubmitButton type="submit">
               <p>Signup</p>
             </SubmitButton>
           </Form>
+          <LineBreak></LineBreak>
+          <Login42 href="http://localhost:5000/api/auth/42">
+            <Logo>
+              <img width="30px" alt="42 &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/42_Logo.svg/1200px-42_Logo.svg.png"/>
+            </Logo>
+            <TextButton>Continue with 42</TextButton>
+          </Login42>
+          <LoginGoogle href="http://localhost:5000/api/auth/google">
+            <Logo>
+              <img width="30px" alt="Google &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"/>
+            </Logo>
+            <TextButton>Continue with Google</TextButton>
+          </LoginGoogle>
           <Redirect>
             <p>Already a member ? <Link to="/login">Login here</Link></p>
           </Redirect>

@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
-import { actionLogin } from '../../../actions/authActions';
 import AppContext from '../../../contexts/AppContext';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
@@ -43,22 +42,9 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
 `;
-// const ErrorBox = styled.section`
-//   background-color: ${props => props.theme.color.ultraLightRed};
-//   color: red;
-//   padding: 5px;
-//   width: 60%;
-//   border: solid 0.5px red;
-//   border-radius: ${props => props.theme.borderRadius};
-//   margin: 0 auto;
-//   margin-top: 40px;
-//   text-align: center;
-//   p {
-//     font-size: 0.8rem;
-//   }
-// `;
 const SubmitButton = styled.button`
   text-decoration: none;
+  cursor: pointer;
   border: none;
   display: block;
   margin: 0 auto;
@@ -69,21 +55,74 @@ const SubmitButton = styled.button`
   border-radius: ${props => props.theme.borderRadius};
   color: ${props => props.theme.color.white};
   font-family: Roboto;
-  font-size: 1em;
+  font-size: 1.1em;
+  font-weight: medium;
+  &:hover {
+    background-color: #C50C15;
+  }
+`;
+const LineBreak = styled.div`
+  margin: 0 auto;
+  margin-top: 20px;
+  border: inset 1px rgb(0,0,0,0.2);
 `;
 const Login42 = styled.a`
+  cursor: pointer;
+  padding: 3px;
   text-decoration: none;
   border: none;
-  display: block;
+  display: grid;
+  grid-template-columns: 2fr 8fr;
+  align-items: center;
+  height: 60px;
   margin: 0 auto;
   margin-top: 40px;
-  background-color: ${props => props.theme.color.red};
-  width: 50%;
+  background-color: #DBDBDB;
+  width: 280px;
+  text-align: center;
+  border-radius: ${props => props.theme.borderRadius};
+  color: black;
+  font-family: Roboto;
+  font-size: 1em;
+  font-weight: 500;
+  &:hover {
+    background-color: #BFBFBF;
+  }
+`;
+const TextButton = styled.p`
+  text-align: left;
+  margin-left: 20px;
+`;
+const LoginGoogle = styled.a`
+  cursor: pointer;
+  padding: 3px;
+  text-decoration: none;
+  border: none;
+  display: grid;
+  grid-template-columns: 2fr 8fr;
+  align-items: center;
+  height: 60px;
+  margin: 0 auto;
+  margin-top: 20px;
+  background-color: #4081EC;
+  width: 280px;
   text-align: center;
   border-radius: ${props => props.theme.borderRadius};
   color: ${props => props.theme.color.white};
   font-family: Roboto;
   font-size: 1em;
+  font-weight: 500;
+  &:hover {
+    background-color: #1F62CF;
+  }
+`;
+const Logo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: ${props => props.theme.color.white};
+  border-radius: 3px;
+  height: 100%;
 `;
 const Redirect = styled.section`
   margin-top: 100px;
@@ -97,6 +136,9 @@ const Redirect = styled.section`
     font-style: normal;
     font-weight: 500;
     text-decoration: underline;
+    &:hover {
+      color: ${props => props.theme.color.red};
+    }
   }
 `;
 const ResetButton = styled.span`
@@ -106,6 +148,9 @@ const ResetButton = styled.span`
   font-weight: 500;
   text-decoration: underline;
   cursor: pointer;
+  &:hover {
+    color: ${props => props.theme.color.red};
+  }
 `;
 const ModalSection = styled.section`
   display: flex;
@@ -202,14 +247,6 @@ export default function PageLogin(props) {
       const res = await axios.post(`/auth/login`, credentials);
       console.log(res);
       // if (res.data.token) await actionLogin(res.data.token);
-      // const resNotif = await axios.get(`/notifications/unseenNotificationsNb?authToken=${res.data.token}`);
-      // if (resNotif.data) appState.setUnseenNotificationsNb(resNotif.data.nb);
-      // const resMsg = await axios.get(`/chat/unreadMessagesNb?authToken=${res.data.token}`);
-      // if (resMsg.data) {
-      //   appState.setUnreadMessagesNb(resMsg.data.nb);
-      //   appState.toggleConnected();
-      //   props.history.push('/search');
-      // }
     } catch(err) {
       if (err.response && err.response.data) {
         setValues({ ...values, error: true, errorMsg: err.response.data.errorMsg});
@@ -241,14 +278,6 @@ export default function PageLogin(props) {
       setValues({ ...values, resetPasswordError: true, resetPasswordHelper: 'Enter a proper email' });
     }
   };
-
-
-  const connectVia42 = async () => {
-    console.log(42);
-    const res = await axios.get(`/auth/42`);
-    console.log(res);
-  }
-
 
   return (
     <Hero>
@@ -337,12 +366,20 @@ export default function PageLogin(props) {
             <SubmitButton type="submit">
               <p>Login</p>
             </SubmitButton>
-            <Login42
-              href="http://localhost:5000/api/auth/42"
-            >
-              42
-            </Login42>
           </Form>
+          <LineBreak></LineBreak>
+          <Login42 href="http://localhost:5000/api/auth/42">
+            <Logo>
+              <img width="30px" alt="42 &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/42_Logo.svg/1200px-42_Logo.svg.png"/>
+            </Logo>
+            <TextButton>Continue with 42</TextButton>
+          </Login42>
+          <LoginGoogle href="http://localhost:5000/api/auth/google">
+            <Logo>
+              <img width="30px" alt="Google &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"/>
+            </Logo>
+            <TextButton>Continue with Google</TextButton>
+          </LoginGoogle>
           <Redirect>
             <p>Forgot your password ? <ResetButton onClick={handleOpen}>Reset via your email</ResetButton></p>
             <p>Not a member yet ? <Link to="/signup">Signup now</Link></p>

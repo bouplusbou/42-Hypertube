@@ -6,7 +6,7 @@ import UnauthenticatedSwitch from './appUnauthenticated/UnauthenticatedSwitch';
 
 const GlobalStyles = createGlobalStyle`
   body {
-    @import url('https://fonts.googleapis.com/css?family=Roboto');
+    @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap');
     font-family: 'Roboto', sans-serif;
   }
 `
