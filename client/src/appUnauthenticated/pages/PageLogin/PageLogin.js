@@ -15,6 +15,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Modal from '@material-ui/core/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { actionLogin } from '../../../actions/authActions';
 
 const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
@@ -213,6 +214,21 @@ const StyledInput = styled(Input) `
   }
 `;
 
+const ErrorBox = styled.section`
+  background-color: ${props => props.theme.color.ultraLightRed};
+  color: red;
+  padding: 5px;
+  width: 60%;
+  border: solid 0.5px red;
+  border-radius: ${props => props.theme.borderRadius};
+  margin: 0 auto;
+  margin-top: 40px;
+  text-align: center;
+  p {
+    font-size: 0.8rem;
+  }
+`;
+
 
 export default function PageLogin(props) {
 
@@ -242,11 +258,12 @@ export default function PageLogin(props) {
     try {
       event.preventDefault();
       const credentials = {username: values.username, password: values.password};
-      // const res = await axios.post(`/auth`, credentials);
-      axios.get(`/auth/login`);
       const res = await axios.post(`/auth/login`, credentials);
-      console.log(res);
-      // if (res.data.token) await actionLogin(res.data.token);
+      if (res.data.authToken) {
+        await actionLogin(res.data.authToken);
+        appState.toggleConnected();
+        props.history.push('/home');
+      }
     } catch(err) {
       if (err.response && err.response.data) {
         setValues({ ...values, error: true, errorMsg: err.response.data.errorMsg});
@@ -358,11 +375,11 @@ export default function PageLogin(props) {
               />
               <FormHelperText style={{color: 'red'}} id="password-helper-text">{values.passwordHelper}</FormHelperText>
             </FormControl>
-            {/* { values.error && 
+            { values.error && 
               <ErrorBox>
                 <p> <span aria-label="Attention" role="img" >⚠️</span> {values.errorMsg}</p>
               </ErrorBox>
-            } */}
+            }
             <SubmitButton type="submit">
               <p>Login</p>
             </SubmitButton>

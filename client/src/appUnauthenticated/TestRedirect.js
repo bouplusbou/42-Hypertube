@@ -1,6 +1,8 @@
 import React, {useEffect} from 'react';
 
-export default function TestHome(props) {
+export default function TestRedirect(props) {
+
+// only to redirect, maybe use HOC instead ?!
 
   useEffect(() => {
     if (props.location.search) {

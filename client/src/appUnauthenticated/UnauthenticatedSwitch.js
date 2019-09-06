@@ -2,9 +2,8 @@ import React from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import PageLogin from './pages/PageLogin/PageLogin';
 import PageSignup from './pages/PageSignup/PageSignup';
-import PageMyProfile from './pages/PageMyProfile/PageMyProfile';
-import PageMyProfileEdit from './pages/PageMyProfileEdit/PageMyProfileEdit';
-import TestHome from './TestHome';
+import Page404Unauth from './pages/Page404Unauth/Page404Unauth';
+import TestRedirect from './TestRedirect';
 
 const UnauthenticatedSwitch = () => (
     <BrowserRouter>
@@ -12,9 +11,8 @@ const UnauthenticatedSwitch = () => (
             <Route exact path='/' component={PageLogin}/>
             <Route exact path='/login' component={PageLogin}/>
             <Route exact path='/signup' component={PageSignup}/>
-            <Route exact path='/home' component={TestHome}/>
-            <Route exact path='/myProfile' component={PageMyProfile}/>
-            <Route exact path='/myProfileEdit' component={PageMyProfileEdit}/>
+            <Route exact path='/redirect' component={TestRedirect}/>
+            <Route component={Page404Unauth}/>
         </Switch>
     </BrowserRouter>
 );
