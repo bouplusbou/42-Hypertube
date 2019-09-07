@@ -5,6 +5,7 @@ const keys = require('../config/keys');
 const UserController = require('../controllers/UserController');
 const passport = require('passport');
 const authenticate = require('../middlewares/authenticate');
+const ObjectID = require('mongodb').ObjectID;
 
 router.route('/userIsAuthenticated')
       .get(authenticate, (req, res) => res.status(200).send('User authenticated'));
@@ -20,10 +21,11 @@ router.route('/google')
 
 router.route('/google/callback')
       .get( passport.authenticate('google', { session: false, failureRedirect: '/login' }),
-      (req, res) => {
-            const mongoId = req.user;
-            const authToken = jwt.sign({ mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });
-            res.redirect("http://localhost:3000/home?authToken=" + authToken);
+      async (req, res) => {
+            const mongoId = new ObjectID(req.user);
+            const authToken = await jwt.sign({ mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });
+            console.log(authToken);
+            res.redirect("http://localhost:3000/redirect?authToken=" + authToken);
       });
 
 router.route('/42')
@@ -31,10 +33,10 @@ router.route('/42')
 
 router.route('/42/callback')
       .get( passport.authenticate('42', { session: false, failureRedirect: '/login' }),
-      (req, res) => {
-            const mongoId = req.user;
-            const authToken = jwt.sign({ mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });
-            res.redirect("http://localhost:3000/home?authToken=" + authToken);
+      async (req, res) => {
+            const mongoId = new ObjectID(req.user);
+            const authToken = await jwt.sign({ mongoId: mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });
+            res.redirect("http://localhost:3000/redirect?authToken=" + authToken);
       });
 
 module.exports = router;

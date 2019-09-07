@@ -211,16 +211,9 @@ export default function PageProfileEdit(props) {
     }
   };
 
-  const handleChange = name => event => {
-    setValues({ ...values, [name]: event.target.value, [`${name+'Error'}`]: false, [`${name+'Helper'}`]: null });
-  };
-
-  const toggleShowCurrentPassword = () => {
-    setValues({ ...values, showCurrentPassword: !values.showCurrentPassword });
-  };
-  const toggleShowNewPassword = () => {
-    setValues({ ...values, showNewPassword: !values.showNewPassword });
-  };
+  const handleChange = name => event => setValues({ ...values, [name]: event.target.value, [`${name+'Error'}`]: false, [`${name+'Helper'}`]: null });
+  const toggleShowCurrentPassword = () => setValues({ ...values, showCurrentPassword: !values.showCurrentPassword });
+  const toggleShowNewPassword = () => setValues({ ...values, showNewPassword: !values.showNewPassword });
 
   const handleSubmit = async event => {
     event.preventDefault();
