@@ -61,6 +61,7 @@ const Value = styled.p`
   font-family: Roboto;
   font-weight: 900;
   color: ${props => props.theme.color.white};
+  word-break: break-word;
 `;
 
 export default function PageMyProfile(props) {
@@ -113,6 +114,14 @@ export default function PageMyProfile(props) {
             <Title>Last Name</Title>
             <Value>{user.lastName}</Value>
           </Field>
+          {/* <LineBreak></LineBreak>
+          <Field>
+            <Title>Password</Title>
+            <Value>********</Value>
+            <ChangePasswordButton>
+              <p><FontAwesomeIcon  style={{fontSize: '15px', color: 'white'}} icon={faLock}/> Change Password</p>
+            </ChangePasswordButton>
+          </Field> */}
         </Container>
       </ProfileSection>
     </Hero>
