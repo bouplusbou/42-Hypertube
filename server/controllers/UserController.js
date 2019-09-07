@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const UserModel = require('../models/UserModel');
 const jwt = require('jsonwebtoken');
 const keys = require('../config/keys');
+const ObjectID = require('mongodb').ObjectID;
 
 const emailIsOK = email => {
       const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -107,8 +108,90 @@ const getMyProfile = async (req, res) => {
     } catch(err) { res.status(401).json({ error: 'something went wrong' }); }
 };
 
+const newProfileIsOK = async (_id, email, firstName, lastName, username) => {
+    try {
+        const helpers = {
+              errors: [],
+              taken: [],
+        };
+        if (!emailIsOK(email)) { helpers.errors.push('email') };
+        if (!firstNameIsOK(firstName)) { helpers.errors.push('firstName') };
+        if (!lastNameIsOK(lastName)) { helpers.errors.push('lastName') };
+        if (!usernameIsOK(username)) { helpers.errors.push('username') };
+        const emailExists = await UserModel.findOne({ email });
+        if (emailExists && emailExists._id.toString() !== _id) { helpers.taken.push('email') };
+        const usernameExists = await UserModel.findOne({ username });
+        if (usernameExists && usernameExists._id.toString() !== _id) { helpers.taken.push('username') };
+        return helpers;
+    } catch(err) {
+        console.log(err);
+    }
+};
+
+const updateProfile = async (req, res) => {
+    try {
+        const { authToken } = req.query;
+        jwt.verify(authToken, keys.JWT_SECRET, async (err, decoded) => {
+            const _id = decoded.mongoId;
+            const { email, firstName, lastName, username } = req.body;
+            const helpers = await newProfileIsOK(_id, email, firstName, lastName, username);
+            if (helpers.errors.length !== 0 || helpers.taken.length !== 0) {
+                res.status(400).json(helpers);
+                return;
+            }
+            const objId = new ObjectID(_id);
+            await User.findOneAndUpdate(
+                {_id: objId},
+                {$set: {email, firstName, lastName, username}}
+            );
+            res.status(200).json({ message: 'Profile edited' });
+        });
+    } catch(err) { console.log(err) }
+};
+
+const updatePassword = async (req, res) => {
+    try {
+        const { authToken } = req.query;
+        jwt.verify(authToken, keys.JWT_SECRET, async (err, decoded) => {
+            const _id = decoded.mongoId;
+            const { currentPassword, newPassword } = req.body;
+            const user = await UserModel.findOne({ _id });
+            if (user !== null) {
+                bcrypt.compare(currentPassword, user.password, (err, result) => {
+                    let errors = [];
+                    if (result) {
+                        const newPasswordIsOk = passwordIsOK(newPassword);
+                        if (newPasswordIsOk === false) {
+                            res.status(400).json('newPassword');
+                            return;
+                        } else {
+                            bcrypt.genSalt(10, function(err, salt) {
+                                bcrypt.hash(newPassword, salt, async (err, hash) => {
+                                    const objId = new ObjectID(_id);
+                                    await User.findOneAndUpdate(
+                                        {_id: objId},
+                                        {$set: {password: hash}}
+                                    );
+                                    res.status(200).json({ message: 'Profile edited' });
+                                });
+                            });
+
+                        }
+                    } else {
+                        res.status(400).json('currentPassword');
+                    }
+                });
+            } else {
+                res.status(401).json({ errorMsg: 'wrong credentials' });
+            }
+        });
+    } catch(err) { console.log(err) }
+};
+
 module.exports = {
     findOrCreateUser,
     loginUser,
     getMyProfile,
+    updateProfile,
+    updatePassword,
 };

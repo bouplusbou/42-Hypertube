@@ -111,6 +111,7 @@ passport.use(
 async function connectMongo() {
     const MONGO_URI = require("./config/keys").MONGO_URI;
     const mongoose = require("mongoose");
+    mongoose.set('useFindAndModify', false);
     try {
         await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
         console.log("MongoDB successfully connected");
