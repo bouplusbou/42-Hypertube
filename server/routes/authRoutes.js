@@ -7,6 +7,10 @@ const passport = require('passport');
 const authenticate = require('../middlewares/authenticate');
 const ObjectID = require('mongodb').ObjectID;
 
+router.route('/failureRedirect')
+      .get( (req, res) => {console.log('inside failure'); res.redirect("http://localhost:3000/myProfile");} );
+
+
 router.route('/userIsAuthenticated')
       .get(authenticate, (req, res) => res.status(200).send('User authenticated'));
 
@@ -28,11 +32,12 @@ router.route('/google/callback')
             res.redirect("http://localhost:3000/redirect?authToken=" + authToken);
       });
 
+
 router.route('/42')
       .get( passport.authenticate('42', { session: false }) );
 
 router.route('/42/callback')
-      .get( passport.authenticate('42', { session: false, failureRedirect: '/login' }),
+      .get( passport.authenticate('42', { session: false, failureRedirect: '/api/auth/failureRedirect' }),
       async (req, res) => {
             const mongoId = new ObjectID(req.user);
             const authToken = await jwt.sign({ mongoId: mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });

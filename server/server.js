@@ -79,29 +79,29 @@ passport.use(
       }
     },
 
-    async function(accessToken, refreshToken, profile, done) {
-        try {
-            const userExists = await User.findOne({ fortyTwoId: profile.id });
-            if (userExists) {
-                return done(null, userExists._id);
-            } else {
-                // DL photo to cloudinary and put URL
-                const user = { 
-                    fortyTwoId: profile.id,
-                    firstName: profile.name.givenName,
-                    lastName: profile.name.familyName,
-                    username: profile.username,
-                    // photo: profile.photos[0].value
-                };
-                let newUser = new User(user);
-                const data = await User.collection.insertOne(newUser)
-                if (data) {
-                    return done(null, data.insertedId);
-                } 
-            }
-        } catch(err) {
-          console.log(err);
-        }
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+          const userExists = await User.findOne({ fortyTwoId: profile.id });
+          if (userExists) {
+              return done(null, userExists._id);
+          } else {
+              // DL photo to cloudinary and put URL
+              const user = { 
+                  fortyTwoId: profile.id,
+                  firstName: profile.name.givenName,
+                  lastName: profile.name.familyName,
+                  username: profile.username,
+                  // photo: profile.photos[0].value
+              };
+              let newUser = new User(user);
+              const data = await User.collection.insertOne(newUser)
+              if (data) {
+                  return done(null, data.insertedId);
+              } 
+          }
+      } catch(err) {
+        console.log(err);
+      }
     }
 ));
 
