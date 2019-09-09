@@ -13,12 +13,17 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+// import cloudinary from 'cloudinary-core';
+
+// import { Image } from 'cloudinary-react';
+
+// const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
   height: 100vh;
 `;
-const LoginSection = styled.section`
+const Section = styled.section`
   display: flex;
   justify-content: center;
   padding-top: 10%;
@@ -119,6 +124,15 @@ const StyledInput = styled(Input) `
     border-bottom: 2px solid ${props => props.theme.color.white};
   }
 `;
+
+
+// const ProfilePhoto = styled(Image) `
+//     height:100%;
+//     width:80px;
+
+//     object-fit:cover;
+// `
+
 
 export default function PageProfileEdit(props) {
 
@@ -224,12 +238,13 @@ export default function PageProfileEdit(props) {
 
   return (
     <Hero>
-      <LoginSection>
+      <Section>
         <FormContainer>
           <CloseEdit to="/myProfile">
             <FontAwesomeIcon  style={{fontSize: '15px', color: 'white'}} icon={faTimes}/>
           </CloseEdit>
-          <h1>Edit Profile</h1>
+          <h1>Edit Profileeerewrew</h1>
+          {/* <ProfilePhoto cloudName='dif6rqidm' publicId={'bcdb83f0-d2e4-11e9-ba91-21b75e95e885'}/> */}
           <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
             <StyledTextField
               id="standard-email"
@@ -290,7 +305,7 @@ export default function PageProfileEdit(props) {
             </SubmitButton>
           </Form>
         </FormContainer>
-      </LoginSection>
+      </Section>
     </Hero>
   );
 }

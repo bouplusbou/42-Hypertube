@@ -20,7 +20,7 @@ router.route('/login')
       .post(async (req, res) => UserController.loginUser(req, res));
 
 router.route('/google')
-      .get( passport.authenticate('google', { session: false, scope: ['profile'] }) );
+      .get( passport.authenticate('google', { session: false, scope: ['profile', 'email'] }) );
 
 router.route('/google/callback')
       .get( passport.authenticate('google', { session: false, failureRedirect: '/api/auth/failureRedirect' }),

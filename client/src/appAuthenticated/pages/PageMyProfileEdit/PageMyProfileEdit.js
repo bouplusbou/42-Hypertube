@@ -12,7 +12,9 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faLock, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faLock, faUser, faImage } from '@fortawesome/free-solid-svg-icons';
+import cloudinary from 'cloudinary-core';
+const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
@@ -57,20 +59,19 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
 `;
-const SubmitButton = styled.button`
+const SubmitButton = styled.div`
   text-decoration: none;
   cursor: pointer;
   border: none;
   display: grid;
-  align-items: center;
   grid-template-columns: 2fr 8fr;
+  align-items: center;
   text-align: center;
   padding: 1px;
   margin: 0 auto;
   margin-top: 20px;
   background-color: gray;
   width: 170px;
-  text-align: center;
   border-radius: ${props => props.theme.borderRadius};
   color: ${props => props.theme.color.white};
   font-family: Roboto;
@@ -125,6 +126,40 @@ const LineBreak = styled.div`
   border: inset 1px rgb(0,0,0,0.2);
 `;
 
+const AvatarContainer = styled.section`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+`;
+const Avatar = styled.img`
+  height: 200px;
+  width: 150px;
+  object-fit:cover;
+  border-radius: ${props => props.theme.borderRadius};
+  margin: 0 auto;
+  background-color: black;
+`;
+const UploadLabel = styled.label`
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  display: grid;
+  grid-template-columns: 2fr 8fr;
+  align-items: center;
+  text-align: center;
+  padding: 15px 1px;
+  margin: 20px auto;
+  background-color: gray;
+  width: 170px;
+  border-radius: ${props => props.theme.borderRadius};
+  color: ${props => props.theme.color.white};
+  font-family: Roboto;
+  font-size: 0.9em;
+  font-weight: bold;
+  &:hover {
+    background-color: #C50C15;
+  }
+`;
 
 export default function PageProfileEdit(props) {
 
@@ -148,6 +183,7 @@ export default function PageProfileEdit(props) {
     currentPasswordHelper: null,
     newPasswordHelper: null,
     usernameHelper: null,
+    avatarPublicId: null,
   });
 
   const authToken = localStorage.getItem('authToken');
@@ -156,9 +192,9 @@ export default function PageProfileEdit(props) {
     let isSubscribed = true;
     async function fetchData() {
       const res = await axios.get(`/users?authToken=${authToken}`);
-      const { username, email, firstName, lastName } = res.data.user;
+      const { username, email, firstName, lastName, avatarPublicId } = res.data.user;
       if (isSubscribed) {
-        setValues( curr => ({...curr, username, email, firstName, lastName}) )
+        setValues( curr => ({...curr, username, email, firstName, lastName, avatarPublicId}) )
       }
     };
     if (authToken) fetchData();
@@ -259,6 +295,20 @@ export default function PageProfileEdit(props) {
     } catch(error) {console.log(error);}
   };
 
+  async function uploadAvatar(event) {
+    event.preventDefault();
+    const file = event.target.files[0];
+    if (file.size && file.size < 1000000) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const image  = reader.result;
+        const res = await axios.post(`/users/uploadAvatarEdit?authToken=${authToken}`, { image })
+        setValues({ ...values, avatarPublicId: res.data.avatarPublicId });
+      }
+    }
+  }
+  
   return (
     <Hero>
       <LoginSection>
@@ -267,6 +317,18 @@ export default function PageProfileEdit(props) {
             <FontAwesomeIcon  style={{fontSize: '15px', color: 'white'}} icon={faTimes}/>
           </CloseEdit>
           <h1>Edit Profile</h1>
+          <AvatarContainer>
+            <Avatar src={cloudinaryCore.url(values.avatarPublicId)}/>
+            <input
+              accept="image/*"
+              style={{ display: 'none' }}
+              id="uploadFileButton"
+              type="file"
+              onChange={uploadAvatar}
+            />
+            <UploadLabel htmlFor="uploadFileButton"><FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faImage}/> Upload a picture</UploadLabel>
+          </AvatarContainer>
+          <LineBreak></LineBreak>
           <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
             <StyledTextField
               id="standard-username"

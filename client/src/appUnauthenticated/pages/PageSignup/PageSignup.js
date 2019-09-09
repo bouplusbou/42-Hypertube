@@ -11,6 +11,10 @@ import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faImage } from '@fortawesome/free-solid-svg-icons';
+import cloudinary from 'cloudinary-core';
+const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
@@ -176,6 +180,40 @@ const StyledInput = styled(Input) `
   }
 `;
 
+const AvatarContainer = styled.section`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+`;
+const Avatar = styled.img`
+  height: 200px;
+  width: 150px;
+  object-fit:cover;
+  border-radius: ${props => props.theme.borderRadius};
+  margin: 0 auto;
+`;
+const UploadLabel = styled.label`
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  display: grid;
+  grid-template-columns: 2fr 8fr;
+  align-items: center;
+  text-align: center;
+  padding: 15px 1px;
+  margin: 20px auto;
+  background-color: gray;
+  width: 170px;
+  border-radius: ${props => props.theme.borderRadius};
+  color: ${props => props.theme.color.white};
+  font-family: Roboto;
+  font-size: 0.9em;
+  font-weight: bold;
+  &:hover {
+    background-color: #C50C15;
+  }
+`;
+
 export default function PageSignup(props) {
 
   const [values, setValues] = useState({
@@ -195,6 +233,9 @@ export default function PageSignup(props) {
     lastNameHelper: null,
     passwordHelper: null,
     usernameHelper: null,
+    avatarPublicId: null,
+    avatarPublicIdError: false,
+    avatarPublicIdHelper: false,
   });
 
   const valueIsOk = (name, value) => {
@@ -215,6 +256,7 @@ export default function PageSignup(props) {
       lastName: 'Between 3 and 15 characters, only letters',
       username: 'Between 6 and 10 characters, only letters',
       password: 'Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character',
+      avatarPublicId: 'Please upload a picture',
     };
     const stateArr = nameArr.map(name => {return { [name]: null, [`${name+'Error'}`]: true, [`${name+'Helper'}`]: errorMsg[name] }});
     const state = stateArr.reduce((acc, curr) => {
@@ -262,6 +304,7 @@ export default function PageSignup(props) {
         lastName: values.lastName,
         username: values.username,
         password: values.password,
+        avatarPublicId: values.avatarPublicId,
       };
       const emptyFields = Object.keys(newUser).filter(key => !newUser[key]);
       if (emptyFields.length === 0) {
@@ -278,11 +321,37 @@ export default function PageSignup(props) {
     } catch(error) {console.log(error);}
   }
 
+  async function uploadAvatar(event) {
+    event.preventDefault();
+    const file = event.target.files[0];
+    if (file.size && file.size < 1000000) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const image  = reader.result;
+        const res = await axios.post(`/users/uploadAvatarSignup`, { image })
+        setValues({ ...values, avatarPublicId: res.data.avatarPublicId, avatarPublicIdError: false, avatarPublicIdHelper: '' });
+      }
+    }
+  }
+
   return (
     <Hero>
       <LoginSection>
         <FormContainer>
           <h1>Signup</h1>
+          <AvatarContainer>
+            <Avatar src={values.avatarPublicId ? cloudinaryCore.url(values.avatarPublicId) : 'http://res.cloudinary.com/dif6rqidm/image/upload/profilePlaceholder'}/>
+            <input
+              accept="image/*"
+              style={{ display: 'none' }}
+              id="uploadFileButton"
+              type="file"
+              onChange={uploadAvatar}
+            />
+            <UploadLabel htmlFor="uploadFileButton"><FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faImage}/> Upload a picture</UploadLabel>
+            {values.avatarPublicIdError && <FormHelperText style={{color: '#ef3a2d'}} id="upload-helper-text">{values.avatarPublicIdHelper}</FormHelperText>}
+          </AvatarContainer>
           <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
             <StyledTextField
               id="standard-email"

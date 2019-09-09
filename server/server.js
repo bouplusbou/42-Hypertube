@@ -8,7 +8,8 @@ const passport = require("passport");
 const keys = require("./config/keys");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FortyTwoStrategy = require('passport-42').Strategy;
-
+const cloudinary = require(`./Tools/Cloudinary`);
+const uuidv1 = require('uuid/v1');
 
 app.use(bodyParser.json({limit: '10mb', extended: true}))
 app.use(bodyParser.urlencoded({limit: '10mb', extended: true}))
@@ -16,14 +17,8 @@ app.use(cookieParser());
 app.use(passport.initialize());
 app.use('/api', router);
 
-
-passport.serializeUser(function(user, done) {
-    done(null, user);
-});
-   
-passport.deserializeUser(function(user, done) {
-    done(null, user);
-});
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
 
 passport.use(new GoogleStrategy({
     clientID: keys.GOOGLE_CLIENT_ID,
@@ -43,14 +38,15 @@ passport.use(new GoogleStrategy({
             username = profile.name.givenName+profile.name.familyName + Math.floor(Math.random() * 100)
           }
         }
-        // DL photo to cloudinary and put URL
+        const avatarPublicId = uuidv1();
+        await cloudinary.uploader.upload(profile.photos[0].value, { public_id: avatarPublicId });
         const user = { 
           googleId: profile.id,
           email: profile.emails[0].value,
           firstName: profile.name.givenName,
           lastName: profile.name.familyName,
-          username: username,
-          // photo: profile.photos[0].value
+          username,
+          avatarPublicId,
         };
         let newUser = new User(user);
         const data = await User.collection.insertOne(newUser)
@@ -95,14 +91,15 @@ passport.use(
                 username = await profile.username + Math.floor(Math.random() * 100)
               }
             }
-            // DL photo to cloudinary and put URL
+            const avatarPublicId = uuidv1();
+            await cloudinary.uploader.upload(profile.photos[0].value, { public_id: avatarPublicId });
             const user = { 
                 fortyTwoId: profile.id,
                 email: profile.emails[0].value,
                 firstName: profile.name.givenName,
                 lastName: profile.name.familyName,
                 username: username,
-                // photo: profile.photos[0].value
+                avatarPublicId,
             };
             let newUser = new User(user);
             const data = await User.collection.insertOne(newUser)
