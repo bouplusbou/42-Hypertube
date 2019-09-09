@@ -100,12 +100,15 @@ const getMyProfile = async (req, res) => {
         jwt.verify(authToken, keys.JWT_SECRET, async (err, decoded) => {
             const _id = decoded.mongoId;
             const data = await UserModel.findOne({ _id });
+            let isOAuth = false;
+            if (data.fortyTwoId || data.googleId) isOAuth = true;
             const user = {
                 username: data.username,
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email,
-                avatarPublicId: data.avatarPublicId
+                avatarPublicId: data.avatarPublicId,
+                isOAuth,
             };
             res.status(200).json({ user });
         });
