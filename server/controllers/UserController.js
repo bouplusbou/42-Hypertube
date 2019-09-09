@@ -3,6 +3,8 @@ const UserModel = require('../models/UserModel');
 const jwt = require('jsonwebtoken');
 const keys = require('../config/keys');
 const ObjectID = require('mongodb').ObjectID;
+const cloudinary = require(`../Tools/Cloudinary`);
+const uuidv1 = require('uuid/v1');
 
 const emailIsOK = email => {
       const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -61,9 +63,10 @@ const findOrCreateUser = (req, res) => {
                         firstName: req.body.firstName,
                         lastName: req.body.lastName,
                         username: req.body.username,
-                        password: hash
+                        password: hash,
+                        avatarPublicId: req.body.avatarPublicId,
                     });
-                    const user = await UserModel.collection.insertOne(newUser)
+                    await UserModel.collection.insertOne(newUser)
                     res.status(200).json({ message: 'User created' });
                 });
             });
@@ -102,6 +105,7 @@ const getMyProfile = async (req, res) => {
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email,
+                avatarPublicId: data.avatarPublicId
             };
             res.status(200).json({ user });
         });
@@ -175,7 +179,6 @@ const updatePassword = async (req, res) => {
                                     res.status(200).json({ message: 'Profile edited' });
                                 });
                             });
-
                         }
                     } else {
                         res.status(400).json('currentPassword');
@@ -188,10 +191,37 @@ const updatePassword = async (req, res) => {
     } catch(err) { console.log(err) }
 };
 
+const uploadAvatarSignup = async (req, res) => {
+    try {
+        const avatarPublicId = uuidv1();
+        await cloudinary.uploader.upload(req.body.image, { public_id: avatarPublicId });
+        res.status(200).json({ avatarPublicId });
+    } catch(err) { console.log(err) }
+};
+
+const uploadAvatarEdit = async (req, res) => {
+    try {
+        const { authToken } = req.query;
+        jwt.verify(authToken, keys.JWT_SECRET, async (err, decoded) => {
+            const _id = decoded.mongoId;
+            const avatarPublicId = uuidv1();
+            await cloudinary.uploader.upload(req.body.image, { public_id: avatarPublicId });
+            const objId = new ObjectID(_id);
+            await User.findOneAndUpdate(
+                {_id: objId},
+                {$set: { avatarPublicId }}
+            );
+            res.status(200).json({ avatarPublicId });
+        });
+    } catch(err) { console.log(err) }
+};
+
 module.exports = {
     findOrCreateUser,
     loginUser,
     getMyProfile,
     updateProfile,
     updatePassword,
+    uploadAvatarSignup,
+    uploadAvatarEdit,
 };

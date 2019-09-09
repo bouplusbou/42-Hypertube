@@ -6,7 +6,7 @@ const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
   height: 100vh;
 `;
-const ProfileSection = styled.section`
+const Section = styled.section`
   display: flex;
   justify-content: center;
   padding-top: 10%;
@@ -66,7 +66,7 @@ export default function PageMyProfile(props) {
 
   return (
     <Hero>
-      <ProfileSection>
+      <Section>
         <Container>
           <Link to="/myProfileEdit">
             <Edit>Edit</Edit>
@@ -92,7 +92,7 @@ export default function PageMyProfile(props) {
             <Value>Boucher</Value>
           </Field>
         </Container>
-      </ProfileSection>
+      </Section>
     </Hero>
   );
 }

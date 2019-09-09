@@ -11,4 +11,10 @@ router.route('/updateProfile')
 router.route('/updatePassword')
       .post(async (req, res) => UserController.updatePassword(req, res));
 
+router.route('/uploadAvatarSignup')
+      .post(async (req, res) => UserController.uploadAvatarSignup(req, res));
+
+router.route('/uploadAvatarEdit')
+      .post(async (req, res) => UserController.uploadAvatarEdit(req, res));
+
 module.exports = router;

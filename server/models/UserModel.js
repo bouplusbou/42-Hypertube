@@ -5,23 +5,27 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
   username: {
     type: String,
-    required: false
+    required: true
   },
   firstName: {
     type: String,
-    required: false
+    required: true
   },
   lastName: {
     type: String,
-    required: false
+    required: true
   },
   email: {
     type: String,
-    required: false
+    required: true
   },
   password: {
     type: String,
     required: false
+  },
+  avatarPublicId: {
+    type: String,
+    required: true
   },
   fortyTwoId: {
     type: String,
