@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
@@ -184,6 +184,7 @@ export default function PageProfileEdit(props) {
     newPasswordHelper: null,
     usernameHelper: null,
     avatarPublicId: null,
+    isOAuth: true,
   });
 
   const authToken = localStorage.getItem('authToken');
@@ -192,9 +193,9 @@ export default function PageProfileEdit(props) {
     let isSubscribed = true;
     async function fetchData() {
       const res = await axios.get(`/users?authToken=${authToken}`);
-      const { username, email, firstName, lastName, avatarPublicId } = res.data.user;
+      const { username, email, firstName, lastName, avatarPublicId, isOAuth } = res.data.user;
       if (isSubscribed) {
-        setValues( curr => ({...curr, username, email, firstName, lastName, avatarPublicId}) )
+        setValues( curr => ({...curr, username, email, firstName, lastName, avatarPublicId, isOAuth}) )
       }
     };
     if (authToken) fetchData();
@@ -375,49 +376,53 @@ export default function PageProfileEdit(props) {
               <p>Update Info</p>
             </SubmitButton>
           </Form>
-          <LineBreak></LineBreak>
-          <Form noValidate autoComplete="off" onSubmit={handleSubmitPassword}>
-            <FormControl>
-              <StyledInputLabel htmlFor="adornment-password">Current Password</StyledInputLabel>
-              <StyledInput
-                id="standard-current-password"
-                type={values.showCurrentPassword ? 'text' : 'password'}
-                onBlur={handleBlur('currentPassword')}
-                onChange={handleChange('currentPassword')}
-                error={values.currentPasswordError}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton aria-label="Toggle current password visibility" onClick={toggleShowCurrentPassword}>
-                      {values.showCurrentPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-              <FormHelperText style={{color: '#ef3a2d'}} id="current-password-helper-text">{values.currentPasswordHelper}</FormHelperText>
-            </FormControl>
-            <FormControl>
-              <StyledInputLabel htmlFor="adornment-new-password">New Password</StyledInputLabel>
-              <StyledInput
-                id="standard-new-password"
-                type={values.showNewPassword ? 'text' : 'password'}
-                onBlur={handleBlur('newPassword')}
-                onChange={handleChange('newPassword')}
-                error={values.newPasswordError}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton aria-label="Toggle new password visibility" onClick={toggleShowNewPassword}>
-                      {values.showNewPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-              <FormHelperText style={{color: '#ef3a2d'}} id="new-password-helper-text">{values.newPasswordHelper}</FormHelperText>
-            </FormControl>
-            <SubmitButton>    
-              <FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faLock}/>
-              <p>Update Password</p>
-            </SubmitButton>
-          </Form>
+          {values.isOAuth === false && 
+          <Fragment>
+            <LineBreak></LineBreak>
+            <Form noValidate autoComplete="off" onSubmit={handleSubmitPassword}>
+              <FormControl>
+                <StyledInputLabel htmlFor="adornment-password">Current Password</StyledInputLabel>
+                <StyledInput
+                  id="standard-current-password"
+                  type={values.showCurrentPassword ? 'text' : 'password'}
+                  onBlur={handleBlur('currentPassword')}
+                  onChange={handleChange('currentPassword')}
+                  error={values.currentPasswordError}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton aria-label="Toggle current password visibility" onClick={toggleShowCurrentPassword}>
+                        {values.showCurrentPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+                <FormHelperText style={{color: '#ef3a2d'}} id="current-password-helper-text">{values.currentPasswordHelper}</FormHelperText>
+              </FormControl>
+                <FormControl>
+                  <StyledInputLabel htmlFor="adornment-new-password">New Password</StyledInputLabel>
+                  <StyledInput
+                    id="standard-new-password"
+                    type={values.showNewPassword ? 'text' : 'password'}
+                    onBlur={handleBlur('newPassword')}
+                    onChange={handleChange('newPassword')}
+                    error={values.newPasswordError}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton aria-label="Toggle new password visibility" onClick={toggleShowNewPassword}>
+                          {values.showNewPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                  />
+                  <FormHelperText style={{color: '#ef3a2d'}} id="new-password-helper-text">{values.newPasswordHelper}</FormHelperText>
+                </FormControl>
+              <SubmitButton>    
+                <FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faLock}/>
+                <p>Update Password</p>
+              </SubmitButton>
+            </Form>
+          </Fragment>
+          }
         </FormContainer>
       </LoginSection>
     </Hero>
