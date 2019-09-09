@@ -254,6 +254,7 @@ export default function PageLogin(props) {
   const toggleShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword });
   };
+
   const handleSubmit = async event => {
     try {
       event.preventDefault();
@@ -261,8 +262,8 @@ export default function PageLogin(props) {
       const res = await axios.post(`/auth/login`, credentials);
       if (res.data.authToken) {
         await actionLogin(res.data.authToken);
+        props.history.push('/myProfile');
         appState.toggleConnected();
-        props.history.push('/home');
       }
     } catch(err) {
       if (err.response && err.response.data) {
