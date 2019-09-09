@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
-import { Image } from 'cloudinary-react';
-
+import cloudinary from 'cloudinary-core';
+const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
@@ -70,12 +70,13 @@ const AvatarContainer = styled.section`
   align-items: center;
   flex-direction: column;
 `;
-const Avatar = styled(Image)`
+const Avatar = styled.img`
   height: 200px;
   width: 150px;
   object-fit:cover;
   border-radius: ${props => props.theme.borderRadius};
   margin: 0 auto;
+  background-color: black;
 `;
 
 export default function PageMyProfile(props) {
@@ -111,7 +112,7 @@ export default function PageMyProfile(props) {
           </Link>
           <h1>Profile</h1>
           <AvatarContainer>
-            <Avatar cloudName='dif6rqidm' publicId={user.avatarPublicId}/>
+            <Avatar src={cloudinaryCore.url(user.avatarPublicId)}/>
           </AvatarContainer>
           <Field>
             <Title>Username</Title>

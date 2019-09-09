@@ -13,7 +13,8 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faImage } from '@fortawesome/free-solid-svg-icons';
-import { Image } from 'cloudinary-react';
+import cloudinary from 'cloudinary-core';
+const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
@@ -184,7 +185,7 @@ const AvatarContainer = styled.section`
   align-items: center;
   flex-direction: column;
 `;
-const Avatar = styled(Image)`
+const Avatar = styled.img`
   height: 200px;
   width: 150px;
   object-fit:cover;
@@ -340,7 +341,7 @@ export default function PageSignup(props) {
         <FormContainer>
           <h1>Signup</h1>
           <AvatarContainer>
-            <Avatar cloudName='dif6rqidm' publicId={values.avatarPublicId !== null ? values.avatarPublicId : "profilePlaceholder"}/>
+            <Avatar src={values.avatarPublicId ? cloudinaryCore.url(values.avatarPublicId) : 'http://res.cloudinary.com/dif6rqidm/image/upload/profilePlaceholder'}/>
             <input
               accept="image/*"
               style={{ display: 'none' }}

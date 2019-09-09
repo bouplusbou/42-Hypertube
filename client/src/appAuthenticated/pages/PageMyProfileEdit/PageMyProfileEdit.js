@@ -13,7 +13,8 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faLock, faUser, faImage } from '@fortawesome/free-solid-svg-icons';
-import { Image } from 'cloudinary-react';
+import cloudinary from 'cloudinary-core';
+const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
@@ -130,12 +131,13 @@ const AvatarContainer = styled.section`
   align-items: center;
   flex-direction: column;
 `;
-const Avatar = styled(Image)`
+const Avatar = styled.img`
   height: 200px;
   width: 150px;
   object-fit:cover;
   border-radius: ${props => props.theme.borderRadius};
   margin: 0 auto;
+  background-color: black;
 `;
 const UploadLabel = styled.label`
   text-decoration: none;
@@ -302,7 +304,6 @@ export default function PageProfileEdit(props) {
       reader.onload = async () => {
         const image  = reader.result;
         const res = await axios.post(`/users/uploadAvatarEdit?authToken=${authToken}`, { image })
-        console.log(res.data.avatarPublicId);
         setValues({ ...values, avatarPublicId: res.data.avatarPublicId });
       }
     }
@@ -317,7 +318,7 @@ export default function PageProfileEdit(props) {
           </CloseEdit>
           <h1>Edit Profile</h1>
           <AvatarContainer>
-            <Avatar cloudName='dif6rqidm' publicId={values.avatarPublicId}/>
+            <Avatar src={cloudinaryCore.url(values.avatarPublicId)}/>
             <input
               accept="image/*"
               style={{ display: 'none' }}
