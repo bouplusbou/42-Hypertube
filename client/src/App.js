@@ -5,6 +5,7 @@ import { AppProvider } from './contexts/AppContext';
 import UnauthenticatedSwitch from './appUnauthenticated/UnauthenticatedSwitch';
 import AuthenticatedSwitch from './appAuthenticated/AuthenticatedSwitch';
 import { actionIsAuthenticated } from './actions/authActions';
+import LogoutButton from './appAuthenticated/LogoutButton';
 
 const GlobalStyles = createGlobalStyle`
   body {
@@ -44,7 +45,10 @@ function App() {
         <ThemeProvider theme={StyledCompTheme}>
         {!connected ? <UnauthenticatedSwitch /> 
           :
-          <AuthenticatedSwitch /> 
+          <div>
+            <LogoutButton />
+            <AuthenticatedSwitch /> 
+          </div>
         }
         </ThemeProvider>
       </AppProvider>

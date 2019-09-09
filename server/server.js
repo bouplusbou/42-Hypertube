@@ -25,9 +25,6 @@ passport.deserializeUser(function(user, done) {
     done(null, user);
 });
 
-
-
-
 passport.use(new GoogleStrategy({
     clientID: keys.GOOGLE_CLIENT_ID,
     clientSecret: keys.GOOGLE_CLIENT_SECRET,
@@ -37,16 +34,22 @@ passport.use(new GoogleStrategy({
     try {
       const userExists = await User.findOne({ googleId: profile.id });
       if (userExists) {
-        // console.log('user already exists');
-        // console.log(userExists._id);
         return done(null, userExists._id);
       } else {
+        let username = profile.name.givenName+profile.name.familyName;
+        const usernameExists = await User.findOne({ username: profile.name.givenName+profile.name.familyName });
+        if (usernameExists) {
+          while (username === profile.name.givenName+profile.name.familyName) {
+            username = profile.name.givenName+profile.name.familyName + Math.floor(Math.random() * 100)
+          }
+        }
         // DL photo to cloudinary and put URL
         const user = { 
           googleId: profile.id,
+          email: profile.emails[0].value,
           firstName: profile.name.givenName,
           lastName: profile.name.familyName,
-          username: profile.name.givenName+profile.name.familyName,
+          username: username,
           // photo: profile.photos[0].value
         };
         let newUser = new User(user);
@@ -79,29 +82,37 @@ passport.use(
       }
     },
 
-    async function(accessToken, refreshToken, profile, done) {
-        try {
-            const userExists = await User.findOne({ fortyTwoId: profile.id });
-            if (userExists) {
-                return done(null, userExists._id);
-            } else {
-                // DL photo to cloudinary and put URL
-                const user = { 
-                    fortyTwoId: profile.id,
-                    firstName: profile.name.givenName,
-                    lastName: profile.name.familyName,
-                    username: profile.username,
-                    // photo: profile.photos[0].value
-                };
-                let newUser = new User(user);
-                const data = await User.collection.insertOne(newUser)
-                if (data) {
-                    return done(null, data.insertedId);
-                } 
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+          const userExists = await User.findOne({ fortyTwoId: profile.id });
+          if (userExists) {
+              return done(null, userExists._id);
+          } else {
+            let username = profile.username;
+            const usernameExists = await User.findOne({ username: profile.username });
+            if (usernameExists) {
+              while (username === profile.username) {
+                username = await profile.username + Math.floor(Math.random() * 100)
+              }
             }
-        } catch(err) {
-          console.log(err);
-        }
+            // DL photo to cloudinary and put URL
+            const user = { 
+                fortyTwoId: profile.id,
+                email: profile.emails[0].value,
+                firstName: profile.name.givenName,
+                lastName: profile.name.familyName,
+                username: username,
+                // photo: profile.photos[0].value
+            };
+            let newUser = new User(user);
+            const data = await User.collection.insertOne(newUser)
+            if (data) {
+                return done(null, data.insertedId);
+            } 
+          }
+      } catch(err) {
+        console.log(err);
+      }
     }
 ));
 

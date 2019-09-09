@@ -77,9 +77,9 @@ const loginUser = async (req, res) => {
         const { username, password } = req.body;
         const user = await UserModel.findOne({ username });
         if (user !== null) {
-            bcrypt.compare(password, user.password, (err, result) => {
+            bcrypt.compare(password, user.password, async (err, result) => {
                 if (result) {
-                    const authToken = jwt.sign({ mongoId: user._id }, keys.JWT_SECRET, { expiresIn: '6h' });
+                    const authToken = await jwt.sign({ mongoId: user._id }, keys.JWT_SECRET, { expiresIn: '6h' });
                     res.status(200).json({ authToken });
                 } else {
                     res.status(401).json({ errorMsg: 'wrong credentials' });
