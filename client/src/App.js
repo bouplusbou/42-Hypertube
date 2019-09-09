@@ -42,7 +42,7 @@ function App() {
       <GlobalStyles />
       <AppProvider value={appState}>
         <ThemeProvider theme={StyledCompTheme}>
-        {!connected ? <UnauthenticatedSwitch /> 
+        {connected ? <UnauthenticatedSwitch /> 
           :
           <AuthenticatedSwitch /> 
         }

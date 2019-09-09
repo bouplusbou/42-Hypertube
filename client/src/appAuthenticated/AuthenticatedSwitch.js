@@ -4,6 +4,7 @@ import PageMyProfile from './pages/PageMyProfile/PageMyProfile';
 import PageMyProfileEdit from './pages/PageMyProfileEdit/PageMyProfileEdit';
 import Page404Auth from './pages/Page404Auth/Page404Auth';
 import TestHome from './TestHome';
+import Search from './PageSearch';
 
 const AuthenticatedSwitch = () => (
     <BrowserRouter>
@@ -13,6 +14,7 @@ const AuthenticatedSwitch = () => (
             <Route exact path='/myProfileEdit' component={PageMyProfileEdit}/>
             <Route exact path='/login' component={TestHome}/>
             <Route exact path='/signup' component={TestHome}/>
+            <Route exact path='/search' component={Search}/>
             <Route component={Page404Auth}/>
         </Switch>
     </BrowserRouter>
