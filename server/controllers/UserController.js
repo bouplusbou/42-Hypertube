@@ -185,7 +185,6 @@ const updatePassword = async (req, res) => {
             const user = await UserModel.findOne({ _id });
             if (user !== null) {
                 bcrypt.compare(currentPassword, user.password, (err, result) => {
-                    let errors = [];
                     if (result) {
                         const newPasswordIsOk = passwordIsOK(newPassword);
                         if (newPasswordIsOk === false) {
@@ -242,7 +241,11 @@ const uploadAvatarEdit = async (req, res) => {
 const resetPasswordEmail = async (req, res) => {
     try {
         const data = await UserModel.findOne({ email: req.body.email });
-        if (data) sendEmail(req.body.email, data.emailHash);
+        if (data) {
+            let isOAuth = false;
+            if (data.fortyTwoId || data.googleId) isOAuth = true;
+            sendEmail(isOAuth, req.body.email, data.emailHash);
+        }
         res.status(200).send('Query treated');
     } catch(err) { console.log(err) }
 };
