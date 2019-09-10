@@ -94,7 +94,7 @@ export default function HeaderComp() {
                 console.log(err);
             }
         }
-        fetchData();
+        if (authToken) fetchData();
         return () => isSubscribed = false;
     })
 
