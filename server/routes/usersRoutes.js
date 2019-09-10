@@ -11,6 +11,7 @@ router.post('/uploadAvatarSignup', authenticate, async (req, res) => UserControl
 router.post('/updateProfile', authenticate, async (req, res) => UserController.updateProfile(req, res));
 router.post('/updatePassword', authenticate, async (req, res) => UserController.updatePassword(req, res));
 router.post('/uploadAvatarEdit', authenticate, async (req, res) => UserController.uploadAvatarEdit(req, res));
+router.get('/getAvatar', authenticate, async (req, res) => UserController.getAvatar(req, res));
 router.get('/:username', authenticate, async (req, res) => UserController.getProfile(req, res));
 
 module.exports = router;
