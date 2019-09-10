@@ -48,6 +48,7 @@ const newUserIsOK = async (email, firstName, lastName, username, password) => {
 
 const findOrCreateUser = (req, res) => {
     try {
+        console.log(req.body)
         const manageNewUser = async ({ email, firstName, lastName, username, password }) => {
             const helpers = await newUserIsOK(email, firstName, lastName, username, password);
             if (helpers.errors.length !== 0 || helpers.taken.length !== 0) {
