@@ -115,6 +115,23 @@ const getMyProfile = async (req, res) => {
     } catch(err) { res.status(401).json({ error: 'something went wrong' }); }
 };
 
+const getProfile = async (req, res) => {
+    try {
+        const data = await UserModel.findOne({ username: req.params.username });
+        if (data !== null) {
+            const user = {
+                username: data.username,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                avatarPublicId: data.avatarPublicId,
+            };
+            res.status(200).json({ user });
+        } else {
+            res.status(400).json({ error: 'user does not exists' });
+        }
+    } catch(err) { res.status(401).json({ error: 'something went wrong' }); }
+};
+
 const newProfileIsOK = async (_id, email, firstName, lastName, username) => {
     try {
         const helpers = {
@@ -223,6 +240,7 @@ module.exports = {
     findOrCreateUser,
     loginUser,
     getMyProfile,
+    getProfile,
     updateProfile,
     updatePassword,
     uploadAvatarSignup,
