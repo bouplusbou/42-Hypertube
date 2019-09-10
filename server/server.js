@@ -39,6 +39,7 @@ passport.use(new GoogleStrategy({
           }
         }
         const avatarPublicId = uuidv1();
+        const emailHash = uuidv1();
         await cloudinary.uploader.upload(profile.photos[0].value, { public_id: avatarPublicId });
         const user = { 
           googleId: profile.id,
@@ -47,6 +48,7 @@ passport.use(new GoogleStrategy({
           lastName: profile.name.familyName,
           username,
           avatarPublicId,
+          emailHash,
         };
         let newUser = new User(user);
         const data = await User.collection.insertOne(newUser)
@@ -92,6 +94,7 @@ passport.use(
               }
             }
             const avatarPublicId = uuidv1();
+            const emailHash = uuidv1();
             await cloudinary.uploader.upload(profile.photos[0].value, { public_id: avatarPublicId });
             const user = { 
                 fortyTwoId: profile.id,
@@ -100,6 +103,7 @@ passport.use(
                 lastName: profile.name.familyName,
                 username: username,
                 avatarPublicId,
+                emailHash,
             };
             let newUser = new User(user);
             const data = await User.collection.insertOne(newUser)

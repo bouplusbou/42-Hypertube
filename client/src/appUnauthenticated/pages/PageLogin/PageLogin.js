@@ -51,7 +51,7 @@ const SubmitButton = styled.button`
   margin: 0 auto;
   margin-top: 40px;
   background-color: ${props => props.theme.color.red};
-  width: 50%;
+  width: 150px;
   text-align: center;
   border-radius: ${props => props.theme.borderRadius};
   color: ${props => props.theme.color.white};
@@ -163,15 +163,15 @@ const ModalSection = styled.section`
 const ModalContainer = styled.section`
   flex-basis: 550px;
   padding: 50px;
-  background-color: ${props => props.theme.color.white};
+  background-color: ${props => props.theme.color.black};
   border-radius: ${props => props.theme.borderRadius};
   box-shadow: 0px 42px 60px rgba(0, 0, 0, 0.25);
   outline: none;
+  color: ${props => props.theme.color.white};
   h1 {
     font-size: 1.5rem;
     text-align: center;
     font-family: Roboto;
-    color: ${props => props.theme.color.white};
   }
 `;
 
@@ -282,9 +282,12 @@ export default function PageLogin(props) {
     if (!emailIsOk(values.email)) {
       setValues({ ...values, resetPasswordError: true, resetPasswordHelper: 'Enter a proper email' });
     } else {
-      axios.post(`/users/resetPasswordEmail`, {email: values.email})
-        .then(res => { setValues({ ...values, resetPasswordSubmited: true }); })
-        .catch(err => {});
+      try {
+        axios.post(`/users/resetPasswordEmail`, {email: values.email})
+        setValues({ ...values, resetPasswordSubmited: true });
+      } catch(err) {
+        console.log(err);
+      }
     }
   };
 
@@ -326,7 +329,7 @@ export default function PageLogin(props) {
             <h1>Forgot Password</h1>
             <p>We will send you an email with instructions on how to reset your password.</p>
             <Form noValidate autoComplete="off" onSubmit={handleResetPasswordSubmit}>
-              <TextField
+              <StyledTextField
                 id="standard-email"
                 label="Email"
                 required={true}

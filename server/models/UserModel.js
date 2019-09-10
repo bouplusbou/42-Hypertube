@@ -35,6 +35,10 @@ const UserSchema = new Schema({
     type: String,
     required: false
   },
+  emailHash: {
+    type: String,
+    required: true
+  },
   date: {
     type: Date,
     default: Date.now

@@ -5,6 +5,7 @@ const keys = require('../config/keys');
 const ObjectID = require('mongodb').ObjectID;
 const cloudinary = require(`../Tools/Cloudinary`);
 const uuidv1 = require('uuid/v1');
+const sendEmail = require('../Tools/Email.js');
 
 const emailIsOK = email => {
       const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -58,6 +59,7 @@ const findOrCreateUser = (req, res) => {
             }
             bcrypt.genSalt(10, function(err, salt) {
                 bcrypt.hash(password, salt, async (err, hash) => {
+                    const emailHash = uuidv1();
                     const newUser = new User({
                         email: req.body.email,
                         firstName: req.body.firstName,
@@ -65,6 +67,7 @@ const findOrCreateUser = (req, res) => {
                         username: req.body.username,
                         password: hash,
                         avatarPublicId: req.body.avatarPublicId,
+                        emailHash,
                     });
                     await UserModel.collection.insertOne(newUser)
                     res.status(200).json({ message: 'User created' });
@@ -85,11 +88,11 @@ const loginUser = async (req, res) => {
                     const authToken = await jwt.sign({ mongoId: user._id }, keys.JWT_SECRET, { expiresIn: '6h' });
                     res.status(200).json({ authToken });
                 } else {
-                    res.status(401).json({ errorMsg: 'wrong credentials' });
+                    res.status(401).json({ errorMsg: 'Wrong credentials' });
                 }
             });
         } else {
-            res.status(401).json({ errorMsg: 'wrong credentials' });
+            res.status(401).json({ errorMsg: 'Wrong credentials' });
         }
     } catch(err) { res.status(401).json({ errorMsg: 'something went wrong' }); }
 };
@@ -205,7 +208,7 @@ const updatePassword = async (req, res) => {
                     }
                 });
             } else {
-                res.status(401).json({ errorMsg: 'wrong credentials' });
+                res.status(401).json({ errorMsg: 'Wrong credentials' });
             }
         });
     } catch(err) { console.log(err) }
@@ -236,6 +239,49 @@ const uploadAvatarEdit = async (req, res) => {
     } catch(err) { console.log(err) }
 };
 
+const resetPasswordEmail = async (req, res) => {
+    try {
+        const data = await UserModel.findOne({ email: req.body.email });
+        if (data) sendEmail(req.body.email, data.emailHash);
+        res.status(200).send('Query treated');
+    } catch(err) { console.log(err) }
+};
+
+const emailHashIsValid = async (req, res) => {
+    try {
+        const data = await UserModel.findOne({ emailHash: req.body.emailHash });
+        if (data) {
+            res.status(200).send('emailHash is OK');
+        } else {
+            res.status(400).send('emailHash is NOT Ok');
+        }
+    } catch(err) { console.log(err) }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        const regex = /^(?:(?=.*?[A-Z])(?:(?=.*?[0-9])(?=.*?[-!@#$%^&*()_[\]{},.<>+=])|(?=.*?[a-z])(?:(?=.*?[0-9])|(?=.*?[-!@#$%^&*()_[\]{},.<>+=])))|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[-!@#$%^&*()_[\]{},.<>+=]))[A-Za-z0-9!@#$%^&*()_[\]{},.<>+=-]{6,50}$/;
+        if (regex.test(String(req.body.newPassword))) {
+            const data = await UserModel.findOne({ emailHash: req.body.emailHash });
+            if (data) {
+                bcrypt.genSalt(10, function(err, salt) {
+                    bcrypt.hash(req.body.newPassword, salt, async (err, hash) => {
+                        await User.findOneAndUpdate(
+                            {emailHash: req.body.emailHash},
+                            {$set: {password: hash}}
+                        );
+                        res.status(200).json({ message: 'Password changed' });
+                    });
+                });
+            } else {
+                res.status(401).send('Link error');
+            }
+        } else {
+            res.status(400).send('Invalid password');
+        }
+    } catch(err) { console.log(err) }
+};
+
 module.exports = {
     findOrCreateUser,
     loginUser,
@@ -245,4 +291,7 @@ module.exports = {
     updatePassword,
     uploadAvatarSignup,
     uploadAvatarEdit,
+    resetPasswordEmail,
+    emailHashIsValid,
+    resetPassword,
 };
