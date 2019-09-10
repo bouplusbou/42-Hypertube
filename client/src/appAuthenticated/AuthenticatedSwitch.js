@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 import PageMyProfile from './pages/PageMyProfile/PageMyProfile';
 import PageMyProfileEdit from './pages/PageMyProfileEdit/PageMyProfileEdit';
 import Page404Auth from './pages/Page404Auth/Page404Auth';
@@ -7,18 +7,16 @@ import PageProfile from './pages/PageProfile/PageProfile';
 import TestHome from './TestHome';
 
 const AuthenticatedSwitch = () => (
-    <BrowserRouter>
-        <Switch>
-            <Route exact path='/home' component={TestHome}/>
-            <Route exact path='/redirect' component={TestHome}/>
-            <Route exact path='/myProfile' component={PageMyProfile}/>
-            <Route exact path='/myProfileEdit' component={PageMyProfileEdit}/>
-            <Route exact path='/users/:username' component={PageProfile}/>
-            {/* <Route exact path='/login' component={TestHome}/>
-            <Route exact path='/signup' component={TestHome}/> */}
-            <Route component={Page404Auth}/>
-        </Switch>
-    </BrowserRouter>
+    <Switch>
+        <Route exact path='/home' component={TestHome}/>
+        <Route exact path='/redirect' component={TestHome}/>
+        <Route exact path='/myProfile' component={PageMyProfile}/>
+        <Route exact path='/myProfileEdit' component={PageMyProfileEdit}/>
+        <Route exact path='/users/:username' component={PageProfile}/>
+        {/* <Route exact path='/login' component={TestHome}/>
+        <Route exact path='/signup' component={TestHome}/> */}
+        <Route component={Page404Auth}/>
+    </Switch>
 );
 
 export default AuthenticatedSwitch;

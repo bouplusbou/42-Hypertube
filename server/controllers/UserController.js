@@ -285,6 +285,17 @@ const resetPassword = async (req, res) => {
     } catch(err) { console.log(err) }
 };
 
+const getAvatar = async (req, res) => {
+    try {
+        const { authToken } = req.query;
+        jwt.verify(authToken, keys.JWT_SECRET, async (err, decoded) => {
+            const _id = decoded.mongoId;
+            const data = await UserModel.findOne({ _id });
+            res.status(200).json({ avatarPublicId: data.avatarPublicId });
+        });
+    } catch(err) { console.log(err) }
+};
+
 module.exports = {
     findOrCreateUser,
     loginUser,
@@ -297,4 +308,5 @@ module.exports = {
     resetPasswordEmail,
     emailHashIsValid,
     resetPassword,
+    getAvatar,
 };

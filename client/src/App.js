@@ -5,7 +5,8 @@ import { AppProvider } from './contexts/AppContext';
 import UnauthenticatedSwitch from './appUnauthenticated/UnauthenticatedSwitch';
 import AuthenticatedSwitch from './appAuthenticated/AuthenticatedSwitch';
 import { actionIsAuthenticated } from './actions/authActions';
-import LogoutButton from './appAuthenticated/LogoutButton';
+import Header from './appAuthenticated/Header/Header';
+import { BrowserRouter } from 'react-router-dom';
 
 const GlobalStyles = createGlobalStyle`
   body {
@@ -43,13 +44,15 @@ function App() {
       <GlobalStyles />
       <AppProvider value={appState}>
         <ThemeProvider theme={StyledCompTheme}>
-        {!connected ? <UnauthenticatedSwitch /> 
-          :
-          <div>
-            <LogoutButton />
-            <AuthenticatedSwitch /> 
-          </div>
-        }
+          <BrowserRouter>
+          {!connected ? <UnauthenticatedSwitch /> 
+            :
+            <div>
+              <Header /> 
+              <AuthenticatedSwitch /> 
+            </div>
+          }
+          </BrowserRouter>
         </ThemeProvider>
       </AppProvider>
     </Fragment>
