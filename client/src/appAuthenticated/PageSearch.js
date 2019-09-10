@@ -96,8 +96,8 @@ export default function PageSearch() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedOrder, setSelectedOrder] = useState(-1)
-    const [selectedSorting, setSelectedSorting] = useState('rating')
-    const [selectedGenre, setSelectedGenre] = useState("Horror");
+    const [selectedSorting, setSelectedSorting] = useState('year')
+    const [selectedGenre, setSelectedGenre] = useState("orror");
     const genreList = [
         'action',
         'adventure',
@@ -135,20 +135,25 @@ export default function PageSearch() {
     const [displayedMovies, setDisplayedMovies] = useState({ movies: []});
     useEffect(() => {
         const fetchMovies = async () => {
-            let page = 1;
-            let completeResult = []
-            console.log("first request")
-            let res = await axios.get(`https://tv-v2.api-fetch.website/movies/${page}?genre=${selectedGenre}&order=${selectedOrder}&sort=${selectedSorting}`);
-            completeResult.push(...res.data);
-            page++;
-            while (res.data.length !== 0) {
-                console.log(page)
-                res = await axios.get(`https://tv-v2.api-fetch.website/movies/${page}?genre=${selectedGenre}&order=${selectedOrder}&sort=${selectedSorting}`);
-                completeResult.push(...res.data);
-                page++;
+            const terms = {
+                genre: selectedGenre,
+                order: selectedOrder,
+                sort: selectedSorting,
             }
-            setMoviesList({movies: [...completeResult]});
-            setDisplayedMovies({movies: completeResult.slice(0, 20)});
+            const res = await axios.post("/search/genre", terms);
+            // let page = 1;
+            // let completeResult = []
+            // let res = await axios.get(`https://tv-v2.api-fetch.website/movies/${page}?sort=${selectedSorting}&order=${selectedOrder}&genre=${selectedGenre}`);
+            // completeResult = res.data;
+            // page++;
+            // while (res.data.length !== 0) {
+            //     console.log(page, selectedGenre, selectedOrder, selectedSorting);
+            //     res = await axios.get(`https://tv-v2.api-fetch.website/movies/${page}?genre=${selectedGenre}&order=${selectedOrder}&sort=${selectedSorting}`);
+            //     completeResult.push(...res.data);
+            //     page++;
+            // }
+            // setMoviesList({movies: [...completeResult]});
+            // setDisplayedMovies({movies: completeResult.slice(0, 20)});
         }
         fetchMovies();
     }, [selectedGenre, selectedSorting, selectedOrder])
