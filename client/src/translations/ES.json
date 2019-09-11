@@ -30,7 +30,8 @@
         "updateInfoButton": "Editar información",
         "currentPassword": "Contraseña actual",
         "newPassword": "Contraseña nueva",
-        "updatePasswordButton": "Cambiar Contraseña"
+        "updatePasswordButton": "Cambiar Contraseña",
+        "uploadAValidPicture": "Cargue una imagen JPG o PNG válida de menos de 1Mo"
     },
     "profile": {
         "edit": "Editar",

@@ -186,6 +186,8 @@ export default function PageProfileEdit(props) {
     newPasswordHelper: null,
     usernameHelper: null,
     avatarPublicId: null,
+    avatarPublicIdError: false,
+    avatarPublicIdHelper: null,
     isOAuth: true,
   });
 
@@ -224,6 +226,7 @@ export default function PageProfileEdit(props) {
       username: t.errorMsg.username,
       currentPassword: t.errorMsg.currentPassword,
       newPassword: t.errorMsg.newPassword,
+      avatarPublicId: t.errorMsg.uploadAValidPicture,
     };
     const stateArr = nameArr.map(name => {return { [`${name+'Error'}`]: true, [`${name+'Helper'}`]: errorMsg[name] }});
     const state = stateArr.reduce((acc, curr) => {
@@ -298,19 +301,50 @@ export default function PageProfileEdit(props) {
     } catch(error) {console.log(error);}
   };
 
+
   async function uploadAvatar(event) {
     event.preventDefault();
     const file = event.target.files[0];
-    if (file.size && file.size < 1000000) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = async () => {
-        const image  = reader.result;
-        const res = await axios.post(`/users/uploadAvatarEdit?authToken=${authToken}`, { image })
-        setValues({ ...values, avatarPublicId: res.data.avatarPublicId });
+    const reader = new FileReader();
+    reader.onloadend = async (evt) => {
+      if (evt.target.readyState === FileReader.DONE) {
+        const uint = new Uint8Array(evt.target.result)
+        let bytes = []
+        uint.forEach((byte) => {
+            bytes.push(byte.toString(16))
+        })
+        const hex = await bytes.join('').toUpperCase();
+        if (file.size && file.size < 1000000 && (hex === '89504E47' || hex === 'FFD8FFE0')) {
+          reader.readAsDataURL(file);
+          reader.onload = async () => {
+            const image  = reader.result;
+            const res = await axios.post(`/users/uploadAvatarEdit?authToken=${authToken}`, { image })
+            setValues({ ...values, avatarPublicId: res.data.avatarPublicId, avatarPublicIdError: false, avatarPublicIdHelper: '' });
+          }
+        } else if (hex) {
+            setValues({ ...values, avatarPublicId: values.avatarPublicId, avatarPublicIdError: true, avatarPublicIdHelper: 'Please upload a valid JPG or PNG picture less than 1Mo' });
+        }
       }
+    };
+    if (file) {
+      const blob = file.slice(0, 4);
+      reader.readAsArrayBuffer(blob);
     }
   }
+
+  // async function uploadAvatar(event) {
+  //   event.preventDefault();
+  //   const file = event.target.files[0];
+  //   if (file.size && file.size < 1000000) {
+  //     const reader = new FileReader();
+  //     reader.readAsDataURL(file);
+  //     reader.onload = async () => {
+  //       const image  = reader.result;
+  //       const res = await axios.post(`/users/uploadAvatarEdit?authToken=${authToken}`, { image })
+  //       setValues({ ...values, avatarPublicId: res.data.avatarPublicId });
+  //     }
+  //   }
+  // }
   
   return (
     <Hero>
@@ -330,6 +364,7 @@ export default function PageProfileEdit(props) {
               onChange={uploadAvatar}
             />
             <UploadLabel htmlFor="uploadFileButton"><FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faImage}/> {t.myProfileEdit.avatarUploadButton}</UploadLabel>
+            {values.avatarPublicIdError && <FormHelperText style={{color: '#ef3a2d'}} id="upload-helper-text">{values.avatarPublicIdHelper}</FormHelperText>}          
           </AvatarContainer>
           <LineBreak></LineBreak>
           <Form noValidate autoComplete="off" onSubmit={handleSubmit}>

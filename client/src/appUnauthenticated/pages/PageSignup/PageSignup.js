@@ -235,7 +235,7 @@ export default function PageSignup(props) {
     usernameHelper: null,
     avatarPublicId: null,
     avatarPublicIdError: false,
-    avatarPublicIdHelper: false,
+    avatarPublicIdHelper: null,
   });
 
   const valueIsOk = (name, value) => {

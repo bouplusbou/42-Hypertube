@@ -30,7 +30,8 @@
         "updateInfoButton": "изменить информацию",
         "currentPassword": "текущий пароль",
         "newPassword": "новый пароль",
-        "updatePasswordButton": "изменить пароль"
+        "updatePasswordButton": "изменить пароль",
+        "uploadAValidPicture": "Пожалуйста, загрузите действительное изображение в формате JPG или PNG менее чем за 1 месяц"
     },
     "profile": {
         "edit": "Редактировать",

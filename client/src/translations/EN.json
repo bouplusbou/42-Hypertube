@@ -30,7 +30,8 @@
         "updateInfoButton": "Update Info",
         "currentPassword": "Current Password",
         "newPassword": "New Password",
-        "updatePasswordButton": "Update Password"
+        "updatePasswordButton": "Update Password",
+        "uploadAValidPicture": "Please upload a valid JPG or PNG picture less than 1Mo"
     },
     "profile": {
         "edit": "Edit",

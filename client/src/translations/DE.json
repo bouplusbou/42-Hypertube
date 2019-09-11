@@ -30,7 +30,8 @@
         "updateInfoButton": "Info bearbeiten",
         "currentPassword": "Aktuelles Passwort",
         "newPassword": "Neues Passwort",
-        "updatePasswordButton": "Passwort ändern"
+        "updatePasswordButton": "Passwort ändern",
+        "uploadAValidPicture": "Bitte laden Sie ein gültiges JPG- oder PNG-Bild mit weniger als 1Mo hoch"
     },
     "profile": {
         "edit": "Bearbeiten",
