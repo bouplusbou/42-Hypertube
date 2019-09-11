@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
@@ -14,6 +14,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faLock, faUser, faImage } from '@fortawesome/free-solid-svg-icons';
 import cloudinary from 'cloudinary-core';
+import AppContext from '../../../contexts/AppContext';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
@@ -71,7 +72,7 @@ const SubmitButton = styled.div`
   margin: 0 auto;
   margin-top: 20px;
   background-color: gray;
-  width: 170px;
+  width: 200px;
   border-radius: ${props => props.theme.borderRadius};
   color: ${props => props.theme.color.white};
   font-family: Roboto;
@@ -150,7 +151,7 @@ const UploadLabel = styled.label`
   padding: 15px 1px;
   margin: 20px auto;
   background-color: gray;
-  width: 170px;
+  width: 200px;
   border-radius: ${props => props.theme.borderRadius};
   color: ${props => props.theme.color.white};
   font-family: Roboto;
@@ -163,6 +164,7 @@ const UploadLabel = styled.label`
 
 export default function PageProfileEdit(props) {
 
+  const { t } = useContext(AppContext);
   const [values, setValues] = useState({
     showPassword: false,
     email: null,
@@ -216,12 +218,12 @@ export default function PageProfileEdit(props) {
 
   const valueError = nameArr => {    
     const errorMsg = {
-      email: 'Enter a proper email',
-      firstName: 'Between 3 and 15 characters, only letters and "-"',
-      lastName: 'Between 3 and 15 characters, only letters',
-      username: 'Between 6 and 10 characters, only letters',
-      currentPassword: 'Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character',
-      newPassword: 'Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character',
+      email: t.errorMsg.email,
+      firstName: t.errorMsg.firstName,
+      lastName: t.errorMsg.lastName,
+      username: t.errorMsg.username,
+      currentPassword: t.errorMsg.currentPassword,
+      newPassword: t.errorMsg.newPassword,
     };
     const stateArr = nameArr.map(name => {return { [`${name+'Error'}`]: true, [`${name+'Helper'}`]: errorMsg[name] }});
     const state = stateArr.reduce((acc, curr) => {
@@ -317,7 +319,7 @@ export default function PageProfileEdit(props) {
           <CloseEdit to="/myProfile">
             <FontAwesomeIcon  style={{fontSize: '15px', color: 'white'}} icon={faTimes}/>
           </CloseEdit>
-          <h1>Edit Profile</h1>
+          <h1>{t.myProfileEdit.editProfile}</h1>
           <AvatarContainer>
             <Avatar src={cloudinaryCore.url(values.avatarPublicId)}/>
             <input
@@ -327,13 +329,13 @@ export default function PageProfileEdit(props) {
               type="file"
               onChange={uploadAvatar}
             />
-            <UploadLabel htmlFor="uploadFileButton"><FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faImage}/> Upload a picture</UploadLabel>
+            <UploadLabel htmlFor="uploadFileButton"><FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faImage}/> {t.myProfileEdit.avatarUploadButton}</UploadLabel>
           </AvatarContainer>
           <LineBreak></LineBreak>
           <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
             <StyledTextField
               id="standard-username"
-              label="Username"
+              label={t.myProfileEdit.username}
               onBlur={handleBlur('username')}
               onChange={handleChange('username')}
               error={values.usernameError}
@@ -343,7 +345,7 @@ export default function PageProfileEdit(props) {
             />
             <StyledTextField
               id="standard-email"
-              label="Email"
+              label={t.myProfileEdit.email}
               onBlur={handleBlur('email')}
               onChange={handleChange('email')}
               error={values.emailError}
@@ -353,7 +355,7 @@ export default function PageProfileEdit(props) {
             />
             <StyledTextField
               id="standard-firstName"
-              label="First Name"
+              label={t.myProfileEdit.firstName}
               onBlur={handleBlur('firstName')}
               onChange={handleChange('firstName')}
               error={values.firstNameError}
@@ -363,7 +365,7 @@ export default function PageProfileEdit(props) {
             />
             <StyledTextField
               id="standard-lastName"
-              label="Last Name"
+              label={t.myProfileEdit.lastName}
               onBlur={handleBlur('lastName')}
               onChange={handleChange('lastName')}
               error={values.lastNameError}
@@ -373,7 +375,7 @@ export default function PageProfileEdit(props) {
             />
             <SubmitButton type="submit">
               <FontAwesomeIcon  style={{marginLeft: '10px', fontSize: '15px', color: 'white', marginRight:'10px'}} icon={faUser}/>
-              <p>Update Info</p>
+              <p>{t.myProfileEdit.updateInfoButton}</p>
             </SubmitButton>
           </Form>
           {values.isOAuth === false && 
@@ -381,7 +383,7 @@ export default function PageProfileEdit(props) {
             <LineBreak></LineBreak>
             <Form noValidate autoComplete="off" onSubmit={handleSubmitPassword}>
               <FormControl>
-                <StyledInputLabel htmlFor="adornment-password">Current Password</StyledInputLabel>
+                <StyledInputLabel htmlFor="adornment-password">{t.myProfileEdit.currentPassword}</StyledInputLabel>
                 <StyledInput
                   id="standard-current-password"
                   type={values.showCurrentPassword ? 'text' : 'password'}
@@ -399,7 +401,7 @@ export default function PageProfileEdit(props) {
                 <FormHelperText style={{color: '#ef3a2d'}} id="current-password-helper-text">{values.currentPasswordHelper}</FormHelperText>
               </FormControl>
                 <FormControl>
-                  <StyledInputLabel htmlFor="adornment-new-password">New Password</StyledInputLabel>
+                  <StyledInputLabel htmlFor="adornment-new-password">{t.myProfileEdit.newPassword}</StyledInputLabel>
                   <StyledInput
                     id="standard-new-password"
                     type={values.showNewPassword ? 'text' : 'password'}
@@ -418,7 +420,7 @@ export default function PageProfileEdit(props) {
                 </FormControl>
               <SubmitButton>    
                 <FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faLock}/>
-                <p>Update Password</p>
+                <p>{t.myProfileEdit.updatePasswordButton}</p>
               </SubmitButton>
             </Form>
           </Fragment>

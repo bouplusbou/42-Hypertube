@@ -1,7 +1,8 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import cloudinary from 'cloudinary-core';
+import AppContext from '../../../contexts/AppContext';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
@@ -64,8 +65,9 @@ const Avatar = styled.img`
   background-color: black;
 `;
 
-export default function PageMyProfile(props) {
+export default function Pageprofile(props) {
 
+  const { t } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
   const [error, setError] = useState(false);
   const [user, setUser] = useState({
@@ -96,25 +98,25 @@ export default function PageMyProfile(props) {
       <ProfileSection>
         <Container>
         {error === true ?
-          <h1>This profile does not exist</h1>
+          <h1>{t.profile.invalidProfile}</h1>
           :
           <Fragment>
-            <h1>Profile</h1>
+            <h1>{t.profile.profil}</h1>
             <AvatarContainer>
               <Avatar src={cloudinaryCore.url(user.avatarPublicId)}/>
             </AvatarContainer>
             <Field>
-              <Title>Username</Title>
+              <Title>{t.profile.username}</Title>
               <Value>{user.username}</Value>
             </Field>
             <LineBreak></LineBreak>
             <Field>
-              <Title>First Name</Title>
+              <Title>{t.profile.firstName}</Title>
               <Value>{user.firstName}</Value>
             </Field>
             <LineBreak></LineBreak>
             <Field>
-              <Title>Last Name</Title>
+              <Title>{t.profile.lastName}</Title>
               <Value>{user.lastName}</Value>
             </Field>
           </Fragment>

@@ -7,6 +7,8 @@ import AuthenticatedSwitch from './appAuthenticated/AuthenticatedSwitch';
 import { actionIsAuthenticated } from './actions/authActions';
 import Header from './appAuthenticated/Header/Header';
 import { BrowserRouter } from 'react-router-dom';
+import EN from './translations/EN.json';
+import FR from './translations/FR.json';
 
 const GlobalStyles = createGlobalStyle`
   body {
@@ -17,6 +19,7 @@ const GlobalStyles = createGlobalStyle`
 
 function App() {
   const [connected, setConnected] = useState(false);
+  const [t, setT] = useState(EN);
   const authToken = localStorage.getItem('authToken');
 
   useEffect(() => {
@@ -37,6 +40,10 @@ function App() {
     connected,
     setConnected,
     toggleConnected: () => {setConnected(!connected)},
+    t,
+    setT,
+    EN,
+    FR,
   };
 
   return (

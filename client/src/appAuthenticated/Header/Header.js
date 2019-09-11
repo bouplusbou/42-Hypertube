@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import cloudinary from 'cloudinary-core';
@@ -7,6 +7,7 @@ import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import Switch from '@material-ui/core/Switch';
 import { Link } from 'react-router-dom';
 import LogoutButton from './LogoutButton';
+import AppContext from '../../contexts/AppContext';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Header = styled.header`
@@ -76,19 +77,17 @@ const StyledSwitch = styled(Switch)`
 
 export default function HeaderComp() {
 
+    const { t, setT, EN, FR } = useContext(AppContext);
     const authToken = localStorage.getItem('authToken');
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [avatar, setAvatar] = useState(null);
-    const [checked, setChecked] = useState(null);
-    // const [language, setLanguage] = useState('EN');
+    const [checked, setChecked] = useState(true);
 
     useEffect(() => {
         let isSubscribed = true;
         const fetchData = async () => {
             try {
                 const res = await axios.get(`/users/getAvatar?authToken=${authToken}`);
-                console.log('avatarPublicId:');
-                console.log(res.data.avatarPublicId);
                 if (isSubscribed) setAvatar(res.data.avatarPublicId);
             } catch(err) {
                 console.log(err);
@@ -100,10 +99,10 @@ export default function HeaderComp() {
 
     const toggleSwitch = () => {
         setChecked(prev => !prev);
-        // setLanguage(prev => prev === 'EN' ? 'FR' : 'EN');
+        setT(prev => prev === EN ? FR : EN)
     };
 
-    const toggleDropdown = () => setDropdownOpen(prev => !prev);
+    const toggleDropdown = () => setDropdownOpen(true);
 
     const node = useRef();
 
@@ -129,7 +128,7 @@ export default function HeaderComp() {
                 <FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white', cursor: 'pointer'}} icon={faChevronDown}/>
                 { dropdownOpen &&
                     <DropDown ref={node}>
-                        <YourProfileLink to="/myProfile">Profile</YourProfileLink>
+                        <YourProfileLink to="/myProfile">{t.header.profile}</YourProfileLink>
                         <Languages>
                             <Flag><span aria-label="French flag" role="img" >🇫🇷</span></Flag>
                             <StyledSwitch

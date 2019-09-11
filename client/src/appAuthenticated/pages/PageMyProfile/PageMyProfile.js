@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 import cloudinary from 'cloudinary-core';
+import AppContext from '../../../contexts/AppContext';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
@@ -79,8 +80,9 @@ const Avatar = styled.img`
   background-color: black;
 `;
 
-export default function PageMyProfile(props) {
+export default function PageMyProfile() {
 
+  const { t } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
   const [user, setUser] = useState({
     username: '',
@@ -108,39 +110,31 @@ export default function PageMyProfile(props) {
       <ProfileSection>
         <Container>
           <Link to="/myProfileEdit">
-            <Edit>Edit</Edit>
+            <Edit>{t.myProfile.edit}</Edit>
           </Link>
-          <h1>Profile</h1>
+          <h1>{t.myProfile.profile}</h1>
           <AvatarContainer>
             <Avatar src={cloudinaryCore.url(user.avatarPublicId)}/>
           </AvatarContainer>
           <Field>
-            <Title>Username</Title>
+            <Title>{t.myProfile.username}</Title>
             <Value>{user.username}</Value>
           </Field>
           <LineBreak></LineBreak>
           <Field>
-            <Title>Email</Title>
+            <Title>{t.myProfile.email}</Title>
             <Value>{user.email}</Value>
           </Field>
           <LineBreak></LineBreak>
           <Field>
-            <Title>First Name</Title>
+            <Title>{t.myProfile.firstName}</Title>
             <Value>{user.firstName}</Value>
           </Field>
           <LineBreak></LineBreak>
           <Field>
-            <Title>Last Name</Title>
+            <Title>{t.myProfile.lastName}</Title>
             <Value>{user.lastName}</Value>
           </Field>
-          {/* <LineBreak></LineBreak>
-          <Field>
-            <Title>Password</Title>
-            <Value>********</Value>
-            <ChangePasswordButton>
-              <p><FontAwesomeIcon  style={{fontSize: '15px', color: 'white'}} icon={faLock}/> Change Password</p>
-            </ChangePasswordButton>
-          </Field> */}
         </Container>
       </ProfileSection>
     </Hero>

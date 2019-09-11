@@ -1,0 +1,43 @@
+{
+    "header": {
+        "profile": "Profil",
+        "logout": "Deconnecter"
+    },
+    "myProfile": {
+        "edit": "Editer",
+        "profile": "Profil",
+        "username": "Nom d'utilisateur",
+        "email": "Email",
+        "firstName": "Prénom",
+        "lastName": "Nom de famille"
+    },
+    "myProfileEdit": {
+        "editProfile": "Edition du Profil",
+        "avatarUploadButton": "Télécharger une photo",
+        "username": "Nom d'utilisateur",
+        "email": "Email",
+        "firstName": "Prénom",
+        "lastName": "Nom de famille",
+        "updateInfoButton": "Modifier les infos",
+        "currentPassword": "Mot de passe actuel",
+        "newPassword": "Nouveau mot de passe",
+        "updatePasswordButton": "Modifier le mot de passe"
+    },
+    "profile": {
+        "edit": "Editer",
+        "profile": "Profil",
+        "username": "Nom d'utilisateur",
+        "email": "Email",
+        "firstName": "Prénom",
+        "lastName": "Nom de famille",
+        "invalidProfile": "Ce profil n'existe pas"
+    },
+    "errorMsg": {
+        "email": "Entrez un email au bon format",
+        "firstName": "Entre 3 et 15 caractères, des lettres uniquement et '-'",
+        "lastName": "Entre 3 et 15 caractères, des lettres uniquement",
+        "username": "Entre 6 et 10 caractères, des lettres uniquement",
+        "currentPassword": "Minimum 6 caractères, au moins trois des quatre catégories: majuscule, minuscule, nombre et caractère spécial",
+        "newPassword": "Minimum 6 caractères, au moins trois des quatre catégories: majuscule, minuscule, nombre et caractère spécial"
+    }
+}
