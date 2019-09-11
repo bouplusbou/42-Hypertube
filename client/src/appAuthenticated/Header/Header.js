@@ -97,9 +97,12 @@ export default function HeaderComp() {
         return () => isSubscribed = false;
     })
 
-    const toggleSwitch = () => {
+    const toggleSwitch = async () => {
         setChecked(prev => !prev);
-        setT(prev => prev === EN ? FR : EN)
+        let newLocale = t === EN ? 'FR' : 'EN';
+        const res = await axios.post(`/users/setLocale?authToken=${authToken}`, { newLocale });
+        console.log(res);
+        setT(prev => prev === EN ? FR : EN);
     };
 
     const toggleDropdown = () => setDropdownOpen(true);

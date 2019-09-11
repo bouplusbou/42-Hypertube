@@ -9,6 +9,7 @@ import Header from './appAuthenticated/Header/Header';
 import { BrowserRouter } from 'react-router-dom';
 import EN from './translations/EN.json';
 import FR from './translations/FR.json';
+import axios from 'axios';
 
 const GlobalStyles = createGlobalStyle`
   body {
@@ -30,6 +31,20 @@ function App() {
         if (isSubscribed && userIsAuthenticated === true) setConnected(true);
       } catch(e) {
         if (isSubscribed) setConnected(false)
+      }
+    };
+    if (authToken) fetchData();
+    return () => isSubscribed = false;
+  }, [authToken]);
+
+  useEffect(() => {
+    let isSubscribed = true;
+    async function fetchData() {
+      try {
+        const res = await axios.get(`/users/getLocale?authToken=${authToken}`);
+        if (res.data.locale === 'FR' && isSubscribed) setT(FR);
+      } catch(e) {
+        console.log(e);
       }
     };
     if (authToken) fetchData();

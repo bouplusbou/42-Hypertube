@@ -49,6 +49,7 @@ passport.use(new GoogleStrategy({
           username,
           avatarPublicId,
           emailHash,
+          locale: 'EN',
         };
         let newUser = new User(user);
         const data = await User.collection.insertOne(newUser)
@@ -104,6 +105,7 @@ passport.use(
                 username: username,
                 avatarPublicId,
                 emailHash,
+                locale: 'EN',
             };
             let newUser = new User(user);
             const data = await User.collection.insertOne(newUser)
