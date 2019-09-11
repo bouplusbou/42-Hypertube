@@ -1,6 +1,15 @@
 {
+    "language": {
+        "chooseALanguage": "Choose a language",
+        "english": "English",
+        "french": "French",
+        "spanish": "Spanish",
+        "german": "German",
+        "russian": "Russian"
+    },
     "header": {
         "profile": "Profile",
+        "language": "Language",
         "logout": "Logout"
     },
     "myProfile": {
@@ -41,3 +50,4 @@
         "newPassword": "Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character"
     }
 }
+

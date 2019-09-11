@@ -23,6 +23,7 @@ export default function LogoutButton() {
         &:hover {
             background: ${props => props.theme.color.red};
             color: ${props => props.theme.color.white};
+            border: none;
         }
         p {
             margin: 0;

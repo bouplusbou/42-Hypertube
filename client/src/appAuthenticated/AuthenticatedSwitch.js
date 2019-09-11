@@ -4,6 +4,7 @@ import PageMyProfile from './pages/PageMyProfile/PageMyProfile';
 import PageMyProfileEdit from './pages/PageMyProfileEdit/PageMyProfileEdit';
 import Page404Auth from './pages/Page404Auth/Page404Auth';
 import PageProfile from './pages/PageProfile/PageProfile';
+import PageLanguage from './pages/PageLanguage/PageLanguage';
 import TestHome from './TestHome';
 
 const AuthenticatedSwitch = () => (
@@ -12,6 +13,7 @@ const AuthenticatedSwitch = () => (
         <Route exact path='/redirect' component={TestHome}/>
         <Route exact path='/myProfile' component={PageMyProfile}/>
         <Route exact path='/myProfileEdit' component={PageMyProfileEdit}/>
+        <Route exact path='/language' component={PageLanguage}/>
         <Route exact path='/users/:username' component={PageProfile}/>
         {/* <Route exact path='/login' component={TestHome}/>
         <Route exact path='/signup' component={TestHome}/> */}

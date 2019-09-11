@@ -9,6 +9,9 @@ import Header from './appAuthenticated/Header/Header';
 import { BrowserRouter } from 'react-router-dom';
 import EN from './translations/EN.json';
 import FR from './translations/FR.json';
+import ES from './translations/ES.json';
+import DE from './translations/DE.json';
+import RU from './translations/RU.json';
 import axios from 'axios';
 
 const GlobalStyles = createGlobalStyle`
@@ -20,6 +23,7 @@ const GlobalStyles = createGlobalStyle`
 
 function App() {
   const [connected, setConnected] = useState(false);
+  const [locale, setLocale] = useState('EN');
   const [t, setT] = useState(EN);
   const authToken = localStorage.getItem('authToken');
 
@@ -43,6 +47,10 @@ function App() {
       try {
         const res = await axios.get(`/users/getLocale?authToken=${authToken}`);
         if (res.data.locale === 'FR' && isSubscribed) setT(FR);
+        if (res.data.locale === 'ES' && isSubscribed) setT(ES);
+        if (res.data.locale === 'DE' && isSubscribed) setT(DE);
+        if (res.data.locale === 'RU' && isSubscribed) setT(RU);
+        setLocale(res.data.locale);
       } catch(e) {
         console.log(e);
       }
@@ -59,6 +67,11 @@ function App() {
     setT,
     EN,
     FR,
+    ES,
+    DE,
+    RU,
+    locale,
+    setLocale,
   };
 
   return (

@@ -1,6 +1,15 @@
 {
+    "language": {
+        "chooseALanguage": "Choisissez une langue",
+        "english": "Anglais",
+        "french": "Français",
+        "spanish": "Espagnol",
+        "german": "Allemand",
+        "russian": "Russe"
+    },
     "header": {
         "profile": "Profil",
+        "language": "Langue",
         "logout": "Deconnecter"
     },
     "myProfile": {

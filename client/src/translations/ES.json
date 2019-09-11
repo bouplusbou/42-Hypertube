@@ -1,0 +1,52 @@
+{
+    "language": {
+        "chooseALanguage": "Elija un idioma",
+        "english": "Inglés",
+        "french": "Francés",
+        "spanish": "Español",
+        "german": "Alemán",
+        "russian": "Ruso"
+    },
+    "header": {
+        "profile": "Perfil",
+        "language": "Idioma",
+        "logout": "Cerrar sesión"
+    },
+    "myProfile": {
+        "edit": "Editar",
+        "profile": "Perfil",
+        "username": "Nombre de usuario",
+        "email": "Email",
+        "firstName": "Nombre",
+        "lastName": "Apellido"
+    },
+    "myProfileEdit": {
+        "editProfile": "Editar el Perfil",
+        "avatarUploadButton": "Descargar una foto",
+        "username": "Nombre de usuario",
+        "email": "Email",
+        "firstName": "Nombre",
+        "lastName": "Apellido",
+        "updateInfoButton": "Editar información",
+        "currentPassword": "Contraseña actual",
+        "newPassword": "Contraseña nueva",
+        "updatePasswordButton": "Cambiar Contraseña"
+    },
+    "profile": {
+        "edit": "Editar",
+        "profile": "Perfil",
+        "username": "Nombre de usuario",
+        "email": "Email",
+        "firstName": "Nombre",
+        "lastName": "Apellido",
+        "invalidProfile": "Este perfil no existe"
+    },
+    "errorMsg": {
+        "email": "Introduzca un email en el formato correcto",
+        "firstName": "Entre 3 y 15 caracteres, sólo letras y '-'",
+        "lastName": "Entre 3 y 15 caracteres, sólo letras",
+        "username": "Entre 6 y 10 caracteres, sólo letras",
+        "currentPassword": "Mínimo 6 caracteres, al menos tres de las cuatro categorías: mayúscula, minúscula, número y carácter especial",
+        "newPassword": "Mínimo 6 caracteres, al menos tres de las cuatro categorías: mayúscula, minúscula, número y carácter especial"
+    }
+}
