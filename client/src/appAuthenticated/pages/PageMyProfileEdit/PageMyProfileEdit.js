@@ -331,21 +331,7 @@ export default function PageProfileEdit(props) {
       reader.readAsArrayBuffer(blob);
     }
   }
-
-  // async function uploadAvatar(event) {
-  //   event.preventDefault();
-  //   const file = event.target.files[0];
-  //   if (file.size && file.size < 1000000) {
-  //     const reader = new FileReader();
-  //     reader.readAsDataURL(file);
-  //     reader.onload = async () => {
-  //       const image  = reader.result;
-  //       const res = await axios.post(`/users/uploadAvatarEdit?authToken=${authToken}`, { image })
-  //       setValues({ ...values, avatarPublicId: res.data.avatarPublicId });
-  //     }
-  //   }
-  // }
-  
+ 
   return (
     <Hero>
       <LoginSection>
