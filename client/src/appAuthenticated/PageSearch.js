@@ -12,7 +12,6 @@ const MainSection = styled.section `
 const GenresContainer = styled.section `
 `
 
-
 const StyledTextField = styled(TextField) `
     label {
         color:white;
@@ -77,7 +76,7 @@ const MovieThumbnail = props => {
     }
     return (
         <Thumbnail 
-            cover={props.movie.images.poster}
+            cover={props.movie.medium_cover_image}
             onMouseEnter={handleHover}
             onMouseLeave={handleHover}
         >
@@ -86,6 +85,7 @@ const MovieThumbnail = props => {
                     <Title>{props.movie.title}</Title>
                     <Year>({props.movie.year})</Year>
                     <Year>({props.movie.runtime} minutes)</Year>
+                    <Year>({props.movie.rating})</Year>
                 </Mask>
             }
         </Thumbnail>
@@ -95,9 +95,12 @@ const MovieThumbnail = props => {
 export default function PageSearch() {
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [selectedOrder, setSelectedOrder] = useState(-1)
-    const [selectedSorting, setSelectedSorting] = useState('year')
-    const [selectedGenre, setSelectedGenre] = useState("orror");
+    const [selectedOrder, setSelectedOrder] = useState("");
+    const [selectedSorting, setSelectedSorting] = useState('year');
+    const [selectedGenre, setSelectedGenre] = useState("Horror");
+    const [selectedRatings, setRatings] = useState({ min: null, max: null });
+    const [queryTerms, setQueryTerms] = useState("");
+    const [searchResult, setSearchResult] = useState({movies: []});
     const genreList = [
         'action',
         'adventure',
@@ -131,29 +134,17 @@ export default function PageSearch() {
         'year'
     ]
 
-    const [moviesList, setMoviesList] = useState({ movies: [] });
-    const [displayedMovies, setDisplayedMovies] = useState({ movies: []});
     useEffect(() => {
         const fetchMovies = async () => {
             const terms = {
                 genre: selectedGenre,
                 order: selectedOrder,
                 sort: selectedSorting,
+                page: currentPage,
+                limit: 20
             }
             const res = await axios.post("/search/genre", terms);
-            // let page = 1;
-            // let completeResult = []
-            // let res = await axios.get(`https://tv-v2.api-fetch.website/movies/${page}?sort=${selectedSorting}&order=${selectedOrder}&genre=${selectedGenre}`);
-            // completeResult = res.data;
-            // page++;
-            // while (res.data.length !== 0) {
-            //     console.log(page, selectedGenre, selectedOrder, selectedSorting);
-            //     res = await axios.get(`https://tv-v2.api-fetch.website/movies/${page}?genre=${selectedGenre}&order=${selectedOrder}&sort=${selectedSorting}`);
-            //     completeResult.push(...res.data);
-            //     page++;
-            // }
-            // setMoviesList({movies: [...completeResult]});
-            // setDisplayedMovies({movies: completeResult.slice(0, 20)});
+            setSearchResult({ movies: [...res.data] })
         }
         fetchMovies();
     }, [selectedGenre, selectedSorting, selectedOrder])
@@ -218,12 +209,12 @@ export default function PageSearch() {
                     margin="normal"
                     variant="outlined"
                     >
-                    <option value="-1">Desc</option>
-                    <option value="1">Asc</option>
+                    <option value="desc">Desc</option>
+                    <option value="asc">Asc</option>
                 </StyledTextField>
             </GenresContainer>
             <MoviesContainer>
-                {displayedMovies.movies.map(movie => <MovieThumbnail movie={movie}/>)}
+                {searchResult.movies.map(movie => <MovieThumbnail movie={movie}/>)}
             </MoviesContainer>
         </MainSection>
     )

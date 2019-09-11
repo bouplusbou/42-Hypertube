@@ -1,5 +1,5 @@
 const axios = require("axios");
-
+ // 
 const scrapPopcorn = async () => {
     console.log("Scraping Popcorn Time API...");
     const pageCount = await axios.get('https://tv-v2.api-fetch.website/movies');
@@ -30,6 +30,7 @@ const scrapPopcorn = async () => {
         }
         return infos
     })
+    console.log(cleanResults[0]);
     console.log(`${cleanResults.length} movies found in total.`);
     return cleanResults;
 }
