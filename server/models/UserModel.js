@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-// Create Schema
 const UserSchema = new Schema({
   username: {
     type: String,
@@ -36,6 +35,10 @@ const UserSchema = new Schema({
     required: false
   },
   emailHash: {
+    type: String,
+    required: true
+  },
+  locale: {
     type: String,
     required: true
   },

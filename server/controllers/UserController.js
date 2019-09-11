@@ -68,6 +68,7 @@ const findOrCreateUser = (req, res) => {
                         password: hash,
                         avatarPublicId: req.body.avatarPublicId,
                         emailHash,
+                        locale: 'EN',
                     });
                     await UserModel.collection.insertOne(newUser)
                     res.status(200).json({ message: 'User created' });
@@ -296,6 +297,33 @@ const getAvatar = async (req, res) => {
     } catch(err) { console.log(err) }
 };
 
+const getLocale = async (req, res) => {
+    try {
+        const { authToken } = req.query;
+        jwt.verify(authToken, keys.JWT_SECRET, async (err, decoded) => {
+            const _id = decoded.mongoId;
+            const data = await UserModel.findOne({ _id });
+            res.status(200).json({ locale: data.locale });
+        });
+    } catch(err) { console.log(err) }
+};
+
+const setLocale = async (req, res) => {
+    try {
+        const { authToken } = req.query;
+        jwt.verify(authToken, keys.JWT_SECRET, async (err, decoded) => {
+            // console.log(req.body.newLocale);
+            const _id = decoded.mongoId;
+            const objId = new ObjectID(_id);
+            await User.findOneAndUpdate(
+                {_id: objId},
+                {$set: {locale: req.body.newLocale}}
+            );
+            res.status(200).send('OK');
+        });
+    } catch(err) { console.log(err) }
+};
+
 module.exports = {
     findOrCreateUser,
     loginUser,
@@ -309,4 +337,6 @@ module.exports = {
     emailHashIsValid,
     resetPassword,
     getAvatar,
+    getLocale,
+    setLocale,
 };

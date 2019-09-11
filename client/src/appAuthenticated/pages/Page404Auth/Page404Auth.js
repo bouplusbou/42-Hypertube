@@ -1,6 +1,6 @@
 import React, {useEffect, Fragment} from 'react';
 
-export default function Page404Auth(props) {
+export default function Page404Auth() {
 
   useEffect(() => {
 

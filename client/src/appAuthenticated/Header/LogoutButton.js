@@ -6,7 +6,7 @@ import AppContext from '../../contexts/AppContext';
 
 export default function LogoutButton() {
 
-    const userState = useContext(AppContext);
+    const { t, toggleConnected } = useContext(AppContext);
 
     const LogoutButton = styled.button`
         display: inline-block;
@@ -23,6 +23,7 @@ export default function LogoutButton() {
         &:hover {
             background: ${props => props.theme.color.red};
             color: ${props => props.theme.color.white};
+            border: none;
         }
         p {
             margin: 0;
@@ -30,7 +31,7 @@ export default function LogoutButton() {
     `;
 
     const handleLogout = () => {
-        userState.toggleConnected();
+        toggleConnected();
         actionLogout();
     };
 
@@ -40,7 +41,7 @@ export default function LogoutButton() {
             onClick={handleLogout}
         >
             <LogoutButton>
-                <p>Logout</p>
+                <p>{t.header.logout}</p>
             </LogoutButton>
         </Link>
     );

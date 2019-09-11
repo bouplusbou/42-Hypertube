@@ -1,0 +1,53 @@
+{
+    "language": {
+        "chooseALanguage": "Choose a language",
+        "english": "English",
+        "french": "French",
+        "spanish": "Spanish",
+        "german": "German",
+        "russian": "Russian"
+    },
+    "header": {
+        "profile": "Profile",
+        "language": "Language",
+        "logout": "Logout"
+    },
+    "myProfile": {
+        "edit": "Edit",
+        "profile": "Profile",
+        "username": "Username",
+        "email": "Email",
+        "firstName": "First Name",
+        "lastName": "Last Name"
+    },
+    "myProfileEdit": {
+        "editProfile": "Edit Profile",
+        "avatarUploadButton": "Upload a Picture",
+        "username": "Username",
+        "email": "Email",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "updateInfoButton": "Update Info",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "updatePasswordButton": "Update Password"
+    },
+    "profile": {
+        "edit": "Edit",
+        "profile": "Profile",
+        "username": "Username",
+        "email": "Email",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "invalidProfile": "This profile does not exist"
+    },
+    "errorMsg": {
+        "email": "Enter a proper email",
+        "firstName": "Between 3 and 15 characters, only letters and '-'",
+        "lastName": "Between 3 and 15 characters, only letters",
+        "username": "Between 6 and 10 characters, only letters",
+        "currentPassword": "Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character",
+        "newPassword": "Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character"
+    }
+}
+
