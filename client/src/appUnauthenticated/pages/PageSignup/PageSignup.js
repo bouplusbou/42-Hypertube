@@ -324,16 +324,36 @@ export default function PageSignup(props) {
   async function uploadAvatar(event) {
     event.preventDefault();
     const file = event.target.files[0];
-    if (file.size && file.size < 1000000) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = async () => {
-        const image  = reader.result;
-        const res = await axios.post(`/users/uploadAvatarSignup`, { image })
-        setValues({ ...values, avatarPublicId: res.data.avatarPublicId, avatarPublicIdError: false, avatarPublicIdHelper: '' });
+    const reader = new FileReader();
+    reader.onloadend = async (evt) => {
+      if (evt.target.readyState === FileReader.DONE) {
+        const uint = new Uint8Array(evt.target.result)
+        let bytes = []
+        uint.forEach((byte) => {
+            bytes.push(byte.toString(16))
+        })
+        const hex = await bytes.join('').toUpperCase();
+        if (file.size && file.size < 1000000 && (hex === '89504E47' || hex === 'FFD8FFE0')) {
+          reader.readAsDataURL(file);
+          reader.onload = async () => {
+            const image  = reader.result;
+            const res = await axios.post(`/users/uploadAvatarSignup`, { image })
+            setValues({ ...values, avatarPublicId: res.data.avatarPublicId, avatarPublicIdError: false, avatarPublicIdHelper: '' });
+          }
+        } else if (hex) {
+            setValues({ ...values, avatarPublicId: null, avatarPublicIdError: true, avatarPublicIdHelper: 'Please upload a valid JPG or PNG picture less than 1Mo' });
+        }
       }
+    };
+    if (file) {
+      const blob = file.slice(0, 4);
+      reader.readAsArrayBuffer(blob);
     }
   }
+
+  const resetAvatarError = () => {
+    setValues({ ...values, avatarPublicId: null, avatarPublicIdError: false, avatarPublicIdHelper: '' });
+  };
 
   return (
     <Hero>
@@ -348,6 +368,7 @@ export default function PageSignup(props) {
               id="uploadFileButton"
               type="file"
               onChange={uploadAvatar}
+              onClick={resetAvatarError}
             />
             <UploadLabel htmlFor="uploadFileButton"><FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faImage}/> Upload a picture</UploadLabel>
             {values.avatarPublicIdError && <FormHelperText style={{color: '#ef3a2d'}} id="upload-helper-text">{values.avatarPublicIdHelper}</FormHelperText>}
