@@ -1,5 +1,16 @@
 const axios = require("axios");
 const MovieModel = require('../models/MovieModel');
+var throttledQueue = require('throttled-queue');
+var throttle = throttledQueue(20, 10000);
+
+function sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+      if ((new Date().getTime() - start) > milliseconds){
+        break;
+      }
+    }
+  }
 
 async function connectMongo() {
     const MONGO_URI = require("../config/keys").MONGO_URI;
@@ -67,36 +78,32 @@ const scrapPopcorn = async () => {
 
 const ScrapMoviesDatabases = async () => {
     console.log("***** HYPERTUBE DATABASE SCRAPING *****");
-connectMongo();
-
+    await connectMongo();
+    const tmdb = await axios.get(`https://api.themoviedb.org/3/configuration?api_key=256917e54af5083cae342214e4c314d0`);
     const popcorn = await scrapPopcorn();
-    for (i = 0; i < 1; i++) {
-        const newMovie = new Movie({ ...popcorn[i] })                    
-        await MovieModel.collection.insertOne(newMovie)
+    const completeResult = [];
+    for (i = 0; i < popcorn.length; i++) {
+        throttle(function() {
+            // const omdbRes = await axios.get(`http://www.omdbapi.com/?apikey=da694061&i=${popcorn[i].imdbId}`);
+            console.log(i);
+        })
+        // const tmdbRes = await axios.get(`https://api.themoviedb.org/3/movie/${popcorn[index].imdbId}?api_key=256917e54af5083cae342214e4c314d0&language=en-US`);
+        // const filteredInfos = {
+        //     imdbId: popcorn[index].imdbId,
+        //     title: tmdbRes.data.original_title,
+        //     plot: tmdbRes.data.overview,
+        //     language: tmdbRes.data.original_language,
+        //     poster: `${tmdb.data.images.base_url}original${tmdbRes.data.poster_path}`,
+        //     backdrop: `${tmdb.data.images.base_url}original${tmdbRes.data.backdrop_path}`,
+        //     runtime: tmdbRes.data.runtime,
+        //     tagline: tmdbRes.data.tagline,
+        //     rating: parseInt(omdbRes.data.imdbRating),
+        //     torrents: popcorn[index].torrents
+        // }
+        // completeResult.push(filteredInfos);
+        
     }
     process.exit(0);
-    // const popcorn = await scrapPopcorn(1);
-    // const results = [...yts, ...popcorn];
-    // let tesResults = [];
-    // results.map(movie => {
-    //     if (tesResults.find(element => {
-    //         return element.imdbId === movie.imdbId
-    //     })) {
-    //         const index = tesResults.findIndex(element => { return element.imdbId === movie.imdbId });
-    //         console.log(tesResults[index]);
-    //         tesResults[index] = {
-    //             imdbId: tesResults[index].imdbId,
-    //             torrents: {
-    //                 torrents1: tesResults[index].torrents,
-    //                 torrents2: movie.torrents
-    //             }
-    //         }
-    //         console.log(tesResults[index]);
-    //     } else {
-    //         tesResults.push(movie);
-    //     }
-    // })
-    // console.log(tesResults.length);
 }
 
 ScrapMoviesDatabases();

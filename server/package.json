@@ -26,6 +26,7 @@
     "passport-42": "^1.2.6",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.0",
+    "throttled-queue": "^1.0.7",
     "uuid": "^3.3.3",
     "validator": "^11.1.0"
   },
