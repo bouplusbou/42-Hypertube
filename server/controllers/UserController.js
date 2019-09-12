@@ -71,7 +71,7 @@ const findOrCreateUser = (req, res) => {
                         locale: 'EN',
                     });
                     await UserModel.collection.insertOne(newUser)
-                    res.status(200).json({ message: 'User created' });
+                    res.status(201).json({ message: 'User created' });
                 });
             });
         };
@@ -95,7 +95,7 @@ const loginUser = async (req, res) => {
         } else {
             res.status(401).json({ errorMsg: 'Wrong credentials' });
         }
-    } catch(err) { res.status(401).json({ errorMsg: 'something went wrong' }); }
+    } catch(err) { res.status(500).json({ errorMsg: 'something went wrong' }); }
 };
 
 const getMyProfile = async (req, res) => {
@@ -131,9 +131,9 @@ const getProfile = async (req, res) => {
             };
             res.status(200).json({ user });
         } else {
-            res.status(400).json({ error: 'user does not exists' });
+            res.status(404).json({ error: 'user does not exists' });
         }
-    } catch(err) { res.status(401).json({ error: 'something went wrong' }); }
+    } catch(err) { res.status(500).json({ error: 'something went wrong' }); }
 };
 
 const newProfileIsOK = async (_id, email, firstName, lastName, username) => {
