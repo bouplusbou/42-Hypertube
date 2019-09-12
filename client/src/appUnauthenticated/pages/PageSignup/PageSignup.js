@@ -309,7 +309,7 @@ export default function PageSignup(props) {
       const emptyFields = Object.keys(newUser).filter(key => !newUser[key]);
       if (emptyFields.length === 0) {
         axios.post(`/auth/signup`, newUser)
-          .then(res => { if (res.status === 200) props.history.push('/login'); })
+          .then(res => { props.history.push('/login'); })
           .catch(error => {
             const res = error.response.data;
             if (res.errors.length !== 0) valueError(res.errors);

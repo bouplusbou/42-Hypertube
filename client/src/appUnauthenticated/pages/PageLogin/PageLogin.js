@@ -231,7 +231,7 @@ const ErrorBox = styled.section`
 
 export default function PageLogin(props) {
 
-  const appState = useContext(AppContext);
+  const { toggleConnected, socket } = useContext(AppContext);
   const [values, setValues] = useState({
     username: '',
     password: '',
@@ -262,7 +262,7 @@ export default function PageLogin(props) {
       if (res.data.authToken) {
         await actionLogin(res.data.authToken);
         props.history.push('/myProfile');
-        appState.toggleConnected();
+        toggleConnected();
       }
     } catch(err) {
       if (err.response && err.response.data) {
@@ -388,18 +388,22 @@ export default function PageLogin(props) {
             </SubmitButton>
           </Form>
           <LineBreak></LineBreak>
-          <Login42 href="http://localhost:5000/api/auth/42">
-            <Logo>
-              <img width="30px" alt="42 &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/42_Logo.svg/1200px-42_Logo.svg.png"/>
-            </Logo>
-            <TextButton>Continue with 42</TextButton>
-          </Login42>
-          <LoginGoogle href="http://localhost:5000/api/auth/google">
-            <Logo>
-              <img width="30px" alt="Google &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"/>
-            </Logo>
-            <TextButton>Continue with Google</TextButton>
-          </LoginGoogle>
+          {socket && 
+            <Fragment>
+              <Login42 href={`http://localhost:5000/api/auth/42?socketId=${socket.id}`}>
+                <Logo>
+                  <img width="30px" alt="42 &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/42_Logo.svg/1200px-42_Logo.svg.png"/>
+                </Logo>
+                <TextButton>Continue with 42</TextButton>
+              </Login42>
+              <LoginGoogle href={`http://localhost:5000/api/auth/google?socketId=${socket.id}`}>
+                <Logo>
+                  <img width="30px" alt="Google &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"/>
+                </Logo>
+                <TextButton>Continue with Google</TextButton>
+              </LoginGoogle>
+            </Fragment>
+          }
           <Redirect>
             <p>Forgot your password ? <ResetButton onClick={handleOpen}>Reset via your email</ResetButton></p>
             <p>Not a member yet ? <Link to="/signup">Signup now</Link></p>

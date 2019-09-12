@@ -10,11 +10,26 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FortyTwoStrategy = require('passport-42').Strategy;
 const cloudinary = require(`./Tools/Cloudinary`);
 const uuidv1 = require('uuid/v1');
+const session = require('express-session');
+const io = require('socket.io').listen(server);
 
 app.use(bodyParser.json({limit: '10mb', extended: true}))
 app.use(bodyParser.urlencoded({limit: '10mb', extended: true}))
 app.use(cookieParser());
 app.use(passport.initialize());
+
+app.use(session({ 
+  secret: 'secret', 
+  resave: true, 
+  saveUninitialized: true 
+}));
+
+io.on('connection', async client => { 
+  // console.log('new connection');
+});
+
+app.set("io", io);
+
 app.use('/api', router);
 
 passport.serializeUser((user, done) => done(null, user));
@@ -118,6 +133,16 @@ passport.use(
       }
     }
 ));
+
+
+
+
+
+
+
+
+
+
 
 async function connectMongo() {
     const MONGO_URI = require("./config/keys").MONGO_URI;
