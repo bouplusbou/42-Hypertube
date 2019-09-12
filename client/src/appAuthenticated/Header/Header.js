@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef, useContext } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
-import cloudinary from 'cloudinary-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import LogoutButton from './LogoutButton';
 import AppContext from '../../contexts/AppContext';
+import cloudinary from 'cloudinary-core';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Header = styled.header`

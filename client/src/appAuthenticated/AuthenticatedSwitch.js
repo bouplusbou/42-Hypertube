@@ -6,10 +6,12 @@ import Page404Auth from './pages/Page404Auth/Page404Auth';
 import PageProfile from './pages/PageProfile/PageProfile';
 import PageLanguage from './pages/PageLanguage/PageLanguage';
 import TestHome from './TestHome';
+import TestMovie from './TestMovie';
 
 const AuthenticatedSwitch = () => (
     <Switch>
         <Route exact path='/home' component={TestHome}/>
+        <Route exact path='/movie' component={TestMovie}/>
         <Route exact path='/redirect' component={TestHome}/>
         <Route exact path='/myProfile' component={PageMyProfile}/>
         <Route exact path='/myProfileEdit' component={PageMyProfileEdit}/>
