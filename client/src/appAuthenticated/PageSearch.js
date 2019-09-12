@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import { TextField } from '@material-ui/core';
+import { TextField, Slider, Typography } from '@material-ui/core';
 
 const MainSection = styled.section `
     background-color:#141414;
@@ -94,15 +94,19 @@ const MovieThumbnail = props => {
 
 export default function PageSearch() {
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [selectedOrder, setSelectedOrder] = useState("");
-    const [selectedSorting, setSelectedSorting] = useState('year');
-    const [selectedGenre, setSelectedGenre] = useState("Horror");
-    const [selectedRatings, setRatings] = useState({ min: null, max: null });
-    const [queryTerms, setQueryTerms] = useState("");
+    const [searchTerms, setSearchTerms] = useState({
+        genre: "",
+        page: 1,
+        order: "desc",
+        sort: "year",
+        ratings: [0, 10],
+        years: [0, 2019],
+        keywords: "",
+        limit:50
+    })
     const [searchResult, setSearchResult] = useState({movies: []});
     const genreList = [
-        'action',
+        'Action',
         'adventure',
         'animation',
         'comedy',
@@ -127,38 +131,40 @@ export default function PageSearch() {
     ]
 
     const sortingList = [
-        'last added',
-        'rating',
-        'title',
-        'trending',
-        'year'
+        'Last added',
+        'Rating',
+        'Title',
+        'Trending',
+        'Year'
     ]
 
     useEffect(() => {
         const fetchMovies = async () => {
-            const terms = {
-                genre: selectedGenre,
-                order: selectedOrder,
-                sort: selectedSorting,
-                page: currentPage,
-                limit: 20
-            }
-            const res = await axios.post("/search/genre", terms);
-            setSearchResult({ movies: [...res.data] })
+            const res = await axios.post("/search/genre", searchTerms);
+            if (res.data.length !== 0) setSearchResult({ movies: [...res.data] })
         }
         fetchMovies();
-    }, [selectedGenre, selectedSorting, selectedOrder])
+    }, [searchTerms])
 
-    const switchGenre = name => event => {
-        setSelectedGenre(event.target.value)
+    const handleTermsChange = event => {
+        setSearchTerms({
+            ...searchTerms,
+            [event.target.name]: event.target.value,
+        })
     }
 
-    const switchSorting = name => event => {
-        setSelectedSorting(event.target.value);
+    const handleRatingsChanges = (event, newValue) => {
+        setSearchTerms({
+            ...searchTerms,
+            ratings: newValue
+        })
     }
 
-    const switchOrdering = name => event => {
-        setSelectedOrder(event.target.value);
+    const handleYearsChanges = (event, newValue) => {
+        setSearchTerms({
+            ...searchTerms,
+            years: newValue
+        })
     }
 
     return (
@@ -167,8 +173,9 @@ export default function PageSearch() {
                 <StyledTextField
                     select
                     label="Genre"
-                    value={selectedGenre}
-                    onChange={switchGenre()}
+                    name="genre"
+                    value={searchTerms.genre}
+                    onChange={handleTermsChange}
                     SelectProps={{
                       native: true,
                     }}
@@ -184,8 +191,9 @@ export default function PageSearch() {
                 <StyledTextField
                     select
                     label="Sort by"
-                    value={selectedSorting}
-                    onChange={switchSorting()}
+                    name="sort"
+                    value={searchTerms.sort}
+                    onChange={handleTermsChange}
                     SelectProps={{
                       native: true,
                     }}
@@ -193,7 +201,7 @@ export default function PageSearch() {
                     variant="outlined"
                     >
                     {sortingList.map(sorting => (
-                        <option key={sorting} value={sorting}>
+                        <option key={sorting} value={sorting.toLowerCase()}>
                             {sorting}
                         </option>
                     ))}
@@ -201,8 +209,9 @@ export default function PageSearch() {
                 <StyledTextField
                     select
                     label="Order"
-                    value={selectedOrder}
-                    onChange={switchOrdering()}
+                    name="order"
+                    value={searchTerms.order}
+                    onChange={handleTermsChange}
                     SelectProps={{
                       native: true,
                     }}
@@ -212,6 +221,30 @@ export default function PageSearch() {
                     <option value="desc">Desc</option>
                     <option value="asc">Asc</option>
                 </StyledTextField>
+                <Typography gutterBottom>
+                    Ratings
+                </Typography>
+                <Slider
+                    name="ratings"
+                    value={searchTerms.ratings}
+                    onChange={handleRatingsChanges}
+                    min={0}
+                    max={10}
+                    valueLabelDisplay="on"
+                />
+                <Typography gutterBottom>
+                    Years
+                </Typography>
+                <Slider
+                    name="years"
+                    value={searchTerms.years}
+                    onChange={handleYearsChanges}
+                    valueLabelDisplay="auto"
+                    aria-labelledby="range-slider"
+                    min={0}
+                    max={2019}
+                    valueLabelDisplay="on"
+                />
             </GenresContainer>
             <MoviesContainer>
                 {searchResult.movies.map(movie => <MovieThumbnail movie={movie}/>)}

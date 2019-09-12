@@ -1,5 +1,16 @@
 const axios = require("axios");
- // 
+const MovieModel = require('../models/MovieModel');
+
+async function connectMongo() {
+    const MONGO_URI = require("../config/keys").MONGO_URI;
+    const mongoose = require("mongoose");
+    mongoose.set('useFindAndModify', false);
+    try {
+        await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
+        console.log("MongoDB successfully connected");
+    } catch(err) { console.log(err); }
+}
+
 const scrapPopcorn = async () => {
     console.log("Scraping Popcorn Time API...");
     const pageCount = await axios.get('https://tv-v2.api-fetch.website/movies');
@@ -30,34 +41,40 @@ const scrapPopcorn = async () => {
         }
         return infos
     })
-    console.log(cleanResults[0]);
     console.log(`${cleanResults.length} movies found in total.`);
     return cleanResults;
 }
 
-const scrapYTS = async () => {
-    console.log("Scraping YTS API...");
-    const rawResults = [];
-    for (let i = 1; i < 3; i++) {
-        const res = await axios.get(`https://yts.lt/api/v2/list_movies.json?limit=50&page=${i}`);
-        if (!res.data.data.movies) break;
-        // console.log(`${res.data.data.movies.length} movie(s) found on page ${i}.`);
-        rawResults.push(...res.data.data.movies)
-    }
-    const cleanResults = rawResults.map(movie => {
-        const infos = {
-            imdbId: movie.imdb_code,
-            torrents: movie.torrents
-        }
-        return infos;
-    })
-    // console.log(cleanResults[0].torrents);
-    return cleanResults;
-}
+// const scrapYTS = async () => {
+//     console.log("Scraping YTS API...");
+//     const rawResults = [];
+//     for (let i = 1; i < 3; i++) {
+//         const res = await axios.get(`https://yts.lt/api/v2/list_movies.json?limit=50&page=${i}`);
+//         if (!res.data.data.movies) break;
+//         // console.log(`${res.data.data.movies.length} movie(s) found on page ${i}.`);
+//         rawResults.push(...res.data.data.movies)
+//     }
+//     const cleanResults = rawResults.map(movie => {
+//         const infos = {
+//             imdbId: movie.imdb_code,
+//             torrents: movie.torrents
+//         }
+//         return infos;
+//     })
+//     // console.log(cleanResults[0].torrents);
+//     return cleanResults;
+// }
 
 const ScrapMoviesDatabases = async () => {
     console.log("***** HYPERTUBE DATABASE SCRAPING *****");
-    const yts = await scrapPopcorn();
+connectMongo();
+
+    const popcorn = await scrapPopcorn();
+    for (i = 0; i < 1; i++) {
+        const newMovie = new Movie({ ...popcorn[i] })                    
+        await MovieModel.collection.insertOne(newMovie)
+    }
+    process.exit(0);
     // const popcorn = await scrapPopcorn(1);
     // const results = [...yts, ...popcorn];
     // let tesResults = [];
