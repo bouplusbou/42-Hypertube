@@ -2,8 +2,11 @@ import React from "react";
 
 export default () => {
   return (
-    <video>
-        <source src="http://localhost:7000/player"></source>
+    <video controls>
+      <source
+        src="http://localhost:5000/api/player/stream"
+        type="video/mp4"
+      ></source>
     </video>
   );
 };

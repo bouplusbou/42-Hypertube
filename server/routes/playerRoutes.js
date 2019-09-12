@@ -1,9 +1,13 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const getChunks = require('../../torrent/index')
+const PlayerController = require("../controllers/PlayerController");
 
-router.route('/').get(async (req, res) => {
-    await getChunks(req, res);
-});
+router
+  .route("/download")
+  .get(async (req, res) => PlayerController.downloadVideo(req, res));
+
+router
+  .route("/stream")
+  .get(async (req, res) => PlayerController.streamVideo(req, res));
 
 module.exports = router;

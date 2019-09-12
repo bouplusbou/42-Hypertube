@@ -18,6 +18,8 @@
     "concurrently": "^4.1.2",
     "cookie-parser": "^1.4.4",
     "express": "^4.17.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "fs": "0.0.1-security",
     "googleapis": "^42.0.0",
     "is-empty": "^1.2.0",
     "jsonwebtoken": "^8.5.1",
@@ -26,6 +28,9 @@
     "passport-42": "^1.2.6",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.0",
+    "path": "^0.12.7",
+    "torrent-stream": "^1.1.0",
+    "torrent-to-magnet": "^1.0.1",
     "uuid": "^3.3.3",
     "validator": "^11.1.0"
   },

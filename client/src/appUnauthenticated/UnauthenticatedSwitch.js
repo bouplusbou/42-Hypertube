@@ -13,7 +13,7 @@ const UnauthenticatedSwitch = () => (
             <Route exact path='/login' component={PageLogin}/>
             <Route exact path='/signup' component={PageSignup}/>
             <Route exact path='/redirect' component={TestRedirect}/>
-            <Route exact path='/player' component={PagePlayer}/>
+            <Route exact path='/stream' component={PagePlayer}/>
             <Route component={Page404Unauth}/>
         </Switch>
     </BrowserRouter>
