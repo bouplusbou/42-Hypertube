@@ -20,17 +20,21 @@ router.get('/google', addSocketIdtoSession, passport.authenticate('google', { sc
 router.get('/42', addSocketIdtoSession, passport.authenticate('42') );
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/api/auth/failureRedirect' }),
       async (req, res) => {
-            const mongoId = new ObjectID(req.user);
-            const authToken = await jwt.sign({ mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });
-            let io = req.app.get("io");
-            io.in(req.session.socketId).emit('redirect', { authToken })
+            try {
+                  const mongoId = new ObjectID(req.user);
+                  const authToken = await jwt.sign({ mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });
+                  let io = req.app.get("io");
+                  io.in(req.session.socketId).emit('redirect', { authToken });
+            } catch(err) { console.log(err); }
       });
 router.get('/42/callback', passport.authenticate('42', { failureRedirect: '/api/auth/failureRedirect' }),
       async (req, res) => {
-            const mongoId = new ObjectID(req.user);
-            const authToken = await jwt.sign({ mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });
-            let io = req.app.get("io");
-            io.in(req.session.socketId).emit('redirect', { authToken })
+            try {
+                  const mongoId = new ObjectID(req.user);
+                  const authToken = await jwt.sign({ mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });
+                  let io = req.app.get("io");
+                  io.in(req.session.socketId).emit('redirect', { authToken });
+            } catch(err) { console.log(err); }
       });
 
 module.exports = router;
