@@ -14,6 +14,7 @@ import DE from './translations/DE.json';
 import RU from './translations/RU.json';
 import axios from 'axios';
 import io from 'socket.io-client';
+import { actionLogout } from './actions/authActions';
 
 const GlobalStyles = createGlobalStyle`
   body {
@@ -77,13 +78,14 @@ function App(props) {
         if (res.data.locale === 'DE' && isSubscribed) setT(DE);
         if (res.data.locale === 'RU' && isSubscribed) setT(RU);
         setLocale(res.data.locale);
-      } catch(e) {
-        console.log(e);
+      } catch(err) {
+        console.log(err);
+        if (err.response.status === 401) actionLogout(appState.toggleConnected);
       }
     };
     if (authToken) fetchData();
     return () => isSubscribed = false;
-  }, [authToken]);
+  }, [authToken, appState.toggleConnected]);
 
   return (
     <Fragment>

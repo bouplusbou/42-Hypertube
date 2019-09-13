@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import cloudinary from 'cloudinary-core';
 import AppContext from '../../../contexts/AppContext';
+import { actionLogout } from '../../../actions/authActions';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
@@ -67,7 +68,7 @@ const Avatar = styled.img`
 
 export default function Pageprofile(props) {
 
-  const { t } = useContext(AppContext);
+  const { t, toggleConnected } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
   const [error, setError] = useState(false);
   const [user, setUser] = useState({
@@ -86,12 +87,14 @@ export default function Pageprofile(props) {
         const { username, firstName, lastName, avatarPublicId } = res.data.user;
         if (isSubscribed) setUser({ username, firstName, lastName, avatarPublicId });
       } catch(err) {
+        console.log(err);
+        if (err.response.status === 401) actionLogout(toggleConnected);
         if (err.response.status === 400 && isSubscribed) setError(true);
       }
     };
     if (authToken) fetchData();
     return () => isSubscribed = false;
-  }, [authToken, props.match.params.username]);
+  }, [authToken, props.match.params.username, toggleConnected]);
 
   return (
     <Hero>

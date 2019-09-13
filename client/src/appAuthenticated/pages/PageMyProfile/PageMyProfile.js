@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import cloudinary from 'cloudinary-core';
 import AppContext from '../../../contexts/AppContext';
+import { actionLogout } from '../../../actions/authActions';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
@@ -82,7 +83,7 @@ const Avatar = styled.img`
 
 export default function PageMyProfile() {
 
-  const { t } = useContext(AppContext);
+  const { t, toggleConnected } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
   const [user, setUser] = useState({
     username: '',
@@ -95,15 +96,20 @@ export default function PageMyProfile() {
   useEffect(() => {
     let isSubscribed = true;
     async function fetchData() {
-      const res = await axios.get(`/users?authToken=${authToken}`);
-      const { username, email, firstName, lastName, avatarPublicId } = res.data.user;
-      if (isSubscribed) {
-        setUser({ username, email, firstName, lastName, avatarPublicId })
+      try{
+        const res = await axios.get(`/users?authToken=${authToken}`);
+        const { username, email, firstName, lastName, avatarPublicId } = res.data.user;
+        if (isSubscribed) {
+          setUser({ username, email, firstName, lastName, avatarPublicId })
+        }
+      } catch(err) {
+        console.log(err);
+        if (err.response.status === 401) actionLogout(toggleConnected);
       }
     };
     if (authToken) fetchData();
     return () => isSubscribed = false;
-  }, [authToken]);
+  }, [authToken, toggleConnected]);
 
   return (
     <Hero>

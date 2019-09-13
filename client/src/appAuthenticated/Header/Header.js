@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import LogoutButton from './LogoutButton';
 import AppContext from '../../contexts/AppContext';
 import cloudinary from 'cloudinary-core';
+import { actionLogout } from '../../actions/authActions';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Header = styled.header`
@@ -63,7 +64,7 @@ const LogoutSection = styled.section`
 
 export default function HeaderComp() {
 
-    const { t } = useContext(AppContext);
+    const { t, toggleConnected } = useContext(AppContext);
     const authToken = localStorage.getItem('authToken');
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [avatar, setAvatar] = useState(null);
@@ -75,7 +76,7 @@ export default function HeaderComp() {
                 const res = await axios.get(`/users/getAvatar?authToken=${authToken}`);
                 if (isSubscribed) setAvatar(res.data.avatarPublicId);
             } catch(err) {
-                console.log(err);
+                if (err.response.status === 401) actionLogout(toggleConnected);
             }
         }
         if (authToken) fetchData();

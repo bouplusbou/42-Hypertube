@@ -31,8 +31,7 @@ export default function LogoutButton() {
     `;
 
     const handleLogout = () => {
-        toggleConnected();
-        actionLogout();
+        actionLogout(toggleConnected);
     };
 
     return (

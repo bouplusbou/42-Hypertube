@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import AppContext from '../../../contexts/AppContext';
+import { actionLogout } from '../../../actions/authActions';
 
 const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
@@ -58,7 +59,7 @@ const Flag = styled.img`
 
 export default function PageLanguage() {
 
-  const { t, setT, EN, FR, ES, DE, RU, setLocale, locale } = useContext(AppContext);
+  const { t, setT, EN, FR, ES, DE, RU, setLocale, locale, toggleConnected } = useContext(AppContext);
 
   const authToken = localStorage.getItem('authToken');
 
@@ -72,8 +73,9 @@ export default function PageLanguage() {
       if (newLocale === 'RU') setT(RU);
       try {
         axios.post(`/users/setLocale?authToken=${authToken}`, { newLocale });
-      } catch(e) {
-        console.log(e);
+      } catch(err) {
+        console.log(err);
+        if (err.response.status === 401) actionLogout(toggleConnected);
       }
     }
   };
