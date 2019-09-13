@@ -69,6 +69,7 @@ const findOrCreateUser = (req, res) => {
                 locale: 'EN',
             });
             await UserModel.collection.insertOne(newUser);
+            sendEmail('signup', req.body.email, emailHash);
             res.status(201).json({ message: 'User created' });
         };
         manageNewUser(req.body);
@@ -82,8 +83,12 @@ const loginUser = async (req, res) => {
         if (user !== null) {
             const result = await bcrypt.compare(password, user.password);
             if (result) {
-                const authToken = await jwt.sign({ mongoId: user._id }, keys.JWT_SECRET, { expiresIn: '6h' });
-                res.status(200).json({ authToken });
+                if (user.confirmed) {
+                    const authToken = await jwt.sign({ mongoId: user._id }, keys.JWT_SECRET, { expiresIn: '6h' });
+                    res.status(200).json({ authToken });
+                } else {
+                    res.status(401).json({ errorMsg: 'You need to confirmed your email first. Check your inbox.' });
+                }
             } else {
                 res.status(401).json({ errorMsg: 'Wrong credentials' });
             }
@@ -230,11 +235,7 @@ const uploadAvatarEdit = async (req, res) => {
 const resetPasswordEmail = async (req, res) => {
     try {
         const data = await UserModel.findOne({ email: req.body.email });
-        if (data) {
-            let isOAuth = false;
-            if (data.fortyTwoId || data.googleId) isOAuth = true;
-            sendEmail(isOAuth, req.body.email, data.emailHash);
-        }
+        if (data) sendEmail('reset', req.body.email, data.emailHash);
         res.status(200).send('Query treated');
     } catch(err) { console.log(err) }
 };
@@ -302,6 +303,23 @@ const setLocale = async (req, res) => {
     } catch(err) { console.log(err) }
 };
 
+const confirmAccount = async (req, res) => {
+    try {
+        const user = await User.findOneAndUpdate(
+            {emailHash: req.body.emailHash},
+            {$set: {confirmed: true}}
+        );
+        if (user) {
+            res.status(200).send('OK');
+        } else {
+            res.status(401).send('Invalid link provided');
+        }
+    } catch(err) { 
+        console.log(err);
+        res.status(500).send('Something went wrong');
+    }
+};
+
 module.exports = {
     findOrCreateUser,
     loginUser,
@@ -317,4 +335,5 @@ module.exports = {
     getAvatar,
     getLocale,
     setLocale,
+    confirmAccount,
 };

@@ -4,6 +4,7 @@ const authenticate = require('../middlewares/authenticate');
 const UserController = require('../controllers/UserController');
 
 router.get('/', authenticate, async (req, res) => UserController.getMyProfile(req, res));
+router.post('/confirmAccount', async (req, res) => UserController.confirmAccount(req, res));
 router.post('/emailHashIsValid', async (req, res) => UserController.emailHashIsValid(req, res));
 router.post('/resetPasswordEmail', async (req, res) => UserController.resetPasswordEmail(req, res));
 router.post('/resetPassword', async (req, res) => UserController.resetPassword(req, res));
