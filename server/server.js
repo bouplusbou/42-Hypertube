@@ -10,11 +10,26 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FortyTwoStrategy = require('passport-42').Strategy;
 const cloudinary = require(`./Tools/Cloudinary`);
 const uuidv1 = require('uuid/v1');
+const session = require('express-session');
+const io = require('socket.io').listen(server);
 
 app.use(bodyParser.json({limit: '10mb', extended: true}))
 app.use(bodyParser.urlencoded({limit: '10mb', extended: true}))
 app.use(cookieParser());
 app.use(passport.initialize());
+
+app.use(session({ 
+  secret: keys.SESSION_SECRET,
+  resave: true, 
+  saveUninitialized: true 
+}));
+
+io.on('connection', async client => { 
+  // console.log('new connection');
+});
+
+app.set("io", io);
+
 app.use('/api', router);
 
 passport.serializeUser((user, done) => done(null, user));
@@ -85,7 +100,7 @@ passport.use(
       try {
           const userExists = await User.findOne({ fortyTwoId: profile.id });
           if (userExists) {
-              return done(null, userExists._id);
+            return done(null, userExists._id);
           } else {
             let username = profile.username;
             const usernameExists = await User.findOne({ username: profile.username });
@@ -110,7 +125,7 @@ passport.use(
             let newUser = new User(user);
             const data = await User.collection.insertOne(newUser)
             if (data) {
-                return done(null, data.insertedId);
+              return done(null, data.insertedId);
             } 
           }
       } catch(err) {
@@ -120,12 +135,12 @@ passport.use(
 ));
 
 async function connectMongo() {
+  try {
     const MONGO_URI = require("./config/keys").MONGO_URI;
     const mongoose = require("mongoose");
     mongoose.set('useFindAndModify', false);
-    try {
-        await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
-        console.log("MongoDB successfully connected");
+    await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
+    console.log("MongoDB successfully connected");
     } catch(err) { console.log(err); }
 }
 connectMongo();

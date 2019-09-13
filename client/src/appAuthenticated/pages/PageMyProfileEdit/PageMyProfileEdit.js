@@ -60,7 +60,7 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
 `;
-const SubmitButton = styled.div`
+const SubmitButton = styled.button`
   text-decoration: none;
   cursor: pointer;
   border: none;

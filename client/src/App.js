@@ -13,6 +13,7 @@ import ES from './translations/ES.json';
 import DE from './translations/DE.json';
 import RU from './translations/RU.json';
 import axios from 'axios';
+import io from 'socket.io-client';
 
 const GlobalStyles = createGlobalStyle`
   body {
@@ -21,12 +22,37 @@ const GlobalStyles = createGlobalStyle`
   }
 `;
 
-function App() {
+function App(props) {
   const [connected, setConnected] = useState(false);
+  const [socket, setSocket] = useState(null);
   const [locale, setLocale] = useState('EN');
   const [t, setT] = useState(EN);
   const authToken = localStorage.getItem('authToken');
 
+  const appState = {
+    connected,
+    setConnected,
+    toggleConnected: () => {setConnected(!connected)},
+    t,
+    setT,
+    EN,
+    FR,
+    ES,
+    DE,
+    RU,
+    locale,
+    setLocale,
+    socket,
+  };
+
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+    socket.on('connect', () => {
+      // console.log(socket.id);
+      setSocket(socket);
+    });
+  }, [])
+ 
   useEffect(() => {
     let isSubscribed = true;
     async function fetchData() {
@@ -58,21 +84,6 @@ function App() {
     if (authToken) fetchData();
     return () => isSubscribed = false;
   }, [authToken]);
-
-  const appState = {
-    connected,
-    setConnected,
-    toggleConnected: () => {setConnected(!connected)},
-    t,
-    setT,
-    EN,
-    FR,
-    ES,
-    DE,
-    RU,
-    locale,
-    setLocale,
-  };
 
   return (
     <Fragment>
