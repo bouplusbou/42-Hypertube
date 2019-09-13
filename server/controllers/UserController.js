@@ -44,9 +44,7 @@ const newUserIsOK = async (email, firstName, lastName, username, password) => {
         const usernameExists = await UserModel.findOne({ username });
         if (usernameExists) { helpers.taken.push('username') };
         return helpers;
-    } catch(err) {
-        console.log(err);
-    }
+    } catch(err) { console.log(err); }
 };
 
 const findOrCreateUser = (req, res) => {

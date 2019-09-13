@@ -72,9 +72,7 @@ passport.use(new GoogleStrategy({
           return done(null, data.insertedId);
         } 
       }
-    } catch(err) {
-      console.log(err);
-    }
+    } catch(err) { console.log(err); }
   }
 ));
 
@@ -128,9 +126,7 @@ passport.use(
               return done(null, data.insertedId);
             } 
           }
-      } catch(err) {
-        console.log(err);
-      }
+      } catch(err) { console.log(err); }
     }
 ));
 
