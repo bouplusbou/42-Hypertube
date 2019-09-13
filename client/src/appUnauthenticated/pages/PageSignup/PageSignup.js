@@ -243,7 +243,7 @@ export default function PageSignup(props) {
 
   const valueIsOk = (name, value) => {
     const regex = {
-      email: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+      email: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       firstName: /^[A-Za-zÀ-ÖØ-öø-ÿ-]{3,15}$/,
       lastName: /^[A-Za-zÀ-ÖØ-öø-ÿ]{3,15}$/,
       username: /^[A-Za-zÀ-ÖØ-öø-ÿ]{5,10}$/,
@@ -276,6 +276,10 @@ export default function PageSignup(props) {
       return acc;
     }, {});
     setValues({ ...values, ...state });
+  };
+
+  const emailIsUsedAsOAuth = provider => {
+    setValues({ ...values, email: null, emailError: true, emailHelper: `This email is already used. Please login using your ${provider} account` });
   };
 
   const valueIsSet = (name, value) => {
@@ -316,6 +320,7 @@ export default function PageSignup(props) {
           .catch(error => {
             const res = error.response.data;
             if (res.errors.length !== 0) valueError(res.errors);
+            if (res.usedAsOAuth.length !== 0) emailIsUsedAsOAuth(res.usedAsOAuth);
             if (res.taken.length !== 0) valueIsTaken(res.taken);
           });
       } else {

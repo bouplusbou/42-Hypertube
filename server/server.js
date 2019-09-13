@@ -46,31 +46,40 @@ passport.use(new GoogleStrategy({
       if (userExists) {
         return done(null, userExists._id);
       } else {
-        let username = profile.name.givenName+profile.name.familyName;
-        const usernameExists = await User.findOne({ username: profile.name.givenName+profile.name.familyName });
-        if (usernameExists) {
-          while (username === profile.name.givenName+profile.name.familyName) {
-            username = profile.name.givenName+profile.name.familyName + Math.floor(Math.random() * 100)
+        const basicAuthUser = await User.findOneAndUpdate(
+          {email: profile.emails[0].value},
+          {$set: {googleId: profile.id}}
+        );
+        if (basicAuthUser) {
+          return done(null, basicAuthUser._id);
+        } else {
+          let username = profile.name.givenName+profile.name.familyName;
+          const usernameExists = await User.findOne({ username: profile.name.givenName+profile.name.familyName });
+          if (usernameExists) {
+            while (username === profile.name.givenName+profile.name.familyName) {
+              username = profile.name.givenName+profile.name.familyName + Math.floor(Math.random() * 100)
+            }
           }
+          const avatarPublicId = uuidv1();
+          const emailHash = uuidv1();
+          await cloudinary.uploader.upload(profile.photos[0].value, { public_id: avatarPublicId });
+          const user = { 
+            googleId: profile.id,
+            email: profile.emails[0].value,
+            firstName: profile.name.givenName,
+            lastName: profile.name.familyName,
+            username,
+            avatarPublicId,
+            emailHash,
+            locale: 'EN',
+            confirmed: true,
+          };
+          let newUser = new User(user);
+          const data = await User.collection.insertOne(newUser)
+          if (data) {
+            return done(null, data.insertedId);
+          } 
         }
-        const avatarPublicId = uuidv1();
-        const emailHash = uuidv1();
-        await cloudinary.uploader.upload(profile.photos[0].value, { public_id: avatarPublicId });
-        const user = { 
-          googleId: profile.id,
-          email: profile.emails[0].value,
-          firstName: profile.name.givenName,
-          lastName: profile.name.familyName,
-          username,
-          avatarPublicId,
-          emailHash,
-          locale: 'EN',
-        };
-        let newUser = new User(user);
-        const data = await User.collection.insertOne(newUser)
-        if (data) {
-          return done(null, data.insertedId);
-        } 
       }
     } catch(err) { console.log(err); }
   }
@@ -96,9 +105,16 @@ passport.use(
 
     async (accessToken, refreshToken, profile, done) => {
       try {
-          const userExists = await User.findOne({ fortyTwoId: profile.id });
-          if (userExists) {
-            return done(null, userExists._id);
+        const userExists = await User.findOne({ fortyTwoId: profile.id });
+        if (userExists) {
+          return done(null, userExists._id);
+        } else {
+          const basicAuthUser = await User.findOneAndUpdate(
+            {email: profile.emails[0].value},
+            {$set: {fortyTwoId: profile.id}}
+          );
+          if (basicAuthUser) {
+            return done(null, basicAuthUser._id);
           } else {
             let username = profile.username;
             const usernameExists = await User.findOne({ username: profile.username });
@@ -119,6 +135,7 @@ passport.use(
                 avatarPublicId,
                 emailHash,
                 locale: 'EN',
+                confirmed: true,
             };
             let newUser = new User(user);
             const data = await User.collection.insertOne(newUser)
@@ -126,6 +143,7 @@ passport.use(
               return done(null, data.insertedId);
             } 
           }
+        }
       } catch(err) { console.log(err); }
     }
 ));

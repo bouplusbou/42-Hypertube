@@ -8,7 +8,7 @@ const uuidv1 = require('uuid/v1');
 const sendEmail = require('../Tools/Email.js');
 
 const emailIsOK = email => {
-      const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return regex.test(String(email).toLowerCase());
 };
 const firstNameIsOK = firstName => {
@@ -33,6 +33,7 @@ const newUserIsOK = async (email, firstName, lastName, username, password) => {
         const helpers = {
               errors: [],
               taken: [],
+              usedAsOAuth: [],
         };
         if (!emailIsOK(email)) { helpers.errors.push('email') };
         if (!firstNameIsOK(firstName)) { helpers.errors.push('firstName') };
@@ -40,7 +41,13 @@ const newUserIsOK = async (email, firstName, lastName, username, password) => {
         if (!usernameIsOK(username)) { helpers.errors.push('username') };
         if (!passwordIsOK(password)) { helpers.errors.push('password') };
         const emailExists = await UserModel.findOne({ email });
-        if (emailExists) { helpers.taken.push('email') };
+        if (emailExists && emailExists.googleId) {
+            helpers.usedAsOAuth.push('Google');
+        } else if (emailExists && emailExists.fortyTwoId) {
+            helpers.usedAsOAuth.push('42');
+        } else if (emailExists) {
+            helpers.taken.push('email')
+        }
         const usernameExists = await UserModel.findOne({ username });
         if (usernameExists) { helpers.taken.push('username') };
         return helpers;
@@ -51,7 +58,7 @@ const findOrCreateUser = (req, res) => {
     try {
         const manageNewUser = async ({ email, firstName, lastName, username, password }) => {
             const helpers = await newUserIsOK(email, firstName, lastName, username, password);
-            if (helpers.errors.length !== 0 || helpers.taken.length !== 0) {
+            if (helpers.errors.length !== 0 || helpers.taken.length !== 0 || helpers.usedAsOAuth.length !== 0) {
                 res.status(400).json(helpers);
                 return;
             }
@@ -67,6 +74,7 @@ const findOrCreateUser = (req, res) => {
                 avatarPublicId: req.body.avatarPublicId,
                 emailHash,
                 locale: 'EN',
+                confirmed: false,
             });
             await UserModel.collection.insertOne(newUser);
             sendEmail('signup', req.body.email, emailHash);
