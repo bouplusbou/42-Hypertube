@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faLock, faUser, faImage } from '@fortawesome/free-solid-svg-icons';
 import cloudinary from 'cloudinary-core';
 import AppContext from '../../../contexts/AppContext';
+import { actionLogout } from '../../../actions/authActions';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
@@ -166,7 +167,7 @@ const UploadLabel = styled.label`
 
 export default function PageProfileEdit(props) {
 
-  const { t } = useContext(AppContext);
+  const { t, toggleConnected } = useContext(AppContext);
   const [values, setValues] = useState({
     showPassword: false,
     email: null,
@@ -194,15 +195,20 @@ export default function PageProfileEdit(props) {
   useEffect(() => {
     let isSubscribed = true;
     async function fetchData() {
-      const res = await axios.get(`/users?authToken=${authToken}`);
-      const { username, email, firstName, lastName, avatarPublicId } = res.data.user;
-      if (isSubscribed) {
-        setValues( curr => ({...curr, username, email, firstName, lastName, avatarPublicId}) )
+      try{
+        const res = await axios.get(`/users?authToken=${authToken}`);
+        const { username, email, firstName, lastName, avatarPublicId } = res.data.user;
+        if (isSubscribed) {
+          setValues( curr => ({...curr, username, email, firstName, lastName, avatarPublicId}) )
+        }
+      } catch(err) {
+        console.log(err);
+        if (err.response.status === 401) actionLogout(toggleConnected);
       }
     };
     if (authToken) fetchData();
     return () => isSubscribed = false;
-  }, [authToken]);
+  }, [authToken, toggleConnected]);
 
   const valueIsOk = (name, value) => {
     const regex = {
@@ -263,13 +269,18 @@ export default function PageProfileEdit(props) {
       };
       const emptyFields = Object.keys(infoPayload).filter(key => !infoPayload[key]);
       if (emptyFields.length === 0) {
-        axios.post(`/users/updateProfile?authToken=${authToken}`, infoPayload)
-          .then(res => { if (res.status === 200) props.history.push('/myProfile'); })
-          .catch(error => {
-            const helpers = error.response.data;
+        try {
+          const res = await axios.post(`/users/updateProfile?authToken=${authToken}`, infoPayload);
+          if (res.status === 200) props.history.push('/myProfile'); 
+        } catch(err) {
+          if (err.response.status === 401) {
+            actionLogout(toggleConnected);
+          } else {
+            const helpers = err.response.data;
             if (helpers.errors.length !== 0) valueError(helpers.errors);
             if (helpers.taken.length !== 0) valueIsTaken(helpers.taken);
-          });
+          }
+        }
       } else { valueError(emptyFields); }
     } catch(error) {console.log(error);}
   };
@@ -283,11 +294,16 @@ export default function PageProfileEdit(props) {
       const emptyFields = Object.keys(passwordPayload).filter(key => !passwordPayload[key]);
       if (valueIsOk('newPassword', values.newPassword)) {
         if (emptyFields.length === 0) {
-          axios.post(`/users/updatePassword?authToken=${authToken}`, passwordPayload)
-            .then(res => { if (res.status === 200) props.history.push('/myProfile'); })
-            .catch(error => {
+          try {
+            const res = await axios.post(`/users/updatePassword?authToken=${authToken}`, passwordPayload);
+            if (res.status === 200) props.history.push('/myProfile');
+          } catch(err) {
+            if (err.response.status === 401) {
+              actionLogout(toggleConnected);
+            } else {
               setValues(prev => ({ ...prev, newPassword: null, newPasswordError: true, newPasswordHelper: 'Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character' }));
-            });
+            }
+          }
         }
       } else {
         setValues(prev => ({ ...prev, newPasswordError: true, newPasswordHelper: 'Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character' }));
@@ -305,18 +321,23 @@ export default function PageProfileEdit(props) {
         const uint = new Uint8Array(evt.target.result)
         let bytes = []
         uint.forEach((byte) => {
-            bytes.push(byte.toString(16))
+          bytes.push(byte.toString(16))
         })
         const hex = await bytes.join('').toUpperCase();
         if (file.size && file.size < 1000000 && (hex === '89504E47' || hex === 'FFD8FFE0')) {
           reader.readAsDataURL(file);
           reader.onload = async () => {
-            const image  = reader.result;
-            const res = await axios.post(`/users/uploadAvatarEdit?authToken=${authToken}`, { image })
-            setValues({ ...values, avatarPublicId: res.data.avatarPublicId, avatarPublicIdError: false, avatarPublicIdHelper: '' });
+            try {
+              const image  = reader.result;
+              const res = await axios.post(`/users/uploadAvatarEdit?authToken=${authToken}`, { image })
+              setValues({ ...values, avatarPublicId: res.data.avatarPublicId, avatarPublicIdError: false, avatarPublicIdHelper: '' });
+            } catch(err) {
+              console.log(err);
+              if (err.response.status === 401) actionLogout(toggleConnected);
+            }
           }
         } else if (hex) {
-            setValues({ ...values, avatarPublicId: values.avatarPublicId, avatarPublicIdError: true, avatarPublicIdHelper: 'Please upload a valid JPG or PNG picture less than 1Mo' });
+          setValues({ ...values, avatarPublicId: values.avatarPublicId, avatarPublicIdError: true, avatarPublicIdHelper: 'Please upload a valid JPG or PNG picture less than 1Mo' });
         }
       }
     };

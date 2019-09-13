@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import cloudinary from 'cloudinary-core';
+import AppContext from '../contexts/AppContext';
+import { actionLogout } from '../actions/authActions';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
@@ -114,6 +116,8 @@ const CommentText = styled.p`
 export default function TestMovie() {
 
   const imdbId = 'tt8485548';
+
+  const { toggleConnected } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
   const [comments, setComments] = useState(null);
   const [comment, setComment] = useState(null);
@@ -123,12 +127,17 @@ export default function TestMovie() {
   useEffect(() => {
     let isSubscribed = true;
     const fetchData = async () => {
-      const res = await axios.get(`/comments/${imdbId}?authToken=${authToken}`);
-      if (isSubscribed) setComments(res.data.comments);
+      try {
+        const res = await axios.get(`/comments/${imdbId}?authToken=${authToken}`);
+        if (isSubscribed) setComments(res.data.comments);
+      } catch(err) {
+        console.log(err);
+        if (err.response.status === 401) actionLogout(toggleConnected);
+      }
     };
     if (authToken) fetchData();
     return () => isSubscribed = false;
-  }, [authToken]);
+  }, [authToken, toggleConnected]);
 
   const handleBlur = name => event => {
     const regex = /^[\w\W]{0,250}$/; 
@@ -152,7 +161,6 @@ export default function TestMovie() {
   };
 
   const handleSubmit = async event => {
-    // trigger que avec enter et pas au click, why ?
     event.preventDefault();
     try {
       const commentPayload = { 
@@ -165,7 +173,10 @@ export default function TestMovie() {
       setCommentHelper(null);
       const resFetch = await axios.get(`/comments/${imdbId}?authToken=${authToken}`);
       setComments(resFetch.data.comments);
-    } catch(error) {console.log(error);}
+    } catch(err) {
+      console.log(err);
+      if (err.response.status === 401) actionLogout(toggleConnected);
+    }
   };
 
   return (

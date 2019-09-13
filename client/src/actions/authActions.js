@@ -19,8 +19,9 @@ const actionIsAuthenticated = async authToken => {
     }
 };
 
-const actionLogout = () => {
+const actionLogout = (toggleConnected) => {
     localStorage.removeItem('authToken');
+    toggleConnected();
     return;
 };
 
