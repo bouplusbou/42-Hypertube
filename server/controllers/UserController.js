@@ -8,7 +8,7 @@ const uuidv1 = require('uuid/v1');
 const sendEmail = require('../Tools/Email.js');
 
 const emailIsOK = email => {
-      const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return regex.test(String(email).toLowerCase());
 };
 const firstNameIsOK = firstName => {
@@ -33,6 +33,7 @@ const newUserIsOK = async (email, firstName, lastName, username, password) => {
         const helpers = {
               errors: [],
               taken: [],
+              usedAsOAuth: [],
         };
         if (!emailIsOK(email)) { helpers.errors.push('email') };
         if (!firstNameIsOK(firstName)) { helpers.errors.push('firstName') };
@@ -40,7 +41,13 @@ const newUserIsOK = async (email, firstName, lastName, username, password) => {
         if (!usernameIsOK(username)) { helpers.errors.push('username') };
         if (!passwordIsOK(password)) { helpers.errors.push('password') };
         const emailExists = await UserModel.findOne({ email });
-        if (emailExists) { helpers.taken.push('email') };
+        if (emailExists && emailExists.googleId) {
+            helpers.usedAsOAuth.push('Google');
+        } else if (emailExists && emailExists.fortyTwoId) {
+            helpers.usedAsOAuth.push('42');
+        } else if (emailExists) {
+            helpers.taken.push('email')
+        }
         const usernameExists = await UserModel.findOne({ username });
         if (usernameExists) { helpers.taken.push('username') };
         return helpers;
@@ -51,7 +58,7 @@ const findOrCreateUser = (req, res) => {
     try {
         const manageNewUser = async ({ email, firstName, lastName, username, password }) => {
             const helpers = await newUserIsOK(email, firstName, lastName, username, password);
-            if (helpers.errors.length !== 0 || helpers.taken.length !== 0) {
+            if (helpers.errors.length !== 0 || helpers.taken.length !== 0 || helpers.usedAsOAuth.length !== 0) {
                 res.status(400).json(helpers);
                 return;
             }
@@ -67,8 +74,10 @@ const findOrCreateUser = (req, res) => {
                 avatarPublicId: req.body.avatarPublicId,
                 emailHash,
                 locale: 'EN',
+                confirmed: false,
             });
             await UserModel.collection.insertOne(newUser);
+            sendEmail('signup', req.body.email, emailHash);
             res.status(201).json({ message: 'User created' });
         };
         manageNewUser(req.body);
@@ -82,8 +91,12 @@ const loginUser = async (req, res) => {
         if (user !== null) {
             const result = await bcrypt.compare(password, user.password);
             if (result) {
-                const authToken = await jwt.sign({ mongoId: user._id }, keys.JWT_SECRET, { expiresIn: '6h' });
-                res.status(200).json({ authToken });
+                if (user.confirmed) {
+                    const authToken = await jwt.sign({ mongoId: user._id }, keys.JWT_SECRET, { expiresIn: '6h' });
+                    res.status(200).json({ authToken });
+                } else {
+                    res.status(401).json({ errorMsg: 'You need to confirmed your email first. Check your inbox.' });
+                }
             } else {
                 res.status(401).json({ errorMsg: 'Wrong credentials' });
             }
@@ -173,32 +186,21 @@ const updateProfile = async (req, res) => {
 const updatePassword = async (req, res) => {
     try {
         const { authToken } = req.query;
+        const { newPassword } = req.body;
         const decoded = await jwt.verify(authToken, keys.JWT_SECRET);
         const _id = decoded.mongoId;
-        const { currentPassword, newPassword } = req.body;
-        const user = await UserModel.findOne({ _id });
-        if (user !== null) {
-            const result = await bcrypt.compare(currentPassword, user.password);
-            if (result) {
-                const newPasswordIsOk = passwordIsOK(newPassword);
-                if (newPasswordIsOk === false) {
-                    res.status(400).json('newPassword');
-                    return;
-                } else {
-                    const salt = await bcrypt.genSalt(10);
-                    const hash = await bcrypt.hash(newPassword, salt);
-                    const objId = new ObjectID(_id);
-                    await User.findOneAndUpdate(
-                        {_id: objId},
-                        {$set: {password: hash}}
-                    );
-                    res.status(200).json({ message: 'Profile edited' });
-                }
-            } else {
-                res.status(400).json('currentPassword');
-            }
+        const newPasswordIsOk = passwordIsOK(newPassword);
+        if (newPasswordIsOk) {
+            const salt = await bcrypt.genSalt(10);
+            const hash = await bcrypt.hash(newPassword, salt);
+            const objId = new ObjectID(_id);
+            await User.findOneAndUpdate(
+                {_id: objId},
+                {$set: {password: hash}}
+            );
+            res.status(200).json({ message: 'Profile edited' });
         } else {
-            res.status(401).json({ errorMsg: 'Wrong credentials' });
+            res.status(400).send('Invalid new password');
         }
     } catch(err) { console.log(err) }
 };
@@ -230,11 +232,7 @@ const uploadAvatarEdit = async (req, res) => {
 const resetPasswordEmail = async (req, res) => {
     try {
         const data = await UserModel.findOne({ email: req.body.email });
-        if (data) {
-            let isOAuth = false;
-            if (data.fortyTwoId || data.googleId) isOAuth = true;
-            sendEmail(isOAuth, req.body.email, data.emailHash);
-        }
+        if (data) sendEmail('reset', req.body.email, data.emailHash);
         res.status(200).send('Query treated');
     } catch(err) { console.log(err) }
 };
@@ -302,6 +300,23 @@ const setLocale = async (req, res) => {
     } catch(err) { console.log(err) }
 };
 
+const confirmAccount = async (req, res) => {
+    try {
+        const user = await User.findOneAndUpdate(
+            {emailHash: req.body.emailHash},
+            {$set: {confirmed: true}}
+        );
+        if (user) {
+            res.status(200).send('OK');
+        } else {
+            res.status(401).send('Invalid link provided');
+        }
+    } catch(err) { 
+        console.log(err);
+        res.status(500).send('Something went wrong');
+    }
+};
+
 module.exports = {
     findOrCreateUser,
     loginUser,
@@ -317,4 +332,5 @@ module.exports = {
     getAvatar,
     getLocale,
     setLocale,
+    confirmAccount,
 };

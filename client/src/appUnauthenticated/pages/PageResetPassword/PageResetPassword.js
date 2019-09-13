@@ -90,7 +90,6 @@ const StyledInput = styled(Input) `
   }
 `;
 
-
 export default function PageResetPassword(props) {
   const [isError, setIsError] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -139,67 +138,67 @@ export default function PageResetPassword(props) {
 
   useEffect(() => {
     let isSubscribed = true;
-      async function fetchData() {
-          try {
-              await axios.post('/users/emailHashIsValid', {emailHash: props.match.params.emailHash});
-              if (isSubscribed) setIsError(false);
-          } catch(error) {}
-          if (isSubscribed) setIsLoading(false);
-      }
-      fetchData();
-      return () => isSubscribed = false;
+    async function fetchData() {
+      try {
+        await axios.post('/users/emailHashIsValid', {emailHash: props.match.params.emailHash});
+        if (isSubscribed) setIsError(false);
+      } catch(error) {}
+      if (isSubscribed) setIsLoading(false);
+    }
+    fetchData();
+    return () => isSubscribed = false;
   }, [props.match.params.emailHash]);
 
   return (
-      <Hero>
-          <Section>
-              <Container>
-              {!isLoading && isError && 
-                <Fragment>
-                  <h1>Sorry but the link you provided is not working</h1>
-                  <Redirect>
-                      <p><Link to="/login">Login</Link></p>
-                  </Redirect>
-                </Fragment>
-              }
-              {!isLoading && isSuccess &&
-                <Fragment>
-                  <h1>Your new password has been set</h1>
-                  <Redirect>
-                      <p><Link to="/login">Login</Link></p>
-                  </Redirect>
-                </Fragment>
-              }
-              {!isLoading && !isError && !isSuccess && 
-                <Fragment>
-                  <h1>Reset your password</h1>
-                  <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
-                    <FormControl required={true}>
-                      <StyledInputLabel htmlFor="adornment-password">New Password</StyledInputLabel>
-                      <StyledInput
-                        id="standard-password"
-                        type={showPassword ? 'text' : 'password'}
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        error={passwordError}
-                        endAdornment={
-                          <InputAdornment position="end">
-                            <IconButton aria-label="Toggle password visibility" onClick={toggleShowPassword}>
-                              {showPassword ? <Visibility /> : <VisibilityOff />}
-                            </IconButton>
-                          </InputAdornment>
-                        }
-                      />
-                      <FormHelperText style={{color: 'red'}} id="password-helper-text">{passwordHelper}</FormHelperText>
-                    </FormControl>
-                    <SubmitButton type="submit">
-                      <p>Change password</p>
-                    </SubmitButton>
-                  </Form>
-                </Fragment>
-              }
-              </Container>
-          </Section>
-      </Hero>
+    <Hero>
+      <Section>
+        <Container>
+        {!isLoading && isError && 
+          <Fragment>
+            <h1>Sorry but the link you provided is not working</h1>
+            <Redirect>
+              <p><Link to="/login">Login</Link></p>
+            </Redirect>
+          </Fragment>
+        }
+        {!isLoading && isSuccess &&
+          <Fragment>
+            <h1>Your new password has been set</h1>
+            <Redirect>
+              <p><Link to="/login">Login</Link></p>
+            </Redirect>
+          </Fragment>
+        }
+        {!isLoading && !isError && !isSuccess && 
+          <Fragment>
+            <h1>Reset your password</h1>
+            <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
+              <FormControl required={true}>
+                <StyledInputLabel htmlFor="adornment-password">New Password</StyledInputLabel>
+                <StyledInput
+                  id="standard-password"
+                  type={showPassword ? 'text' : 'password'}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  error={passwordError}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton aria-label="Toggle password visibility" onClick={toggleShowPassword}>
+                        {showPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+                <FormHelperText style={{color: 'red'}} id="password-helper-text">{passwordHelper}</FormHelperText>
+              </FormControl>
+              <SubmitButton type="submit">
+                <p>Change password</p>
+              </SubmitButton>
+            </Form>
+          </Fragment>
+        }
+        </Container>
+      </Section>
+    </Hero>
   );
 }
