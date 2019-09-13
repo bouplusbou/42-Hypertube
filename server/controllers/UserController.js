@@ -186,32 +186,21 @@ const updateProfile = async (req, res) => {
 const updatePassword = async (req, res) => {
     try {
         const { authToken } = req.query;
+        const { newPassword } = req.body;
         const decoded = await jwt.verify(authToken, keys.JWT_SECRET);
         const _id = decoded.mongoId;
-        const { currentPassword, newPassword } = req.body;
-        const user = await UserModel.findOne({ _id });
-        if (user !== null) {
-            const result = await bcrypt.compare(currentPassword, user.password);
-            if (result) {
-                const newPasswordIsOk = passwordIsOK(newPassword);
-                if (newPasswordIsOk === false) {
-                    res.status(400).json('newPassword');
-                    return;
-                } else {
-                    const salt = await bcrypt.genSalt(10);
-                    const hash = await bcrypt.hash(newPassword, salt);
-                    const objId = new ObjectID(_id);
-                    await User.findOneAndUpdate(
-                        {_id: objId},
-                        {$set: {password: hash}}
-                    );
-                    res.status(200).json({ message: 'Profile edited' });
-                }
-            } else {
-                res.status(400).json('currentPassword');
-            }
+        const newPasswordIsOk = passwordIsOK(newPassword);
+        if (newPasswordIsOk) {
+            const salt = await bcrypt.genSalt(10);
+            const hash = await bcrypt.hash(newPassword, salt);
+            const objId = new ObjectID(_id);
+            await User.findOneAndUpdate(
+                {_id: objId},
+                {$set: {password: hash}}
+            );
+            res.status(200).json({ message: 'Profile edited' });
         } else {
-            res.status(401).json({ errorMsg: 'Wrong credentials' });
+            res.status(400).send('Invalid new password');
         }
     } catch(err) { console.log(err) }
 };
