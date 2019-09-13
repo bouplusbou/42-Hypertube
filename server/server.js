@@ -19,7 +19,7 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 app.use(session({ 
-  secret: 'secret', 
+  secret: keys.SESSION_SECRET,
   resave: true, 
   saveUninitialized: true 
 }));
@@ -100,7 +100,7 @@ passport.use(
       try {
           const userExists = await User.findOne({ fortyTwoId: profile.id });
           if (userExists) {
-              return done(null, userExists._id);
+            return done(null, userExists._id);
           } else {
             let username = profile.username;
             const usernameExists = await User.findOne({ username: profile.username });
@@ -125,7 +125,7 @@ passport.use(
             let newUser = new User(user);
             const data = await User.collection.insertOne(newUser)
             if (data) {
-                return done(null, data.insertedId);
+              return done(null, data.insertedId);
             } 
           }
       } catch(err) {
@@ -134,23 +134,13 @@ passport.use(
     }
 ));
 
-
-
-
-
-
-
-
-
-
-
 async function connectMongo() {
+  try {
     const MONGO_URI = require("./config/keys").MONGO_URI;
     const mongoose = require("mongoose");
     mongoose.set('useFindAndModify', false);
-    try {
-        await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
-        console.log("MongoDB successfully connected");
+    await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
+    console.log("MongoDB successfully connected");
     } catch(err) { console.log(err); }
 }
 connectMongo();

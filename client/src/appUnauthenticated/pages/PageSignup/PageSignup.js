@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
@@ -14,6 +14,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faImage } from '@fortawesome/free-solid-svg-icons';
 import cloudinary from 'cloudinary-core';
+import AppContext from '../../../contexts/AppContext';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
@@ -216,6 +217,8 @@ const UploadLabel = styled.label`
 
 export default function PageSignup(props) {
 
+  const { toggleConnected, socket } = useContext(AppContext);
+
   const [values, setValues] = useState({
     showPassword: false,
     email: null,
@@ -355,6 +358,27 @@ export default function PageSignup(props) {
     setValues({ ...values, avatarPublicId: null, avatarPublicIdError: false, avatarPublicIdHelper: '' });
   };
 
+
+
+  useEffect(() => {
+    return () => {if (socket) socket.off('redirect')};
+  }, [socket])
+
+  const startOAuth = provider => {
+    const popup = window.open(`http://localhost:5000/api/auth/${provider}?socketId=${socket.id}`, '');
+    if (socket) {
+      socket.on('redirect', data => {
+        // console.log('redirect OK');
+        // console.log(data.authToken);
+        localStorage.setItem('authToken', data.authToken);
+        toggleConnected();
+        popup.close();
+      });
+    }
+  }
+
+
+
   return (
     <Hero>
       <LoginSection>
@@ -433,13 +457,13 @@ export default function PageSignup(props) {
             </SubmitButton>
           </Form>
           <LineBreak></LineBreak>
-          <Login42 href="http://localhost:5000/api/auth/42">
+          <Login42 onClick={() => startOAuth('42')}>
             <Logo>
               <img width="30px" alt="42 &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/42_Logo.svg/1200px-42_Logo.svg.png"/>
             </Logo>
             <TextButton>Continue with 42</TextButton>
           </Login42>
-          <LoginGoogle href="http://localhost:5000/api/auth/google">
+          <LoginGoogle onClick={() => startOAuth('google')}>
             <Logo>
               <img width="30px" alt="Google &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"/>
             </Logo>

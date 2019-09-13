@@ -29,20 +29,30 @@ function App(props) {
   const [t, setT] = useState(EN);
   const authToken = localStorage.getItem('authToken');
 
+  const appState = {
+    connected,
+    setConnected,
+    toggleConnected: () => {setConnected(!connected)},
+    t,
+    setT,
+    EN,
+    FR,
+    ES,
+    DE,
+    RU,
+    locale,
+    setLocale,
+    socket,
+  };
+
   useEffect(() => {
     const socket = io('http://localhost:5000');
     socket.on('connect', () => {
-      console.log(socket.id);
+      // console.log(socket.id);
       setSocket(socket);
     });
-    socket.on('redirect', data => {
-      console.log('redirect OK');
-      console.log(data.authToken);
-      localStorage.setItem('aut:wqhToken', data.authToken);
-      // props.history.push('/home');
-    });
-  }, [props.history])
-  
+  }, [])
+ 
   useEffect(() => {
     let isSubscribed = true;
     async function fetchData() {
@@ -74,22 +84,6 @@ function App(props) {
     if (authToken) fetchData();
     return () => isSubscribed = false;
   }, [authToken]);
-
-  const appState = {
-    connected,
-    setConnected,
-    toggleConnected: () => {setConnected(!connected)},
-    t,
-    setT,
-    EN,
-    FR,
-    ES,
-    DE,
-    RU,
-    locale,
-    setLocale,
-    socket,
-  };
 
   return (
     <Fragment>

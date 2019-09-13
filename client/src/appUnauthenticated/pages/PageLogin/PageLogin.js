@@ -1,4 +1,4 @@
-import React, { useState, useContext, Fragment } from 'react';
+import React, { useEffect, useState, useContext, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
@@ -67,7 +67,7 @@ const LineBreak = styled.div`
   margin-top: 20px;
   border: inset 1px rgb(0,0,0,0.2);
 `;
-const Login42 = styled.a`
+const Login42 = styled.div`
   cursor: pointer;
   padding: 3px;
   text-decoration: none;
@@ -261,7 +261,7 @@ export default function PageLogin(props) {
       const res = await axios.post(`/auth/login`, credentials);
       if (res.data.authToken) {
         await actionLogin(res.data.authToken);
-        props.history.push('/myProfile');
+        props.history.push('/home');
         toggleConnected();
       }
     } catch(err) {
@@ -298,6 +298,23 @@ export default function PageLogin(props) {
       setValues({ ...values, resetPasswordError: true, resetPasswordHelper: 'Enter a proper email' });
     }
   };
+
+  useEffect(() => {
+    return () => {if (socket) socket.off('redirect')};
+  }, [socket])
+
+  const startOAuth = provider => {
+    const popup = window.open(`http://localhost:5000/api/auth/${provider}?socketId=${socket.id}`, '');
+    if (socket) {
+      socket.on('redirect', data => {
+        // console.log('redirect OK');
+        // console.log(data.authToken);
+        localStorage.setItem('authToken', data.authToken);
+        toggleConnected();
+        popup.close();
+      });
+    }
+  }
 
   return (
     <Hero>
@@ -390,13 +407,13 @@ export default function PageLogin(props) {
           <LineBreak></LineBreak>
           {socket && 
             <Fragment>
-              <Login42 href={`http://localhost:5000/api/auth/42?socketId=${socket.id}`}>
+              <Login42 onClick={() => startOAuth('42')}>
                 <Logo>
                   <img width="30px" alt="42 &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/42_Logo.svg/1200px-42_Logo.svg.png"/>
                 </Logo>
                 <TextButton>Continue with 42</TextButton>
               </Login42>
-              <LoginGoogle href={`http://localhost:5000/api/auth/google?socketId=${socket.id}`}>
+              <LoginGoogle onClick={() => startOAuth('google')}>
                 <Logo>
                   <img width="30px" alt="Google &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"/>
                 </Logo>

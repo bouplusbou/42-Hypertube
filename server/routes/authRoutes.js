@@ -8,7 +8,6 @@ const authenticate = require('../middlewares/authenticate');
 const ObjectID = require('mongodb').ObjectID;
 
 const addSocketIdtoSession = (req, res, next) => {
-      // console.log(`req.query.socketId: ${req.query.socketId}`);
       req.session.socketId = req.query.socketId;
       next();
 };
@@ -23,7 +22,6 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
       async (req, res) => {
             const mongoId = new ObjectID(req.user);
             const authToken = await jwt.sign({ mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });
-            res.redirect('http://localhost:3000/home');
             let io = req.app.get("io");
             io.in(req.session.socketId).emit('redirect', { authToken })
       });
@@ -31,7 +29,6 @@ router.get('/42/callback', passport.authenticate('42', { failureRedirect: '/api/
       async (req, res) => {
             const mongoId = new ObjectID(req.user);
             const authToken = await jwt.sign({ mongoId }, keys.JWT_SECRET, { expiresIn: '6h' });
-            res.redirect('http://localhost:3000/home');
             let io = req.app.get("io");
             io.in(req.session.socketId).emit('redirect', { authToken })
       });
