@@ -11,7 +11,7 @@ import { actionLogout } from '../../actions/authActions';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Header = styled.header`
-    background-color: black;
+    background-color: #202020;
     height: 70px;
     display: grid;
     grid-template-columns: 8fr 2fr 2fr;
@@ -38,7 +38,7 @@ const DropDown = styled.div`
   top: 65px;
   right: 0px;
   border-radius: ${props => props.theme.borderRadius};
-  background-color: black;
+  background-color: #202020;
   position: absolute;
   padding: 30px;
   text-align: right;
@@ -60,7 +60,6 @@ const LogoutSection = styled.section`
     align-items: center;
     justify-content: center;
 `;
-
 
 export default function HeaderComp() {
 
