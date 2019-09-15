@@ -5,111 +5,101 @@ const ffmpeg = require("fluent-ffmpeg");
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
+const srt2vtt = require('srt-to-vtt')
+const openSubs = require('opensubtitles-api');
 
-// Color utils
-const colors = {
-  BLUE: "\x1b[34m",
-  CYAN: "\x1b[36m",
-  GREEN: "\x1b[32m",
-  PURPLE: "\x1b[35m",
-  RED: "\x1b[31m",
-  YELLOW: "\x1b[33m",
-  END: "\x1b[0m"
-};
-
-const movieData = {
-  name: "",
-  path: "",
-  magnet: "",
-  stream: {},
-  extension: "",
-};
-
-const extensions = [".webm", ".mkv", ".flv", ".wmv", "avi"];
-
-// Download torrent function
-const downloadVideo = async (req, res) => {
-  try {
-    torrentToMagnet(
-      "https://yts.lt/torrent/download/1692BCC8EE303ECEC5C2A41686CF0E767E19E8CF",
-      async (err, uri) => {
-        try {
-          const engine = torrentStream(uri, {
-            connections: 100,
-            uploads: 10,
-            tmp: "/tmp",
-            path: "/tmp/movies"
-          });
-          engine.on("ready", () => {
-            engine.files.forEach(file => {
-              if (
-                path.extname(file.name) === ".mp4" ||
-                extensions.indexOf(path.extname(file.name)) >= 0
-              ) {
-                movieData.name = file.name;
-                movieData.path = `/tmp/movies/${file.path}`;
-                if (!fs.existsSync(movieData.path)) {
-                  movieData.stream = file.createReadStream();
-                  movieData.stream.on('data', () => console.log(`Downloading...`))
-                  if (path.extname(file.name) !== ".mp4") {
-                    ffmpeg(movieData.stream)
-                      .videoCodec("libx264")
-                      .audioCodec("libfaac")
-                      .videoBitrate(1000)
-                      .format("webm")
-                      .on("error", err => console.log("Conversion error", err));
-                  }
-                }
-              } 
-            });
-          });
-          engine.on("download", e => {
-            console.log(`Package index : ${e}`)
-          });
-        } catch (e) {
-          console.log(e);
-        }
-      }
-    );
-  } catch (e) {
-    console.log(e);
-  }
-};
-
-// Stream movie function
-const streamVideo = async (req, res) => {
-  try {
-    if (movieData.path !== "") {
-      const path = movieData.path;
-      const stat = fs.statSync(path);
-      const fileSize = stat.size;
-      const range = req.headers.range;
-      if (range) {
-        const parts = range.replace(/bytes=/, "").split("-");
-        const start = parseInt(parts[0], 10);
-        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-        const chunksize = end - start + 1;
-        const file = fs.createReadStream(path, { start, end });
-        const head = {
-          "Content-Range": `bytes ${start}-${end}/${fileSize}`,
-          "Accept-Ranges": "bytes",
-          "Content-Length": chunksize,
-          "Content-Type": "video/mp4"
-        };
-        res.writeHead(206, head);
-        file.pipe(res);
-      } else {
-        const head = {
-          "Content-Length": fileSize,
-          "Content-Type": "video/mp4"
-        };
-        res.writeHead(200, head);
-        fs.createReadStream(path).pipe(res);
-      }
+const streamTorrent = async (file, res, range) => {
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-")
+    const start = parseInt(parts[0], 10)
+    const end = parts[1] ? parseInt(parts[1], 10) : file.length - 1
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${file.length}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': (end - start) + 1,
+      'Content-Type': 'video/mp4',
     }
-  } catch (e) {
-    console.log(e);
+    res.writeHead(206, head);
+    file.createReadStream({ start, end }).pipe(res)
   }
+}
+
+const downloadTorrent = async (magnet, options, req, res) => {
+  const engine = torrentStream(magnet, options);
+  let movieFile;
+  engine.on('ready', () => {
+    engine.files.forEach(file => {
+      if (path.extname(file.name) === ".mp4") {
+        file.select()
+        movieFile = file
+        streamTorrent(file, res, req.headers.range)
+      } else {
+        file.deselect()
+      }
+    });
+  });
+  engine.on('download', () => {
+    console.log('[ DL TRACKER ]')
+    console.log(`Filename : ${movieFile.name}`)
+    console.log(`Progress : ${(100 * engine.swarm.downloaded / movieFile.length).toPrecision(4)}%`)
+  })
+}
+
+const handleTorrent = async (req, res) => {
+  // const { hash } = req
+
+  const hash = '94B8794BF25722023C7C24B9D80F425B7B86C708' // hash
+  const options = {
+    connections: 100,
+    uploads: 10,
+    verify: true,
+    dht: true,
+    tracker: true,
+    tmp: "/tmp",
+    path: `/tmp/movies/${hash}`
+  }
+  torrentToMagnet(`https://yts.lt/torrent/download/${hash}`, (err, uri) => {
+    if (err) throw err
+    // if (fs.existsSync(`/tmp/movies/${hash}`))
+    //   console.log('file or dir already exists')
+    downloadTorrent(uri, options, req, res);
+  })
 };
 
-module.exports = { downloadVideo, streamVideo };
+
+const handleSubs = async (req, res) => {
+  // const { hash, idIMDB } = req
+  const arr = []
+  const hash = '94B8794BF25722023C7C24B9D80F425B7B86C708' // hash
+  let dir = `/tmp/movies/${hash}`
+  const subs = new openSubs('test');
+  subs.search({
+    imdbid: 'tt6446550', // idIMDB
+  }).then(async subtitles => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+      fs.mkdirSync(dir + '/subs');
+    }
+    const keys = Object.keys(subtitles);
+    await Promise.all(keys.map(async key => {
+      return (async () => {
+        if (subtitles[key].url !== undefined) {
+          const subs = await axios.get(subtitles[key].url)
+          const fullDir = `${dir}/subs/${subtitles[key].langcode}`
+          fs.writeFileSync(`${fullDir}.srt`, subs.data, 'utf8')
+          fs.createReadStream(`${fullDir}.srt`)
+            .pipe(srt2vtt())
+            .pipe(fs.createWriteStream(`${fullDir}.vtt`))
+          fs.unlinkSync(`${fullDir}.srt`)
+          arr.push({ lang: subtitles[key].langcode, path: `${fullDir}.vtt` })
+          return Promise.resolve();
+        } else {
+        return Promise.reject();
+      }
+    })();
+  }));
+  res.status(200).send(arr)
+}).catch (err => console.log(err));
+}
+
+module.exports = { handleTorrent, handleSubs };
