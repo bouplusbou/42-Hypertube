@@ -1,33 +1,43 @@
 const axios = require("axios");
 const MovieModel = require('../models/MovieModel');
-var throttledQueue = require('throttled-queue');
-var throttle = throttledQueue(20, 10000);
 
-function sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-      if ((new Date().getTime() - start) > milliseconds){
-        break;
-      }
-    }
+const Color = {
+    Reset: "\x1b[0m",
+    Bright: "\x1b[1m",
+    Dim: "\x1b[2m",
+    Underscore: "\x1b[4m",
+    Blink: "\x1b[5m",
+    Reverse: "\x1b[7m",
+    Hidden: "\x1b[8m",
+  
+    black: "\x1b[30m",
+    red: "\x1b[31m",
+    green: "\x1b[32m",
+    yellow: "\x1b[33m",
+    blue: "\x1b[34m",
+    magenta: "\x1b[35m",
+    cyan: "\x1b[36m",
+    white: "\x1b[37m",
   }
 
+const log = (text, color = "yellow") => console.log(`${Color[color]}${text}${Color.Reset}`);
+  
 async function connectMongo() {
     const MONGO_URI = require("../config/keys").MONGO_URI;
     const mongoose = require("mongoose");
     mongoose.set('useFindAndModify', false);
-    try {
-        await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
-        console.log("MongoDB successfully connected");
-    } catch(err) { console.log(err); }
+    await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
+    // await mongoose.connection.dropCollection("movies")
+    log("MongoDB successfully connected");
 }
 
 const scrapPopcorn = async () => {
-    console.log("Scraping Popcorn Time API...");
+    log("***** Scraping Popcorn Time API *****", 'cyan');
     const pageCount = await axios.get('https://tv-v2.api-fetch.website/movies');
     const rawResults = [];
     for (let i = 1; i < pageCount.data.length - 1; i++) {
         const res = await axios.get(`https://tv-v2.api-fetch.website/movies/${i}`);
+        log(`${res.data.length} movie(s) found on page ${i}.`);
         rawResults.push(...res.data)
     }
     const cleanResults = rawResults.map(movie => {
@@ -42,128 +52,95 @@ const scrapPopcorn = async () => {
                     peer: movie.torrents[language][quality].peer,
                     bytes: movie.torrents[language][quality].size,
                     fileSize: movie.torrents[language][quality].filesize,
+                    source: 'Popcorn Time'
                 }
                 torrents.push(torrent);
             }
         }
         const infos = {
             imdbId: movie.imdb_id,
+            title: movie.title,
+            year: movie.year,
+            plot: movie.synopsis,
+            runtime: parseInt(movie.runtime),
+            trailer: movie.trailer,
+            poster: movie.images.poster,
+            genres: movie.genres ? movie.genres : null,
+            certification: movie.certification,
+            rating: movie.rating.percentage / 10,
             torrents: torrents,
         }
         return infos
     })
-    console.log(`${cleanResults.length} movies found in total.`);
+    log(`${cleanResults.length} movies found in total.`);
     return cleanResults;
 }
 
-// const scrapYTS = async () => {
-//     console.log("Scraping YTS API...");
-//     const rawResults = [];
-//     for (let i = 1; i < 3; i++) {
-//         const res = await axios.get(`https://yts.lt/api/v2/list_movies.json?limit=50&page=${i}`);
-//         if (!res.data.data.movies) break;
-//         // console.log(`${res.data.data.movies.length} movie(s) found on page ${i}.`);
-//         rawResults.push(...res.data.data.movies)
-//     }
-//     const cleanResults = rawResults.map(movie => {
-//         const infos = {
-//             imdbId: movie.imdb_code,
-//             torrents: movie.torrents
-//         }
-//         return infos;
-//     })
-//     // console.log(cleanResults[0].torrents);
-//     return cleanResults;
-// }
+const scrapYTS = async () => {
+    log("***** Scraping YTS API *****", 'cyan');
+    const rawResults = [];
+    for (let i = 1; i < 300; i++) {
+        const res = await axios.get(`https://yts.lt/api/v2/list_movies.json?limit=50&page=${i}`);
+            if (!res.data.data.movies) break;
+        log(`${res.data.data.movies.length} movie(s) found on page ${i}.`);
+        rawResults.push(...res.data.data.movies)
+    }
+    const cleanResults = rawResults.map(movie => {
+        const torrents = [];
+        for (const item in movie.torrents) {
+            const torrent = {
+                magnet: movie.torrents[item].hash,
+                quality: movie.torrents[item].quality,
+                language: 'en',
+                seed: movie.torrents[item].seeds,
+                peer: movie.torrents[item].peers,
+                bytes: movie.torrents[item].size_bytes,
+                fileSize: movie.torrents[item].size,
+                source: 'YTS'
+            }
+            torrents.push(torrent);
+        }
+        const infos = {
+            imdbId: movie.imdb_code,
+            title: movie.title,
+            year: movie.year,
+            plot: movie.synopsis,
+            runtime: movie.runtime,
+            genres: movie.genres ? movie.genres : null,
+            trailer: movie.yt_trailer_code ? `http://youtube.com/watch?v=${movie.yt_trailer_code}` : null,
+            poster: movie.large_cover_image,
+            certification: movie.mpa_rating,
+            rating: movie.rating,
+            torrents: torrents
+        }
+        return infos;
+    })
+    return cleanResults;
+}
 
 const ScrapMoviesDatabases = async () => {
-    console.log("***** HYPERTUBE DATABASE SCRAPING *****");
-    await connectMongo();
-    const tmdb = await axios.get(`https://api.themoviedb.org/3/configuration?api_key=256917e54af5083cae342214e4c314d0`);
-    const popcorn = await scrapPopcorn();
-    const completeResult = [];
-    for (i = 0; i < popcorn.length; i++) {
-        throttle(function() {
-            // const omdbRes = await axios.get(`http://www.omdbapi.com/?apikey=da694061&i=${popcorn[i].imdbId}`);
-            console.log(i);
+    try {
+        log("***** HYPERTUBE DATABASE SCRAPING *****", 'cyan');
+        await connectMongo();
+        // const popcornRes = await scrapPopcorn();
+        const ytsRes = await scrapYTS();
+        const completeRawResult = ytsRes.concat(null);
+        const filteredResults = [];
+        completeRawResult.map(movie => {
+            for (i = 0; i < filteredResults.length; i++) {
+                if (filteredResults[i].imdbId === movie.imdbId) 
+                    return null
+            }
+            filteredResults.push(movie);
         })
-        // const tmdbRes = await axios.get(`https://api.themoviedb.org/3/movie/${popcorn[index].imdbId}?api_key=256917e54af5083cae342214e4c314d0&language=en-US`);
-        // const filteredInfos = {
-        //     imdbId: popcorn[index].imdbId,
-        //     title: tmdbRes.data.original_title,
-        //     plot: tmdbRes.data.overview,
-        //     language: tmdbRes.data.original_language,
-        //     poster: `${tmdb.data.images.base_url}original${tmdbRes.data.poster_path}`,
-        //     backdrop: `${tmdb.data.images.base_url}original${tmdbRes.data.backdrop_path}`,
-        //     runtime: tmdbRes.data.runtime,
-        //     tagline: tmdbRes.data.tagline,
-        //     rating: parseInt(omdbRes.data.imdbRating),
-        //     torrents: popcorn[index].torrents
-        // }
-        // completeResult.push(filteredInfos);
-        
+        const movieList = filteredResults.map(movie => {
+            const item = new Movie({ ...movie });
+            return item;
+        })
+        await MovieModel.collection.insertMany(movieList);
     }
-    process.exit(0);
+    catch (error) { log(error, 'red') }
+    finally { process.exit(0) }
 }
 
 ScrapMoviesDatabases();
-
-
-/* 
-    TORRENT OBJECT TEMPLATE
-
-    { HYPERTUBE
-        magnet: ,
-        seed: ,
-        peer: ,
-        bytes: ,
-        fileSize: ,
-    }
-    { POPCORN
-        en: {
-            '1080p': {
-              url: 'magnet:?xt=urn:btih:6268ABCCB049444BEE76813177AA46643A7ADA88&tr=udp://glotorrents.pw:6969/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://torrent.gresille.org:80/announce&tr=udp://tracker.openbittorrent.com:80&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969&tr=udp://p4p.arenabg.ch:1337&tr=udp://tracker.internetwarriors.net:1337',
-              seed: 2040,
-              peer: 1081,
-              size: 1771674010,
-              filesize: '1.65 GB',
-              provider: 'YTS'
-            },
-            '720p': {
-              url: 'magnet:?xt=urn:btih:A1D0C3B0FD52A29D2487027E6B50F27EAF4912C5&tr=udp://glotorrents.pw:6969/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://torrent.gresille.org:80/announce&tr=udp://tracker.openbittorrent.com:80&tr=udp://tracker.coppersurfer.tk:6969&tr=udp://tracker.leechers-paradise.org:6969&tr=udp://p4p.arenabg.ch:1337&tr=udp://tracker.internetwarriors.net:1337',
-              seed: 3344,
-              peer: 1699,
-              size: 837382308,
-              filesize: '798.59 MB',
-              provider: 'YTS'
-            }
-        }
-    }
-
-    [ YTS
-        {
-            url: 'https://yts.lt/torrent/download/20CC17147F6697953388322C5C728A633E732FC3',
-            hash: '20CC17147F6697953388322C5C728A633E732FC3',
-            quality: '720p',
-            type: 'bluray',
-            seeds: 106,
-            peers: 164,
-            size: '1.24 GB',
-            size_bytes: 1331439862,
-            date_uploaded: '2019-09-11 08:16:56',
-            date_uploaded_unix: 1568182616
-        },
-        {
-            url: 'https://yts.lt/torrent/download/1F6EFADB0B46F556B342655759F5BB53D8E8CEC3',
-            hash: '1F6EFADB0B46F556B342655759F5BB53D8E8CEC3',
-            quality: '1080p',
-            type: 'bluray',
-            seeds: 0,
-            peers: 0,
-            size: '2.23 GB',
-            size_bytes: 2394444268,
-            date_uploaded: '2019-09-11 11:26:29',
-            date_uploaded_unix: 1568193989
-        }
-    ]
-*/
