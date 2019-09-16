@@ -3,7 +3,7 @@ const keys = require('../config/keys');
 const MovieModel = require('../models/MovieModel');
 
 const search = async (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     const {genre, order, sort, ratings, years} = req.body;
     const sorting = {};
     sorting[sort] = parseInt(order);

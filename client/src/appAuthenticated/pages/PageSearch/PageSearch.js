@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Fragment } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
 import { TextField, Typography } from '@material-ui/core';
@@ -252,7 +253,7 @@ export default function PageSearch() {
                 />
             </GenresContainer>
             <MoviesContainer>
-                {searchResult.movies.map(movie => <MovieThumbnail movie={movie}/>)}
+                {searchResult.movies.map(movie => <Link to={`/movies/${movie.imdbId}`}><MovieThumbnail movie={movie}/></Link>)}
             </MoviesContainer>
         </MainSection>
     )
