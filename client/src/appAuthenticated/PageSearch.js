@@ -98,9 +98,9 @@ const MovieThumbnail = props => {
 export default function PageSearch() {
 
     const [searchTerms, setSearchTerms] = useState({
-        genre: "",
+        genre: "All",
         page: 1,
-        order: "desc",
+        order:  -1,
         sort: "year",
         ratings: [0, 5],
         years: [1915, 2019],
@@ -109,6 +109,7 @@ export default function PageSearch() {
     })
     const [searchResult, setSearchResult] = useState({movies: []});
     const genreList = [
+        'All',
         'Action',
         'Adventure',
         'Animation',
@@ -134,18 +135,16 @@ export default function PageSearch() {
     ]
 
     const sortingList = [
-        'Last added',
-        'Rating',
-        'Title',
-        'Trending',
-        'Year'
+        'rating',
+        'title',
+        'year'
     ]
 
     useEffect(() => {
         const fetchMovies = async () => {
             const res = await axios.post("/search/genre", searchTerms);
             console.log(res.data)
-            const test = res.data.slice(0, 20);
+            const test = res.data;
             if (res.data.length !== 0) setSearchResult({ movies: [...test] })
         }
         fetchMovies();
@@ -226,8 +225,8 @@ export default function PageSearch() {
                     margin="normal"
                     variant="outlined"
                     >
-                    <option value="desc">Desc</option>
-                    <option value="asc">Asc</option>
+                    <option value={-1}>Desc</option>
+                    <option value={1}>Asc</option>
                 </StyledTextField>
                 <Typography gutterBottom>
                     Ratings
