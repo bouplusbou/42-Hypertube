@@ -7,30 +7,55 @@ import cloudinary from 'cloudinary-core';
 import AppContext from '../../../contexts/AppContext';
 import { actionLogout } from '../../../actions/authActions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faPlay, faTimes } from '@fortawesome/free-solid-svg-icons';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
   background-color: black;
-  /* height: 100  vh; */
   display: flex;
   color: white;
   font-family: Roboto;
   word-break: break-word;
-`;
-
-const PosterSection = styled.section`
-  flex-basis: 1000px;
-  padding: 50px;
+  justify-content: center;
+  position: relative;
+  @media (max-width: 1280px) {
+    flex-direction: column;
+  }
 `;
 const Poster = styled.img`
-  width: 100%;
+  @media (max-width: 1280px) {
+    width: 300px;
+  }
+`;
+const PosterSection = styled.section`
+  padding: 50px;
+  @media (max-width: 1280px) {
+    padding: 0;
+    padding-top: 15px;
+    align-self: center;
+  }
 `;
 const InfoSection = styled.section`
   padding: 50px;
-
+  @media (max-width: 1280px) {
+    padding: 0 10px;
+    align-self: center;
+    h1 {
+      margin-top: 10px;
+    }
+  }
 `;
-const CloseButton = styled.div`
+const CloseIcon = styled(FontAwesomeIcon)`
+  font-size: 30px;
+  color: gray;
+  &:hover {
+    color: ${props => props.theme.color.red};
+  }
+`;
+const CloseLink = styled(Link)`
+  position: absolute;
+  top: 20px;
+  right: 30px;
 `;
 const Title = styled.h1`
   font-size: 3em;
@@ -42,16 +67,43 @@ const Info = styled.section`
   align-items: center;
   font-weight: 700;
   font-size: 0.9em;
+  @media (max-width: 1280px) {
+    padding: 0;
+    padding-top: 15px;
+    align-self: center;
+    font-size: 0.8em;
+  }
 `;
 const Year = styled.p`
 `;
 const Runtime = styled.p`
 `;
 const Genre = styled.p`
+  width: 150px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 `;
 const ImdbLink = styled.a`
 `;
 const Rating = styled.p`
+  position: relative;
+  ::before, ::after {
+    position: absolute;
+    left: 20%;
+    opacity: 0;
+    background-color: dimgray;
+    border-radius: 5px;
+    padding: 4px;
+    text-align: center;
+  }
+  :hover::before, :hover::after {
+    opacity: 1;
+  }
+  ::after {
+    content: attr(data-tooltip);
+    transform: translateY(-120%);
+  }
 `;
 const FullStar = styled(FontAwesomeIcon)`
   color: #E8BB1A;
@@ -61,24 +113,53 @@ const EmptyStar = styled(FontAwesomeIcon)`
 `;
 const Synopsis = styled.p`
   margin-bottom: 50px;
+  max-width: 520px;
 `;
 const TorrentSection = styled.section`
 `;
 const ProviderLogo = styled.img`
   width: 50px;
-  margin: 30px 0 10px 0;
+  margin: 50px 0 10px 0;
 `;
 const Magnet = styled.div`
-  height: 50px;
-  background-color: dimgray;
+  margin-bottom: 5px;
+  background-color: #353535;
   border-radius: 3px;
-  max-width: 400px;
+  max-width: 500px;
+  padding: 0 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  font-size: 0.9em;
+  font-weight: bold;
+  align-items: center;
+  color: grey;
+  cursor: pointer;
+  :hover {
+    background-color: #858585;
+    color: white;
+  }
+`;
+const Quality = styled.p`
+`;
+const Peers = styled.p`
+`;
+const Seeds = styled.p`
+`;
+const Size = styled.p`
+`;
+const PlayButton = styled(FontAwesomeIcon)`
+  font-size: 1.2em;
+  justify-self: center;
+  color: #353535;
 `;
 const Separator = styled.div`
   width: 2px;
   height: 15px;
   border-right: solid 1px dimgray;
   margin: 0 20px;
+  @media (max-width: 1280px) {
+    margin: 0 5px;
+  }
 `;
 const ImdbLogo = styled.img`
   width: 35px;
@@ -87,7 +168,7 @@ const CommentsTitle = styled.h1`
   color: white;
   font-weight: 700;
   font-size: 1.6em;
-  margin-top: 50px;
+  margin-top: 120px;
 `;
 const StyledTextField = styled(TextField) `
   label {
@@ -126,9 +207,9 @@ const SubmitButton = styled.button`
   }
 `;
 const FormContainer = styled.section`
-  width: 400px;
+  max-width: 400px;
   padding: 0 50px 20px 50px;
-  background-color: dimGray;
+  background-color: #353535;
   border-radius: ${props => props.theme.borderRadius};
   box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.1);
   position: relative;
@@ -140,6 +221,7 @@ const FormContainer = styled.section`
   }
 `;
 const CommentsContainer = styled.section`
+  margin-top: 100px;
 `;
 const Comment = styled.div`
   display: grid;
@@ -187,7 +269,6 @@ const CommentText = styled.p`
   word-break: break-word;
 `;
 
-
 export default function TestMovie() {
 
   const imdbId = 'tt8485548';
@@ -195,6 +276,7 @@ export default function TestMovie() {
   const { toggleConnected } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
   const [comments, setComments] = useState(null);
+  const [movieInfo, setMovieInfo] = useState(null);
   const [comment, setComment] = useState(null);
   const [commentError, setCommentError] = useState(false);
   const [commentHelper, setCommentHelper] = useState(null);
@@ -208,7 +290,23 @@ export default function TestMovie() {
         if (isSubscribed) setComments(res.data.comments);
       } catch(err) {
         console.log(err);
-        // if (err.response.status === 401) actionLogout(toggleConnected);
+        // if (err.response && err.response.status === 401) actionLogout(toggleConnected);
+      }
+    };
+    if (authToken) fetchData();
+    return () => isSubscribed = false;
+  }, [authToken, toggleConnected]);
+
+  useEffect(() => {
+    let isSubscribed = true;
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`/movies/${imdbId}?authToken=${authToken}`);
+        console.log(res);
+        // if (isSubscribed) setMovieInfo(res.data.movieInfo);
+      } catch(err) {
+        console.log(err);
+        // if (err.response && err.response.status === 401) actionLogout(toggleConnected);
       }
     };
     if (authToken) fetchData();
@@ -251,13 +349,15 @@ export default function TestMovie() {
       setComments(resFetch.data.comments);
     } catch(err) {
       console.log(err);
-      if (err.response.status === 401) actionLogout(toggleConnected);
+      if (err.response && err.response.status === 401) actionLogout(toggleConnected);
     }
   };
 
   return (
     <Hero>
-      {/* <CloseButton></CloseButton> */}
+      <CloseLink to="/home">
+        <CloseIcon icon={faTimes}></CloseIcon>
+      </CloseLink>
       <PosterSection>
         <Poster src="http://image.tmdb.org/t/p/w500/w5Gqcb6gfrgbk6utEHYVwDLPiiR.jpg"></Poster>
       </PosterSection>
@@ -268,13 +368,13 @@ export default function TestMovie() {
           <Separator></Separator>
           <Runtime>99 min</Runtime>
           <Separator></Separator>
-          <Genre>action / science-fiction</Genre>
+          <Genre>action / science-fiction / action / science-fiction</Genre>
           <Separator></Separator>
           <ImdbLink target="_blank" href={`https://www.imdb.com/title/${imdbId}`}>
             <ImdbLogo src={cloudinaryCore.url('imdb_logo')}></ImdbLogo>
           </ImdbLink>
           <Separator></Separator>
-          <Rating>
+          <Rating data-tooltip="4.96/5">
             <FullStar icon={faStar}></FullStar>
             <FullStar icon={faStar}></FullStar>
             <FullStar icon={faStar}></FullStar>
@@ -285,11 +385,30 @@ export default function TestMovie() {
         <Synopsis>In 1997, the island of Manhattan has been walled off and turned into a giant maximum security prison within which the country's worst criminals are left to form their own anarchic society. However, when the President of the United States crash lands on the island, the authorities turn to a former soldier and current convict to rescue him.</Synopsis>
         <TorrentSection>
           <ProviderLogo src={cloudinaryCore.url('popcornTime_logo')}></ProviderLogo>
-          <Magnet></Magnet>
+          <Magnet>
+            <Seeds>Seeds: <span style={{color: '#51C148'}}>49</span></Seeds>
+            <Peers>Peers: <span style={{color: '#D33838'}}>15</span></Peers>
+            <Size>1.66 GB</Size>
+            <Quality>1080p</Quality>
+            <PlayButton icon={faPlay}></PlayButton>
+          </Magnet>
+          <Magnet>
+            <Seeds>Seeds: <span style={{color: '#51C148'}}>87</span></Seeds>
+            <Peers>Peers: <span style={{color: '#D33838'}}>53</span></Peers>
+            <Size>1.66 GB</Size>
+            <Quality>720p</Quality>
+            <PlayButton icon={faPlay}></PlayButton>
+          </Magnet>
         </TorrentSection>
         <TorrentSection>
           <ProviderLogo src={cloudinaryCore.url('yts_logo')}></ProviderLogo>
-          <Magnet></Magnet>
+          <Magnet>
+            <Seeds>Seeds: <span style={{color: '#51C148'}}>956</span></Seeds>
+            <Peers>Peers: <span style={{color: '#D33838'}}>225</span></Peers>
+            <Size>1.66 GB</Size>
+            <Quality>1080p</Quality>
+            <PlayButton icon={faPlay}></PlayButton>
+          </Magnet>
         </TorrentSection>
         <CommentsContainer>
           <CommentsTitle>Comments</CommentsTitle>

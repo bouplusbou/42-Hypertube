@@ -75,7 +75,7 @@ export default function HeaderComp() {
                 const res = await axios.get(`/users/getAvatar?authToken=${authToken}`);
                 if (isSubscribed) setAvatar(res.data.avatarPublicId);
             } catch(err) {
-                if (err.response.status === 401) actionLogout(toggleConnected);
+                if (err.response && err.response.status === 401) actionLogout(toggleConnected);
             }
         }
         if (authToken) fetchData();

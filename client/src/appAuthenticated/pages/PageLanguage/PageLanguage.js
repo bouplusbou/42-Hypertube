@@ -75,7 +75,7 @@ export default function PageLanguage() {
         axios.post(`/users/setLocale?authToken=${authToken}`, { newLocale });
       } catch(err) {
         console.log(err);
-        if (err.response.status === 401) actionLogout(toggleConnected);
+        if (err.response && err.response.status === 401) actionLogout(toggleConnected);
       }
     }
   };
