@@ -8,25 +8,32 @@ const passport = require("passport");
 const keys = require("./config/keys");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FortyTwoStrategy = require('passport-42').Strategy;
-
+const cloudinary = require(`./Tools/Cloudinary`);
+const uuidv1 = require('uuid/v1');
+const session = require('express-session');
+const io = require('socket.io').listen(server);
 
 app.use(bodyParser.json({limit: '10mb', extended: true}))
 app.use(bodyParser.urlencoded({limit: '10mb', extended: true}))
 app.use(cookieParser());
 app.use(passport.initialize());
+
+app.use(session({ 
+  secret: keys.SESSION_SECRET,
+  resave: true, 
+  saveUninitialized: true 
+}));
+
+io.on('connection', async client => { 
+  // console.log('new connection');
+});
+
+app.set("io", io);
+
 app.use('/api', router);
 
-
-passport.serializeUser(function(user, done) {
-    done(null, user);
-});
-   
-passport.deserializeUser(function(user, done) {
-    done(null, user);
-});
-
-
-
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
 
 passport.use(new GoogleStrategy({
     clientID: keys.GOOGLE_CLIENT_ID,
@@ -37,27 +44,44 @@ passport.use(new GoogleStrategy({
     try {
       const userExists = await User.findOne({ googleId: profile.id });
       if (userExists) {
-        // console.log('user already exists');
-        // console.log(userExists._id);
         return done(null, userExists._id);
       } else {
-        // DL photo to cloudinary and put URL
-        const user = { 
-          googleId: profile.id,
-          firstName: profile.name.givenName,
-          lastName: profile.name.familyName,
-          username: profile.name.givenName+profile.name.familyName,
-          // photo: profile.photos[0].value
-        };
-        let newUser = new User(user);
-        const data = await User.collection.insertOne(newUser)
-        if (data) {
-          return done(null, data.insertedId);
-        } 
+        const basicAuthUser = await User.findOneAndUpdate(
+          {email: profile.emails[0].value},
+          {$set: {googleId: profile.id}}
+        );
+        if (basicAuthUser) {
+          return done(null, basicAuthUser._id);
+        } else {
+          let username = profile.name.givenName+profile.name.familyName;
+          const usernameExists = await User.findOne({ username: profile.name.givenName+profile.name.familyName });
+          if (usernameExists) {
+            while (username === profile.name.givenName+profile.name.familyName) {
+              username = profile.name.givenName+profile.name.familyName + Math.floor(Math.random() * 100)
+            }
+          }
+          const avatarPublicId = uuidv1();
+          const emailHash = uuidv1();
+          await cloudinary.uploader.upload(profile.photos[0].value, { public_id: avatarPublicId });
+          const user = { 
+            googleId: profile.id,
+            email: profile.emails[0].value,
+            firstName: profile.name.givenName,
+            lastName: profile.name.familyName,
+            username,
+            avatarPublicId,
+            emailHash,
+            locale: 'EN',
+            confirmed: true,
+          };
+          let newUser = new User(user);
+          const data = await User.collection.insertOne(newUser)
+          if (data) {
+            return done(null, data.insertedId);
+          } 
+        }
       }
-    } catch(err) {
-      console.log(err);
-    }
+    } catch(err) { console.log(err); }
   }
 ));
 
@@ -79,42 +103,58 @@ passport.use(
       }
     },
 
-    async function(accessToken, refreshToken, profile, done) {
-        try {
-            const userExists = await User.findOne({ fortyTwoId: profile.id });
-            if (userExists) {
-                return done(null, userExists._id);
-            } else {
-                // DL photo to cloudinary and put URL
-                const user = { 
-                    fortyTwoId: profile.id,
-                    firstName: profile.name.givenName,
-                    lastName: profile.name.familyName,
-                    username: profile.username,
-                    // photo: profile.photos[0].value
-                };
-                let newUser = new User(user);
-                const data = await User.collection.insertOne(newUser)
-                if (data) {
-                    return done(null, data.insertedId);
-                } 
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const userExists = await User.findOne({ fortyTwoId: profile.id });
+        if (userExists) {
+          return done(null, userExists._id);
+        } else {
+          const basicAuthUser = await User.findOneAndUpdate(
+            {email: profile.emails[0].value},
+            {$set: {fortyTwoId: profile.id}}
+          );
+          if (basicAuthUser) {
+            return done(null, basicAuthUser._id);
+          } else {
+            let username = profile.username;
+            const usernameExists = await User.findOne({ username: profile.username });
+            if (usernameExists) {
+              while (username === profile.username) {
+                username = await profile.username + Math.floor(Math.random() * 100)
+              }
             }
-        } catch(err) {
-          console.log(err);
+            const avatarPublicId = uuidv1();
+            const emailHash = uuidv1();
+            await cloudinary.uploader.upload(profile.photos[0].value, { public_id: avatarPublicId });
+            const user = { 
+                fortyTwoId: profile.id,
+                email: profile.emails[0].value,
+                firstName: profile.name.givenName,
+                lastName: profile.name.familyName,
+                username: username,
+                avatarPublicId,
+                emailHash,
+                locale: 'EN',
+                confirmed: true,
+            };
+            let newUser = new User(user);
+            const data = await User.collection.insertOne(newUser)
+            if (data) {
+              return done(null, data.insertedId);
+            } 
+          }
         }
+      } catch(err) { console.log(err); }
     }
 ));
 
-
-
-
 async function connectMongo() {
+  try {
     const MONGO_URI = require("./config/keys").MONGO_URI;
     const mongoose = require("mongoose");
     mongoose.set('useFindAndModify', false);
-    try {
-        await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
-        console.log("MongoDB successfully connected");
+    await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
+    console.log("MongoDB successfully connected");
     } catch(err) { console.log(err); }
 }
 connectMongo();

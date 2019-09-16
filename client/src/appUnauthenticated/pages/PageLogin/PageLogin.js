@@ -1,4 +1,4 @@
-import React, { useState, useContext, Fragment } from 'react';
+import React, { useEffect, useState, useContext, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
@@ -51,7 +51,7 @@ const SubmitButton = styled.button`
   margin: 0 auto;
   margin-top: 40px;
   background-color: ${props => props.theme.color.red};
-  width: 50%;
+  width: 150px;
   text-align: center;
   border-radius: ${props => props.theme.borderRadius};
   color: ${props => props.theme.color.white};
@@ -67,7 +67,7 @@ const LineBreak = styled.div`
   margin-top: 20px;
   border: inset 1px rgb(0,0,0,0.2);
 `;
-const Login42 = styled.a`
+const Login42 = styled.div`
   cursor: pointer;
   padding: 3px;
   text-decoration: none;
@@ -163,15 +163,15 @@ const ModalSection = styled.section`
 const ModalContainer = styled.section`
   flex-basis: 550px;
   padding: 50px;
-  background-color: ${props => props.theme.color.white};
+  background-color: ${props => props.theme.color.black};
   border-radius: ${props => props.theme.borderRadius};
   box-shadow: 0px 42px 60px rgba(0, 0, 0, 0.25);
   outline: none;
+  color: ${props => props.theme.color.white};
   h1 {
     font-size: 1.5rem;
     text-align: center;
     font-family: Roboto;
-    color: ${props => props.theme.color.white};
   }
 `;
 
@@ -229,10 +229,9 @@ const ErrorBox = styled.section`
   }
 `;
 
-
 export default function PageLogin(props) {
 
-  const appState = useContext(AppContext);
+  const { toggleConnected, socket } = useContext(AppContext);
   const [values, setValues] = useState({
     username: '',
     password: '',
@@ -254,6 +253,7 @@ export default function PageLogin(props) {
   const toggleShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword });
   };
+
   const handleSubmit = async event => {
     try {
       event.preventDefault();
@@ -261,11 +261,11 @@ export default function PageLogin(props) {
       const res = await axios.post(`/auth/login`, credentials);
       if (res.data.authToken) {
         await actionLogin(res.data.authToken);
-        appState.toggleConnected();
         props.history.push('/home');
+        toggleConnected();
       }
     } catch(err) {
-      if (err.response && err.response.data) {
+      if (err.response && err.response && err.response.data) {
         setValues({ ...values, error: true, errorMsg: err.response.data.errorMsg});
       }
     }
@@ -281,9 +281,12 @@ export default function PageLogin(props) {
     if (!emailIsOk(values.email)) {
       setValues({ ...values, resetPasswordError: true, resetPasswordHelper: 'Enter a proper email' });
     } else {
-      axios.post(`/users/resetPasswordEmail`, {email: values.email})
-        .then(res => { setValues({ ...values, resetPasswordSubmited: true }); })
-        .catch(err => {});
+      try {
+        axios.post(`/users/resetPasswordEmail`, {email: values.email})
+        setValues({ ...values, resetPasswordSubmited: true });
+      } catch(err) {
+        console.log(err);
+      }
     }
   };
 
@@ -295,6 +298,23 @@ export default function PageLogin(props) {
       setValues({ ...values, resetPasswordError: true, resetPasswordHelper: 'Enter a proper email' });
     }
   };
+
+  useEffect(() => {
+    return () => {if (socket) socket.off('redirect')};
+  }, [socket])
+
+  const startOAuth = provider => {
+    const popup = window.open(`http://localhost:5000/api/auth/${provider}?socketId=${socket.id}`, '');
+    if (socket) {
+      socket.on('redirect', data => {
+        // console.log('redirect OK');
+        // console.log(data.authToken);
+        localStorage.setItem('authToken', data.authToken);
+        toggleConnected();
+        popup.close();
+      });
+    }
+  }
 
   return (
     <Hero>
@@ -325,7 +345,7 @@ export default function PageLogin(props) {
             <h1>Forgot Password</h1>
             <p>We will send you an email with instructions on how to reset your password.</p>
             <Form noValidate autoComplete="off" onSubmit={handleResetPasswordSubmit}>
-              <TextField
+              <StyledTextField
                 id="standard-email"
                 label="Email"
                 required={true}
@@ -385,18 +405,22 @@ export default function PageLogin(props) {
             </SubmitButton>
           </Form>
           <LineBreak></LineBreak>
-          <Login42 href="http://localhost:5000/api/auth/42">
-            <Logo>
-              <img width="30px" alt="42 &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/42_Logo.svg/1200px-42_Logo.svg.png"/>
-            </Logo>
-            <TextButton>Continue with 42</TextButton>
-          </Login42>
-          <LoginGoogle href="http://localhost:5000/api/auth/google">
-            <Logo>
-              <img width="30px" alt="Google &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"/>
-            </Logo>
-            <TextButton>Continue with Google</TextButton>
-          </LoginGoogle>
+          {socket && 
+            <Fragment>
+              <Login42 onClick={() => startOAuth('42')}>
+                <Logo>
+                  <img width="30px" alt="42 &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/42_Logo.svg/1200px-42_Logo.svg.png"/>
+                </Logo>
+                <TextButton>Continue with 42</TextButton>
+              </Login42>
+              <LoginGoogle onClick={() => startOAuth('google')}>
+                <Logo>
+                  <img width="30px" alt="Google &quot;G&quot; Logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png"/>
+                </Logo>
+                <TextButton>Continue with Google</TextButton>
+              </LoginGoogle>
+            </Fragment>
+          }
           <Redirect>
             <p>Forgot your password ? <ResetButton onClick={handleOpen}>Reset via your email</ResetButton></p>
             <p>Not a member yet ? <Link to="/signup">Signup now</Link></p>

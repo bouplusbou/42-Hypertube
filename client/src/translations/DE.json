@@ -1,0 +1,53 @@
+{
+    "language": {
+        "chooseALanguage": "Wähle eine Sprache",
+        "english": "English",
+        "french": "Französisch",
+        "spanish": "Spanisch",
+        "german": "Deutsch",
+        "russian": "Russisch"
+    },
+    "header": {
+        "profile": "Profil",
+        "language": "Sprache",
+        "logout": "Ausloggen"
+    },
+    "myProfile": {
+        "edit": "Bearbeiten",
+        "profile": "Profil",
+        "username": "Benutzername",
+        "email": "Email",
+        "firstName": "Vorname",
+        "lastName": "Nachname"
+    },
+    "myProfileEdit": {
+        "editProfile": "Profilausgabe",
+        "avatarUploadButton": "Foto herunterladen",
+        "username": "Benutzername",
+        "email": "Email",
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "updateInfoButton": "Info bearbeiten",
+        "currentPassword": "Aktuelles Passwort",
+        "newPassword": "Neues Passwort",
+        "updatePasswordButton": "Passwort ändern",
+        "uploadAValidPicture": "Bitte laden Sie ein gültiges JPG- oder PNG-Bild mit weniger als 1Mo hoch"
+    },
+    "profile": {
+        "edit": "Bearbeiten",
+        "profile": "Profil",
+        "username": "Benutzername",
+        "email": "Email",
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "invalidProfile": "Dieses Profil existiert nicht"
+    },
+    "errorMsg": {
+        "email": "Geben Sie eine E-Mail im richtigen Format ein",
+        "firstName": "Zwischen 3 und 15 Zeichen, nur Buchstaben und '-'",
+        "lastName": "Zwischen 3 und 15 Zeichen, nur Buchstaben",
+        "username": "Zwischen 6 und 10 Zeichen, nur Buchstaben",
+        "currentPassword": "Mindestens 6 Zeichen, mindestens drei der vier Kategorien: Großbuchstaben, Kleinbuchstaben, Zahlen und Sonderzeichen",
+        "newPassword": "Mindestens 6 Zeichen, mindestens drei der vier Kategorien: Großbuchstaben, Kleinbuchstaben, Zahlen und Sonderzeichen"
+    }
+}

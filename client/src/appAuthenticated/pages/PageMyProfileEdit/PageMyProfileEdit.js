@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
@@ -12,7 +12,11 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faLock, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faLock, faUser, faImage } from '@fortawesome/free-solid-svg-icons';
+import cloudinary from 'cloudinary-core';
+import AppContext from '../../../contexts/AppContext';
+import { actionLogout } from '../../../actions/authActions';
+const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
@@ -61,16 +65,11 @@ const SubmitButton = styled.button`
   text-decoration: none;
   cursor: pointer;
   border: none;
-  display: grid;
-  align-items: center;
-  grid-template-columns: 2fr 8fr;
-  text-align: center;
   padding: 1px;
   margin: 0 auto;
   margin-top: 20px;
   background-color: gray;
-  width: 170px;
-  text-align: center;
+  width: 200px;
   border-radius: ${props => props.theme.borderRadius};
   color: ${props => props.theme.color.white};
   font-family: Roboto;
@@ -79,6 +78,12 @@ const SubmitButton = styled.button`
   &:hover {
     background-color: #C50C15;
   }
+`;
+const ButtonContent = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 8fr;
+  align-items: center;
+  text-align: center;
 `;
 const StyledTextField = styled(TextField) `
   label {
@@ -125,29 +130,64 @@ const LineBreak = styled.div`
   border: inset 1px rgb(0,0,0,0.2);
 `;
 
+const AvatarContainer = styled.section`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+`;
+const Avatar = styled.img`
+  height: 200px;
+  width: 150px;
+  object-fit:cover;
+  border-radius: ${props => props.theme.borderRadius};
+  margin: 0 auto;
+  background-color: black;
+`;
+const UploadLabel = styled.label`
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  display: grid;
+  grid-template-columns: 2fr 8fr;
+  align-items: center;
+  text-align: center;
+  padding: 15px 1px;
+  margin: 20px auto;
+  background-color: gray;
+  width: 200px;
+  border-radius: ${props => props.theme.borderRadius};
+  color: ${props => props.theme.color.white};
+  font-family: Roboto;
+  font-size: 0.9em;
+  font-weight: bold;
+  &:hover {
+    background-color: #C50C15;
+  }
+`;
 
 export default function PageProfileEdit(props) {
 
+  const { t, toggleConnected } = useContext(AppContext);
   const [values, setValues] = useState({
     showPassword: false,
     email: null,
     firstName: null,
     lastName: null,
     username: null,
-    currentPassword: null,
     newPassword: null,
     emailError: false,
     firstNameError: false,
     lastNameError: false,
     usernameError: false,
-    currentPasswordError: false,
     newPasswordError: false,
     emailHelper: null,
     firstNameHelper: null,
     lastNameHelper: null,
-    currentPasswordHelper: null,
     newPasswordHelper: null,
     usernameHelper: null,
+    avatarPublicId: null,
+    avatarPublicIdError: false,
+    avatarPublicIdHelper: null,
   });
 
   const authToken = localStorage.getItem('authToken');
@@ -155,23 +195,27 @@ export default function PageProfileEdit(props) {
   useEffect(() => {
     let isSubscribed = true;
     async function fetchData() {
-      const res = await axios.get(`/users?authToken=${authToken}`);
-      const { username, email, firstName, lastName } = res.data.user;
-      if (isSubscribed) {
-        setValues( curr => ({...curr, username, email, firstName, lastName}) )
+      try{
+        const res = await axios.get(`/users?authToken=${authToken}`);
+        const { username, email, firstName, lastName, avatarPublicId } = res.data.user;
+        if (isSubscribed) {
+          setValues( curr => ({...curr, username, email, firstName, lastName, avatarPublicId}) )
+        }
+      } catch(err) {
+        console.log(err);
+        if (err.response && err.response.status === 401) actionLogout(toggleConnected);
       }
     };
     if (authToken) fetchData();
     return () => isSubscribed = false;
-  }, [authToken]);
+  }, [authToken, toggleConnected]);
 
   const valueIsOk = (name, value) => {
     const regex = {
-      email: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+      email: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       firstName: /^[A-Za-zÀ-ÖØ-öø-ÿ-]{3,15}$/,
       lastName: /^[A-Za-zÀ-ÖØ-öø-ÿ]{3,15}$/,
       username: /^[A-Za-zÀ-ÖØ-öø-ÿ]{5,10}$/,
-      currentPassword: /^(?:(?=.*?[A-Z])(?:(?=.*?[0-9])(?=.*?[-!@#$%^&*()_[\]{},.<>+=])|(?=.*?[a-z])(?:(?=.*?[0-9])|(?=.*?[-!@#$%^&*()_[\]{},.<>+=])))|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[-!@#$%^&*()_[\]{},.<>+=]))[A-Za-z0-9!@#$%^&*()_[\]{},.<>+=-]{6,50}$/,
       newPassword: /^(?:(?=.*?[A-Z])(?:(?=.*?[0-9])(?=.*?[-!@#$%^&*()_[\]{},.<>+=])|(?=.*?[a-z])(?:(?=.*?[0-9])|(?=.*?[-!@#$%^&*()_[\]{},.<>+=])))|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[-!@#$%^&*()_[\]{},.<>+=]))[A-Za-z0-9!@#$%^&*()_[\]{},.<>+=-]{6,50}$/,
     };
     return regex[name].test(String(value));
@@ -179,12 +223,12 @@ export default function PageProfileEdit(props) {
 
   const valueError = nameArr => {    
     const errorMsg = {
-      email: 'Enter a proper email',
-      firstName: 'Between 3 and 15 characters, only letters and "-"',
-      lastName: 'Between 3 and 15 characters, only letters',
-      username: 'Between 6 and 10 characters, only letters',
-      currentPassword: 'Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character',
-      newPassword: 'Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character',
+      email: t.errorMsg.email,
+      firstName: t.errorMsg.firstName,
+      lastName: t.errorMsg.lastName,
+      username: t.errorMsg.username,
+      newPassword: t.errorMsg.newPassword,
+      avatarPublicId: t.errorMsg.uploadAValidPicture,
     };
     const stateArr = nameArr.map(name => {return { [`${name+'Error'}`]: true, [`${name+'Helper'}`]: errorMsg[name] }});
     const state = stateArr.reduce((acc, curr) => {
@@ -211,16 +255,8 @@ export default function PageProfileEdit(props) {
     }
   };
 
-  const handleChange = name => event => {
-    setValues({ ...values, [name]: event.target.value, [`${name+'Error'}`]: false, [`${name+'Helper'}`]: null });
-  };
-
-  const toggleShowCurrentPassword = () => {
-    setValues({ ...values, showCurrentPassword: !values.showCurrentPassword });
-  };
-  const toggleShowNewPassword = () => {
-    setValues({ ...values, showNewPassword: !values.showNewPassword });
-  };
+  const handleChange = name => event => setValues({ ...values, [name]: event.target.value, [`${name+'Error'}`]: false, [`${name+'Helper'}`]: null });
+  const toggleShowNewPassword = () => setValues({ ...values, showNewPassword: !values.showNewPassword });
 
   const handleSubmit = async event => {
     event.preventDefault();
@@ -233,13 +269,18 @@ export default function PageProfileEdit(props) {
       };
       const emptyFields = Object.keys(infoPayload).filter(key => !infoPayload[key]);
       if (emptyFields.length === 0) {
-        axios.post(`/users/updateProfile?authToken=${authToken}`, infoPayload)
-          .then(res => { if (res.status === 200) props.history.push('/myProfile'); })
-          .catch(error => {
-            const helpers = error.response.data;
+        try {
+          const res = await axios.post(`/users/updateProfile?authToken=${authToken}`, infoPayload);
+          if (res.status === 200) props.history.push('/myProfile'); 
+        } catch(err) {
+          if (err.response && err.response.status === 401) {
+            actionLogout(toggleConnected);
+          } else {
+            const helpers = err.response.data;
             if (helpers.errors.length !== 0) valueError(helpers.errors);
             if (helpers.taken.length !== 0) valueIsTaken(helpers.taken);
-          });
+          }
+        }
       } else { valueError(emptyFields); }
     } catch(error) {console.log(error);}
   };
@@ -248,24 +289,64 @@ export default function PageProfileEdit(props) {
     event.preventDefault();
     try {
       const passwordPayload = { 
-        currentPassword: values.currentPassword,
         newPassword: values.newPassword,
       };
       const emptyFields = Object.keys(passwordPayload).filter(key => !passwordPayload[key]);
-      if (!values.currentPasswordError && !values.newPasswordError && emptyFields.length === 0) {
-        axios.post(`/users/updatePassword?authToken=${authToken}`, passwordPayload)
-          .then(res => { if (res.status === 200) props.history.push('/myProfile'); })
-          .catch(error => {
-            if (error.response.data === 'currentPassword') {
-              setValues(prev => ({ ...prev, currentPassword: null, currentPasswordError: true, currentPasswordHelper: 'The current password does not match' }));
-            } else if (error.response.data === 'newPassword') {
+      if (valueIsOk('newPassword', values.newPassword)) {
+        if (emptyFields.length === 0) {
+          try {
+            const res = await axios.post(`/users/updatePassword?authToken=${authToken}`, passwordPayload);
+            if (res.status === 200) props.history.push('/myProfile');
+          } catch(err) {
+            if (err.response && err.response.status === 401) {
+              actionLogout(toggleConnected);
+            } else {
               setValues(prev => ({ ...prev, newPassword: null, newPasswordError: true, newPasswordHelper: 'Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character' }));
             }
-          });
-      } else { valueError(emptyFields); }
+          }
+        }
+      } else {
+        setValues(prev => ({ ...prev, newPasswordError: true, newPasswordHelper: 'Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character' }));
+      }
     } catch(error) {console.log(error);}
   };
 
+
+  async function uploadAvatar(event) {
+    event.preventDefault();
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = async (evt) => {
+      if (evt.target.readyState === FileReader.DONE) {
+        const uint = new Uint8Array(evt.target.result)
+        let bytes = []
+        uint.forEach((byte) => {
+          bytes.push(byte.toString(16))
+        })
+        const hex = await bytes.join('').toUpperCase();
+        if (file.size && file.size < 1000000 && (hex === '89504E47' || hex === 'FFD8FFE0')) {
+          reader.readAsDataURL(file);
+          reader.onload = async () => {
+            try {
+              const image  = reader.result;
+              const res = await axios.post(`/users/uploadAvatarEdit?authToken=${authToken}`, { image })
+              setValues({ ...values, avatarPublicId: res.data.avatarPublicId, avatarPublicIdError: false, avatarPublicIdHelper: '' });
+            } catch(err) {
+              console.log(err);
+              if (err.response && err.response.status === 401) actionLogout(toggleConnected);
+            }
+          }
+        } else if (hex) {
+          setValues({ ...values, avatarPublicId: values.avatarPublicId, avatarPublicIdError: true, avatarPublicIdHelper: 'Please upload a valid JPG or PNG picture less than 1Mo' });
+        }
+      }
+    };
+    if (file) {
+      const blob = file.slice(0, 4);
+      reader.readAsArrayBuffer(blob);
+    }
+  }
+ 
   return (
     <Hero>
       <LoginSection>
@@ -273,11 +354,24 @@ export default function PageProfileEdit(props) {
           <CloseEdit to="/myProfile">
             <FontAwesomeIcon  style={{fontSize: '15px', color: 'white'}} icon={faTimes}/>
           </CloseEdit>
-          <h1>Edit Profile</h1>
+          <h1>{t.myProfileEdit.editProfile}</h1>
+          <AvatarContainer>
+            <Avatar src={cloudinaryCore.url(values.avatarPublicId)}/>
+            <input
+              accept="image/*"
+              style={{ display: 'none' }}
+              id="uploadFileButton"
+              type="file"
+              onChange={uploadAvatar}
+            />
+            <UploadLabel htmlFor="uploadFileButton"><FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faImage}/> {t.myProfileEdit.avatarUploadButton}</UploadLabel>
+            {values.avatarPublicIdError && <FormHelperText style={{color: '#ef3a2d'}} id="upload-helper-text">{values.avatarPublicIdHelper}</FormHelperText>}          
+          </AvatarContainer>
+          <LineBreak></LineBreak>
           <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
             <StyledTextField
               id="standard-username"
-              label="Username"
+              label={t.myProfileEdit.username}
               onBlur={handleBlur('username')}
               onChange={handleChange('username')}
               error={values.usernameError}
@@ -287,7 +381,7 @@ export default function PageProfileEdit(props) {
             />
             <StyledTextField
               id="standard-email"
-              label="Email"
+              label={t.myProfileEdit.email}
               onBlur={handleBlur('email')}
               onChange={handleChange('email')}
               error={values.emailError}
@@ -297,7 +391,7 @@ export default function PageProfileEdit(props) {
             />
             <StyledTextField
               id="standard-firstName"
-              label="First Name"
+              label={t.myProfileEdit.firstName}
               onBlur={handleBlur('firstName')}
               onChange={handleChange('firstName')}
               error={values.firstNameError}
@@ -307,7 +401,7 @@ export default function PageProfileEdit(props) {
             />
             <StyledTextField
               id="standard-lastName"
-              label="Last Name"
+              label={t.myProfileEdit.lastName}
               onBlur={handleBlur('lastName')}
               onChange={handleChange('lastName')}
               error={values.lastNameError}
@@ -316,53 +410,41 @@ export default function PageProfileEdit(props) {
               value={values.lastName || ''}
             />
             <SubmitButton type="submit">
-              <FontAwesomeIcon  style={{marginLeft: '10px', fontSize: '15px', color: 'white', marginRight:'10px'}} icon={faUser}/>
-              <p>Update Info</p>
+              <ButtonContent>
+                <FontAwesomeIcon  style={{marginLeft: '10px', fontSize: '15px', color: 'white', marginRight:'10px'}} icon={faUser}/>
+                <p>{t.myProfileEdit.updateInfoButton}</p>
+              </ButtonContent>
             </SubmitButton>
           </Form>
-          <LineBreak></LineBreak>
-          <Form noValidate autoComplete="off" onSubmit={handleSubmitPassword}>
-            <FormControl>
-              <StyledInputLabel htmlFor="adornment-password">Current Password</StyledInputLabel>
-              <StyledInput
-                id="standard-current-password"
-                type={values.showCurrentPassword ? 'text' : 'password'}
-                onBlur={handleBlur('currentPassword')}
-                onChange={handleChange('currentPassword')}
-                error={values.currentPasswordError}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton aria-label="Toggle current password visibility" onClick={toggleShowCurrentPassword}>
-                      {values.showCurrentPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-              <FormHelperText style={{color: '#ef3a2d'}} id="current-password-helper-text">{values.currentPasswordHelper}</FormHelperText>
-            </FormControl>
-            <FormControl>
-              <StyledInputLabel htmlFor="adornment-new-password">New Password</StyledInputLabel>
-              <StyledInput
-                id="standard-new-password"
-                type={values.showNewPassword ? 'text' : 'password'}
-                onBlur={handleBlur('newPassword')}
-                onChange={handleChange('newPassword')}
-                error={values.newPasswordError}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton aria-label="Toggle new password visibility" onClick={toggleShowNewPassword}>
-                      {values.showNewPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-              <FormHelperText style={{color: '#ef3a2d'}} id="new-password-helper-text">{values.newPasswordHelper}</FormHelperText>
-            </FormControl>
-            <SubmitButton>    
-              <FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faLock}/>
-              <p>Update Password</p>
-            </SubmitButton>
-          </Form>
+          <Fragment>
+            <LineBreak></LineBreak>
+            <Form noValidate autoComplete="off" onSubmit={handleSubmitPassword}>
+              <FormControl>
+                <StyledInputLabel htmlFor="adornment-new-password">{t.myProfileEdit.newPassword}</StyledInputLabel>
+                <StyledInput
+                  id="standard-new-password"
+                  type={values.showNewPassword ? 'text' : 'password'}
+                  onBlur={handleBlur('newPassword')}
+                  onChange={handleChange('newPassword')}
+                  error={values.newPasswordError}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton aria-label="Toggle new password visibility" onClick={toggleShowNewPassword}>
+                        {values.showNewPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+                <FormHelperText style={{color: '#ef3a2d'}} id="new-password-helper-text">{values.newPasswordHelper}</FormHelperText>
+              </FormControl>
+              <SubmitButton>    
+                <ButtonContent>
+                  <FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white'}} icon={faLock}/>
+                  <p>{t.myProfileEdit.updatePasswordButton}</p>
+                </ButtonContent>
+              </SubmitButton>
+            </Form>
+          </Fragment>
         </FormContainer>
       </LoginSection>
     </Hero>
