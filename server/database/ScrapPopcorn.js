@@ -35,7 +35,7 @@ const scrapPopcorn = async () => {
     log("***** Scraping Popcorn Time API *****", 'cyan');
     const pageCount = await axios.get('https://tv-v2.api-fetch.website/movies');
     const rawResults = [];
-    for (let i = 1; i < pageCount.data.length - 1; i++) {
+    for (let i = 1; i < 105; i++) {
         const res = await axios.get(`https://tv-v2.api-fetch.website/movies/${i}`);
         log(`${res.data.length} movie(s) found on page ${i}.`);
         rawResults.push(...res.data)
@@ -67,7 +67,7 @@ const scrapPopcorn = async () => {
             poster: movie.images.poster,
             genres: movie.genres ? movie.genres : null,
             certification: movie.certification,
-            rating: movie.rating.percentage / 10,
+            rating: (movie.rating.percentage / 10) / 2,
             torrents: torrents,
         }
         return infos
@@ -79,7 +79,7 @@ const scrapPopcorn = async () => {
 const scrapYTS = async () => {
     log("***** Scraping YTS API *****", 'cyan');
     const rawResults = [];
-    for (let i = 1; i < 300; i++) {
+    for (let i = 1; i < 500; i++) {
         const res = await axios.get(`https://yts.lt/api/v2/list_movies.json?limit=50&page=${i}`);
             if (!res.data.data.movies) break;
         log(`${res.data.data.movies.length} movie(s) found on page ${i}.`);
@@ -89,7 +89,7 @@ const scrapYTS = async () => {
         const torrents = [];
         for (const item in movie.torrents) {
             const torrent = {
-                magnet: movie.torrents[item].hash,
+                magnet: movie.torrents[item].url,
                 quality: movie.torrents[item].quality,
                 language: 'en',
                 seed: movie.torrents[item].seeds,
@@ -110,7 +110,7 @@ const scrapYTS = async () => {
             trailer: movie.yt_trailer_code ? `http://youtube.com/watch?v=${movie.yt_trailer_code}` : null,
             poster: movie.large_cover_image,
             certification: movie.mpa_rating,
-            rating: movie.rating,
+            rating: movie.rating / 2,
             torrents: torrents
         }
         return infos;
@@ -122,14 +122,20 @@ const ScrapMoviesDatabases = async () => {
     try {
         log("***** HYPERTUBE DATABASE SCRAPING *****", 'cyan');
         await connectMongo();
-        // const popcornRes = await scrapPopcorn();
+        const popcornRes = await scrapPopcorn();
         const ytsRes = await scrapYTS();
-        const completeRawResult = ytsRes.concat(null);
+        const completeRawResult = ytsRes.concat(popcornRes);
         const filteredResults = [];
         completeRawResult.map(movie => {
             for (i = 0; i < filteredResults.length; i++) {
-                if (filteredResults[i].imdbId === movie.imdbId) 
+                if (!movie.imdbId) return null;
+                if (filteredResults[i].imdbId === movie.imdbId) {
+                    filteredResults[i].torrents = [
+                        ...movie.torrents,
+                        ...filteredResults[i].torrents,
+                    ]
                     return null
+                }
             }
             filteredResults.push(movie);
         })

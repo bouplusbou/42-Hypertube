@@ -3,15 +3,17 @@ const Schema = mongoose.Schema;
 
 // Create Schema
 const MovieSchema = new Schema({
+  imdbId: String,
   title: String,
   year: Number,
-  magnet: String,
-  quality: String,
-  language: String,
-  seed: Number,
-  peer: Number,
-  bytes: Number,
-  fileSize: String,
+  plot: String,
+  runtime: Number,
+  genres: Array,
+  trailer: String,
+  poster: String,
+  certification: String,
+  rating: Number,
+  torrents: Array,
 });
 
 module.exports = Movie = mongoose.model("Movie", MovieSchema);

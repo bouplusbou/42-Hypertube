@@ -1,7 +1,10 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import { TextField, Slider, Typography } from '@material-ui/core';
+import { TextField, Typography } from '@material-ui/core';
+import 'rc-slider/assets/index.css';
+import 'rc-tooltip/assets/bootstrap.css';
+import Slider from 'rc-slider';
 
 const MainSection = styled.section `
     background-color:#141414;
@@ -76,7 +79,7 @@ const MovieThumbnail = props => {
     }
     return (
         <Thumbnail 
-            cover={props.movie.medium_cover_image}
+            cover={props.movie.poster}
             onMouseEnter={handleHover}
             onMouseLeave={handleHover}
         >
@@ -99,35 +102,35 @@ export default function PageSearch() {
         page: 1,
         order: "desc",
         sort: "year",
-        ratings: [0, 10],
-        years: [0, 2019],
+        ratings: [0, 5],
+        years: [1915, 2019],
         keywords: "",
         limit:50
     })
     const [searchResult, setSearchResult] = useState({movies: []});
     const genreList = [
         'Action',
-        'adventure',
-        'animation',
-        'comedy',
-        'crime',
-        'documentary',
-        'drama',
-        'family',
-        'fantasy',
-        'history',
-        'holiday',
-        'horror',
-        'music',
-        'mystery',
-        'romance',
-        'science-fiction',
-        'short',
-        'suspense',
-        'thriller',
-        'tv-movie',
-        'war',
-        'western'
+        'Adventure',
+        'Animation',
+        'Comedy',
+        'Crime',
+        'Documentary',
+        'Drama',
+        'Family',
+        'Fantasy',
+        'History',
+        'Holiday',
+        'Horror',
+        'Music',
+        'Mystery',
+        'Romance',
+        'Science-fiction',
+        'Short',
+        'Suspense',
+        'Thriller',
+        'Tv-movie',
+        'War',
+        'Western'
     ]
 
     const sortingList = [
@@ -141,7 +144,9 @@ export default function PageSearch() {
     useEffect(() => {
         const fetchMovies = async () => {
             const res = await axios.post("/search/genre", searchTerms);
-            if (res.data.length !== 0) setSearchResult({ movies: [...res.data] })
+            console.log(res.data)
+            const test = res.data.slice(0, 20);
+            if (res.data.length !== 0) setSearchResult({ movies: [...test] })
         }
         fetchMovies();
     }, [searchTerms])
@@ -153,19 +158,22 @@ export default function PageSearch() {
         })
     }
 
-    const handleRatingsChanges = (event, newValue) => {
+    const handleRatingsChanges = value => {
         setSearchTerms({
             ...searchTerms,
-            ratings: newValue
+            ratings: value
         })
     }
 
-    const handleYearsChanges = (event, newValue) => {
+    const handleYearsChanges = value => {
         setSearchTerms({
             ...searchTerms,
-            years: newValue
+            years: value
         })
     }
+
+    const createSliderWithTooltip = Slider.createSliderWithTooltip;
+    const Range = createSliderWithTooltip(Slider.Range);
 
     return (
         <MainSection>
@@ -224,26 +232,24 @@ export default function PageSearch() {
                 <Typography gutterBottom>
                     Ratings
                 </Typography>
-                <Slider
-                    name="ratings"
-                    value={searchTerms.ratings}
-                    onChange={handleRatingsChanges}
+                <Range 
+                    onAfterChange={handleRatingsChanges}
                     min={0}
-                    max={10}
-                    valueLabelDisplay="on"
+                    max={5}
+                    allowCross={false}
+                    defaultValue={searchTerms.ratings}
+                    tipFormatter={value => `${value}`} 
                 />
                 <Typography gutterBottom>
                     Years
                 </Typography>
-                <Slider
-                    name="years"
-                    value={searchTerms.years}
-                    onChange={handleYearsChanges}
-                    valueLabelDisplay="auto"
-                    aria-labelledby="range-slider"
-                    min={0}
+                <Range 
+                    onAfterChange={handleYearsChanges}
+                    min={1915}
                     max={2019}
-                    valueLabelDisplay="on"
+                    allowCross={false}
+                    defaultValue={searchTerms.years}
+                    tipFormatter={value => `${value}`} 
                 />
             </GenresContainer>
             <MoviesContainer>
