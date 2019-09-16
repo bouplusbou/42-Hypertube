@@ -14,6 +14,7 @@ const MovieSchema = new Schema({
   certification: String,
   rating: Number,
   torrents: Array,
+  lastViewed: Date,
 });
 
 module.exports = Movie = mongoose.model("Movie", MovieSchema);

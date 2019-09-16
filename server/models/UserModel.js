@@ -49,6 +49,10 @@ const UserSchema = new Schema({
   date: {
     type: Date,
     default: Date.now
+  },
+  viewedList: {
+    type: Array,
+    default: null,
   }
 });
 
