@@ -88,8 +88,8 @@ export default function Pageprofile(props) {
         if (isSubscribed) setUser({ username, firstName, lastName, avatarPublicId });
       } catch(err) {
         console.log(err);
-        if (err.response.status === 401) actionLogout(toggleConnected);
-        if (err.response.status === 400 && isSubscribed) setError(true);
+        if (err.response && err.response.status === 401) actionLogout(toggleConnected);
+        if (err.response && err.response.status === 400 && isSubscribed) setError(true);
       }
     };
     if (authToken) fetchData();

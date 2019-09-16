@@ -11,7 +11,7 @@ import { actionLogout } from '../../actions/authActions';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Header = styled.header`
-    background-color: black;
+    background-color: #202020;
     height: 70px;
     display: grid;
     grid-template-columns: 8fr 2fr 2fr;
@@ -38,7 +38,7 @@ const DropDown = styled.div`
   top: 65px;
   right: 0px;
   border-radius: ${props => props.theme.borderRadius};
-  background-color: black;
+  background-color: #202020;
   position: absolute;
   padding: 30px;
   text-align: right;
@@ -61,7 +61,6 @@ const LogoutSection = styled.section`
     justify-content: center;
 `;
 
-
 export default function HeaderComp() {
 
     const { t, toggleConnected } = useContext(AppContext);
@@ -76,7 +75,7 @@ export default function HeaderComp() {
                 const res = await axios.get(`/users/getAvatar?authToken=${authToken}`);
                 if (isSubscribed) setAvatar(res.data.avatarPublicId);
             } catch(err) {
-                if (err.response.status === 401) actionLogout(toggleConnected);
+                if (err.response && err.response.status === 401) actionLogout(toggleConnected);
             }
         }
         if (authToken) fetchData();

@@ -265,7 +265,7 @@ export default function PageLogin(props) {
         toggleConnected();
       }
     } catch(err) {
-      if (err.response && err.response.data) {
+      if (err.response && err.response && err.response.data) {
         setValues({ ...values, error: true, errorMsg: err.response.data.errorMsg});
       }
     }

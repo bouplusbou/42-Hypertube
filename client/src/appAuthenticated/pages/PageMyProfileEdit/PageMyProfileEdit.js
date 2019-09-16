@@ -203,7 +203,7 @@ export default function PageProfileEdit(props) {
         }
       } catch(err) {
         console.log(err);
-        if (err.response.status === 401) actionLogout(toggleConnected);
+        if (err.response && err.response.status === 401) actionLogout(toggleConnected);
       }
     };
     if (authToken) fetchData();
@@ -273,7 +273,7 @@ export default function PageProfileEdit(props) {
           const res = await axios.post(`/users/updateProfile?authToken=${authToken}`, infoPayload);
           if (res.status === 200) props.history.push('/myProfile'); 
         } catch(err) {
-          if (err.response.status === 401) {
+          if (err.response && err.response.status === 401) {
             actionLogout(toggleConnected);
           } else {
             const helpers = err.response.data;
@@ -298,7 +298,7 @@ export default function PageProfileEdit(props) {
             const res = await axios.post(`/users/updatePassword?authToken=${authToken}`, passwordPayload);
             if (res.status === 200) props.history.push('/myProfile');
           } catch(err) {
-            if (err.response.status === 401) {
+            if (err.response && err.response.status === 401) {
               actionLogout(toggleConnected);
             } else {
               setValues(prev => ({ ...prev, newPassword: null, newPasswordError: true, newPasswordHelper: 'Minimum 6 characters, at least three of those four categories: uppercase, lowercase, number and special character' }));
@@ -333,7 +333,7 @@ export default function PageProfileEdit(props) {
               setValues({ ...values, avatarPublicId: res.data.avatarPublicId, avatarPublicIdError: false, avatarPublicIdHelper: '' });
             } catch(err) {
               console.log(err);
-              if (err.response.status === 401) actionLogout(toggleConnected);
+              if (err.response && err.response.status === 401) actionLogout(toggleConnected);
             }
           }
         } else if (hex) {

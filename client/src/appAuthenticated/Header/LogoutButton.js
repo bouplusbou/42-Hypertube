@@ -13,7 +13,7 @@ export default function LogoutButton() {
         padding: 8px 10px;
         border-radius: 3px;
         border: solid 1px gray;
-        background-color: ${props => props.theme.color.black};
+        background-color: #202020;
         color: gray;
         font-size: 1rem;
         cursor: pointer;

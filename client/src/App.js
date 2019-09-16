@@ -80,7 +80,7 @@ function App(props) {
         setLocale(res.data.locale);
       } catch(err) {
         console.log(err);
-        if (err.response.status === 401) actionLogout(appState.toggleConnected);
+        if (err.response && err.response.status === 401) actionLogout(appState.toggleConnected);
       }
     };
     if (authToken) fetchData();
