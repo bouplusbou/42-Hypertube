@@ -353,6 +353,16 @@ export default function TestMovie() {
     }
   };
 
+  const handlePlay = async event => {
+    event.preventDefault();
+    try {
+      const viewedPayload = { imdbId }
+      await axios.post(`/viewed?authToken=${authToken}`, viewedPayload);
+    } catch(err) {
+      console.log(err);
+    }
+  };
+
   return (
     <Hero>
       <CloseLink to="/home">
@@ -385,7 +395,7 @@ export default function TestMovie() {
         <Synopsis>In 1997, the island of Manhattan has been walled off and turned into a giant maximum security prison within which the country's worst criminals are left to form their own anarchic society. However, when the President of the United States crash lands on the island, the authorities turn to a former soldier and current convict to rescue him.</Synopsis>
         <TorrentSection>
           <ProviderLogo src={cloudinaryCore.url('popcornTime_logo')}></ProviderLogo>
-          <Magnet>
+          <Magnet onClick={handlePlay}>
             <Seeds>Seeds: <span style={{color: '#51C148'}}>49</span></Seeds>
             <Peers>Peers: <span style={{color: '#D33838'}}>15</span></Peers>
             <Size>1.66 GB</Size>
