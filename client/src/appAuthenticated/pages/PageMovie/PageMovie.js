@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import styled from 'styled-components';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
@@ -18,6 +18,7 @@ const Hero = styled.section`
   word-break: break-word;
   justify-content: center;
   position: relative;
+  min-height: 100vh;
   @media (max-width: 1280px) {
     flex-direction: column;
   }
@@ -61,6 +62,7 @@ const Title = styled.h1`
   font-size: 3em;
   font-weight: bold;
   margin-bottom: 20px;
+  max-width: 520px;
 `;
 const Info = styled.section`
   display: flex;
@@ -79,7 +81,7 @@ const Year = styled.p`
 const Runtime = styled.p`
 `;
 const Genre = styled.p`
-  width: 150px;
+  max-width: 150px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -111,7 +113,7 @@ const FullStar = styled(FontAwesomeIcon)`
 const EmptyStar = styled(FontAwesomeIcon)`
   color: dimgray;
 `;
-const Synopsis = styled.p`
+const Plot = styled.p`
   margin-bottom: 50px;
   max-width: 520px;
 `;
@@ -269,9 +271,7 @@ const CommentText = styled.p`
   word-break: break-word;
 `;
 
-export default function TestMovie() {
-
-  const imdbId = 'tt8485548';
+export default function TestMovie(props) {
 
   const { toggleConnected } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
@@ -285,33 +285,32 @@ export default function TestMovie() {
     let isSubscribed = true;
     const fetchData = async () => {
       try {
-        const res = await axios.get(`/comments/${imdbId}?authToken=${authToken}`);
-        console.log(res);
+        const res = await axios.get(`/comments/${props.match.params.imdbId}?authToken=${authToken}`);
         if (isSubscribed) setComments(res.data.comments);
       } catch(err) {
         console.log(err);
-        // if (err.response && err.response.status === 401) actionLogout(toggleConnected);
+        if (err.response && err.response.status === 401) actionLogout(toggleConnected);
       }
     };
     if (authToken) fetchData();
     return () => isSubscribed = false;
-  }, [authToken, toggleConnected]);
+  }, [authToken, toggleConnected, props.match.params.imdbId]);
 
   useEffect(() => {
     let isSubscribed = true;
     const fetchData = async () => {
       try {
-        const res = await axios.get(`/movies/${imdbId}?authToken=${authToken}`);
-        console.log(res);
-        // if (isSubscribed) setMovieInfo(res.data.movieInfo);
+        const res = await axios.get(`/movies/${props.match.params.imdbId}?authToken=${authToken}`);
+        // console.log(res.data.movieInfo[0]);
+        if (isSubscribed) setMovieInfo(res.data.movieInfo[0]);
       } catch(err) {
         console.log(err);
-        // if (err.response && err.response.status === 401) actionLogout(toggleConnected);
+        if (err.response && err.response.status === 401) actionLogout(toggleConnected);
       }
     };
     if (authToken) fetchData();
     return () => isSubscribed = false;
-  }, [authToken, toggleConnected]);
+  }, [authToken, toggleConnected, props.match.params.imdbId]);
 
   const handleBlur = name => event => {
     const regex = /^[\w\W]{0,250}$/; 
@@ -339,13 +338,13 @@ export default function TestMovie() {
     try {
       const commentPayload = { 
         comment,
-        imdbId,
+        imdbId: props.match.params.imdbId,
       };
       await axios.post(`/comments?authToken=${authToken}`, commentPayload);
       setComment(null);
       setCommentError(false);
       setCommentHelper(null);
-      const resFetch = await axios.get(`/comments/${imdbId}?authToken=${authToken}`);
+      const resFetch = await axios.get(`/comments/${props.match.params.imdbId}?authToken=${authToken}`);
       setComments(resFetch.data.comments);
     } catch(err) {
       console.log(err);
@@ -355,90 +354,101 @@ export default function TestMovie() {
 
   return (
     <Hero>
-      <CloseLink to="/home">
+      <CloseLink to="/search">
         <CloseIcon icon={faTimes}></CloseIcon>
       </CloseLink>
-      <PosterSection>
-        <Poster src="http://image.tmdb.org/t/p/w500/w5Gqcb6gfrgbk6utEHYVwDLPiiR.jpg"></Poster>
-      </PosterSection>
-      <InfoSection>
-        <Title>Escape from New-york</Title>
-        <Info>
-          <Year>1981</Year>
-          <Separator></Separator>
-          <Runtime>99 min</Runtime>
-          <Separator></Separator>
-          <Genre>action / science-fiction / action / science-fiction</Genre>
-          <Separator></Separator>
-          <ImdbLink target="_blank" href={`https://www.imdb.com/title/${imdbId}`}>
-            <ImdbLogo src={cloudinaryCore.url('imdb_logo')}></ImdbLogo>
-          </ImdbLink>
-          <Separator></Separator>
-          <Rating data-tooltip="4.96/5">
-            <FullStar icon={faStar}></FullStar>
-            <FullStar icon={faStar}></FullStar>
-            <FullStar icon={faStar}></FullStar>
-            <FullStar icon={faStar}></FullStar>
-            <EmptyStar icon={faStar}></EmptyStar>
-          </Rating>
-        </Info>
-        <Synopsis>In 1997, the island of Manhattan has been walled off and turned into a giant maximum security prison within which the country's worst criminals are left to form their own anarchic society. However, when the President of the United States crash lands on the island, the authorities turn to a former soldier and current convict to rescue him.</Synopsis>
-        <TorrentSection>
-          <ProviderLogo src={cloudinaryCore.url('popcornTime_logo')}></ProviderLogo>
-          <Magnet>
-            <Seeds>Seeds: <span style={{color: '#51C148'}}>49</span></Seeds>
-            <Peers>Peers: <span style={{color: '#D33838'}}>15</span></Peers>
-            <Size>1.66 GB</Size>
-            <Quality>1080p</Quality>
-            <PlayButton icon={faPlay}></PlayButton>
-          </Magnet>
-          <Magnet>
-            <Seeds>Seeds: <span style={{color: '#51C148'}}>87</span></Seeds>
-            <Peers>Peers: <span style={{color: '#D33838'}}>53</span></Peers>
-            <Size>1.66 GB</Size>
-            <Quality>720p</Quality>
-            <PlayButton icon={faPlay}></PlayButton>
-          </Magnet>
-        </TorrentSection>
-        <TorrentSection>
-          <ProviderLogo src={cloudinaryCore.url('yts_logo')}></ProviderLogo>
-          <Magnet>
-            <Seeds>Seeds: <span style={{color: '#51C148'}}>956</span></Seeds>
-            <Peers>Peers: <span style={{color: '#D33838'}}>225</span></Peers>
-            <Size>1.66 GB</Size>
-            <Quality>1080p</Quality>
-            <PlayButton icon={faPlay}></PlayButton>
-          </Magnet>
-        </TorrentSection>
-        <CommentsContainer>
-          <CommentsTitle>Comments</CommentsTitle>
-          {comments && comments.map(comment => 
-            <Comment key={comment.date}>
-              <AvatarThumb src={cloudinaryCore.url(comment.user.avatarPublicId)}></AvatarThumb>
-              <Username to={`/users/${comment.user.username}`}>{comment.user.username}</Username>
-              <Date></Date>
-              <CommentText>{comment.comment}</CommentText>
-            </Comment>
-          )}
-        </CommentsContainer>
-        <FormContainer>
-          <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
-            <StyledTextField
-              id="standard-comment"
-              label="Comment"
-              onBlur={handleBlur('comment')}
-              onChange={handleChange('comment')}
-              error={commentError}
-              helperText={commentHelper}
-              margin="normal"
-              value={comment || ''}
-            />
-            <SubmitButton type="submit">
-              <p>Post</p>
-            </SubmitButton>
-          </Form>
-        </FormContainer>
-      </InfoSection>
+      {movieInfo && 
+        <Fragment>
+          <PosterSection>
+            <Poster src={movieInfo.poster}></Poster>
+          </PosterSection>
+          <InfoSection>
+            <Title>{movieInfo.title}</Title>
+            <Info>
+              <Year>{movieInfo.year}</Year>
+              {movieInfo.runtime !== 0 &&
+                <Fragment>
+                  <Separator></Separator>
+                  <Runtime>{movieInfo.runtime} min</Runtime>
+                </Fragment>
+              }
+              <Separator></Separator>
+              <Genre>{movieInfo.genres.join(' / ')}</Genre>
+              <Separator></Separator>
+              <ImdbLink target="_blank" href={`https://www.imdb.com/title/${props.match.params.imdbId}`}>
+                <ImdbLogo src={cloudinaryCore.url('imdb_logo')}></ImdbLogo>
+              </ImdbLink>
+              <Separator></Separator>
+              <Rating data-tooltip={`${movieInfo.rating}/5`}>
+                {movieInfo.rating > 0.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                {movieInfo.rating > 1.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                {movieInfo.rating > 2.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                {movieInfo.rating > 3.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                {movieInfo.rating > 4.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+              </Rating>
+            </Info>
+            <Plot>{movieInfo.plot}</Plot>
+            <TorrentSection>
+              {movieInfo.torrents.filter(magnet => magnet.source === 'Popcorn Time').length > 0 && 
+                <Fragment>
+                  <ProviderLogo src={cloudinaryCore.url('popcornTime_logo')}></ProviderLogo>
+                  {movieInfo.torrents.filter(magnet => magnet.source === 'Popcorn Time').map((magnet, index) => 
+                    <Magnet key={index}>
+                      <Seeds>Seeds: <span style={{color: '#51C148'}}>{magnet.seed}</span></Seeds>
+                      <Peers>Peers: <span style={{color: '#D33838'}}>{magnet.peer}</span></Peers>
+                      <Size>{magnet.fileSize}</Size>
+                      <Quality>{magnet.quality}</Quality>
+                      <PlayButton icon={faPlay}></PlayButton>
+                    </Magnet>
+                  )}
+                </Fragment>              
+              }
+              {movieInfo.torrents.filter(magnet => magnet.source === 'YTS').length > 0 &&
+              <Fragment>
+                <ProviderLogo src={cloudinaryCore.url('yts_logo')}></ProviderLogo>
+                {movieInfo.torrents.filter(magnet => magnet.source === 'YTS').map((magnet, index) => 
+                  <Magnet key={index}>
+                    <Seeds>Seeds: <span style={{color: '#51C148'}}>{magnet.seed}</span></Seeds>
+                    <Peers>Peers: <span style={{color: '#D33838'}}>{magnet.peer}</span></Peers>
+                    <Size>{magnet.fileSize}</Size>
+                    <Quality>{magnet.quality}</Quality>
+                    <PlayButton icon={faPlay}></PlayButton>
+                  </Magnet>
+                )}
+              </Fragment>
+              }
+            </TorrentSection>
+            <CommentsContainer>
+              <CommentsTitle>Comments</CommentsTitle>
+              {comments && comments.map(comment => 
+                <Comment key={comment.date}>
+                  <AvatarThumb src={cloudinaryCore.url(comment.user.avatarPublicId)}></AvatarThumb>
+                  <Username to={`/users/${comment.user.username}`}>{comment.user.username}</Username>
+                  <Date></Date>
+                  <CommentText>{comment.comment}</CommentText>
+                </Comment>
+              )}
+            </CommentsContainer>
+            <FormContainer>
+              <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
+                <StyledTextField
+                  id="standard-comment"
+                  label="Comment"
+                  onBlur={handleBlur('comment')}
+                  onChange={handleChange('comment')}
+                  error={commentError}
+                  helperText={commentHelper}
+                  margin="normal"
+                  value={comment || ''}
+                />
+                <SubmitButton type="submit">
+                  <p>Post</p>
+                </SubmitButton>
+              </Form>
+            </FormContainer>
+          </InfoSection>
+        </Fragment>
+      }
     </Hero>
   );
 }

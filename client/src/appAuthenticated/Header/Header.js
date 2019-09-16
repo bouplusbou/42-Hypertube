@@ -108,6 +108,7 @@ export default function HeaderComp() {
                 <FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white', cursor: 'pointer'}} icon={faChevronDown}/>
                 { dropdownOpen &&
                     <DropDown ref={node}>
+                        <p><StyledLink to="/search">{t.header.search}</StyledLink></p>
                         <p><StyledLink to="/myProfile">{t.header.profile}</StyledLink></p>
                         <p><StyledLink to="/language">{t.header.language}</StyledLink></p>
                     </DropDown>

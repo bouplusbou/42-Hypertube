@@ -5,5 +5,6 @@ router.use('/auth', require('./authRoutes'));
 router.use('/users', require('./usersRoutes'));
 router.use('/search', require('./searchRoutes'));
 router.use('/comments', require('./commentsRoutes'));
+router.use('/movies', require('./moviesRoutes'));
 
 module.exports = router;
