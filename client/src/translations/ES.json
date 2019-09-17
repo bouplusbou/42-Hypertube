@@ -8,6 +8,7 @@
         "russian": "Ruso"
     },
     "header": {
+        "search": "Buscar",
         "profile": "Perfil",
         "language": "Idioma",
         "logout": "Cerrar sesión"

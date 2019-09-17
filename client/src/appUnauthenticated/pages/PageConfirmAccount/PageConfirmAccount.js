@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const Hero = styled.section`
   background-color: gray;
-  height: 100vh;
+  min-height: 100vh;
 `;
 const Section = styled.section`
   display: flex;

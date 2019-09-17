@@ -19,7 +19,7 @@ const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
   background-color: ${props => props.theme.color.grey};
-  height: 100vh;
+  min-height: 100vh;
 `;
 const LoginSection = styled.section`
   display: flex;
