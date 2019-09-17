@@ -18,13 +18,15 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { actionLogin } from '../../../actions/authActions';
 
 const Hero = styled.section`
-  background-color: ${props => props.theme.color.grey};
   min-height: 100vh;
+  background: url('https://res.cloudinary.com/dif6rqidm/image/upload/v1568709608/wallpaper_clear_dark.jpg') no-repeat center center fixed;
+  background-size: cover;
+  overflow: hidden;
 `;
 const LoginSection = styled.section`
   display: flex;
   justify-content: center;
-  padding-top: 10%;
+  padding: 10% 0;
 `;
 const FormContainer = styled.section`
   flex-basis: 400px;

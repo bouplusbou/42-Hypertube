@@ -270,6 +270,28 @@ const CommentText = styled.p`
   margin: 0 0 20px 0;
   word-break: break-word;
 `;
+const NotFoundSection = styled.section`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+const NotFoundContainer = styled.div`
+  border: solid 1px dimgray;
+  border-radius: 5px;
+  text-align: center;
+  padding: 50px;
+`;
+const NotFoundTitle = styled.h1`
+  color: white;
+  font-size: 10em;
+  font-weight: 100;
+  font-family: Roboto;
+  margin: 0;
+`;
+const NotFoundText = styled.p`
+
+`;
+
 
 export default function TestMovie(props) {
 
@@ -357,6 +379,14 @@ export default function TestMovie(props) {
       <CloseLink to="/search">
         <CloseIcon icon={faTimes}></CloseIcon>
       </CloseLink>
+      {!movieInfo &&
+        <NotFoundSection>
+          <NotFoundContainer>
+              <NotFoundTitle>404</NotFoundTitle>  
+              <NotFoundText>Sorry but this film does not exist in our database</NotFoundText>  
+          </NotFoundContainer>
+        </NotFoundSection>
+      }
       {movieInfo && 
         <Fragment>
           <PosterSection>
