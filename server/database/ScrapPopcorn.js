@@ -23,22 +23,28 @@ const Color = {
 const log = (text, color = "yellow") => console.log(`${Color[color]}${text}${Color.Reset}`);
   
 async function connectMongo() {
+    log('Connecting to MongoDB database...');
     const MONGO_URI = require("../config/keys").MONGO_URI;
     const mongoose = require("mongoose");
     mongoose.set('useFindAndModify', false);
     await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
-    // await mongoose.connection.dropCollection("movies")
-    log("MongoDB successfully connected");
+    await mongoose.connection.dropCollection("movies")
+    log("MongoDB successfully connected", 'green');
 }
 
 const scrapPopcorn = async () => {
-    log("***** Scraping Popcorn Time API *****", 'cyan');
+    log("***** POPCORN TIME API *****", 'cyan');
     const pageCount = await axios.get('https://tv-v2.api-fetch.website/movies');
     const rawResults = [];
-    for (let i = 1; i < 105; i++) {
-        const res = await axios.get(`https://tv-v2.api-fetch.website/movies/${i}`);
-        log(`${res.data.length} movie(s) found on page ${i}.`);
-        rawResults.push(...res.data)
+    for (let i = 1; i < pageCount.data.length - 1; i++) {
+        try {
+            const res = await axios.get(`https://tv-v2.api-fetch.website/movies/${i}`);
+            log(`${res.data.length} movie(s) found on page ${i}.`);
+            rawResults.push(...res.data)
+        } catch (err) {     
+            console.log(err.message)
+            continue;
+        }
     }
     const cleanResults = rawResults.map(movie => {
         const torrents = [];
@@ -72,12 +78,12 @@ const scrapPopcorn = async () => {
         }
         return infos
     })
-    log(`${cleanResults.length} movies found in total.`);
+    log(`Popcorn Time scraping complete ! ${cleanResults.length} movies found in total.`, 'green');
     return cleanResults;
 }
 
 const scrapYTS = async () => {
-    log("***** Scraping YTS API *****", 'cyan');
+    log("***** YTS API *****", 'cyan');
     const rawResults = [];
     for (let i = 1; i < 500; i++) {
         const res = await axios.get(`https://yts.lt/api/v2/list_movies.json?limit=50&page=${i}`);
@@ -115,6 +121,7 @@ const scrapYTS = async () => {
         }
         return infos;
     })
+    log(`YTS scraping complete ! ${cleanResults.length} movies found in total.`, 'green');
     return cleanResults;
 }
 
@@ -140,7 +147,10 @@ const ScrapMoviesDatabases = async () => {
             filteredResults.push(movie);
         })
         const movieList = filteredResults.map(movie => {
-            const item = new Movie({ ...movie });
+            const item = new Movie({ 
+                ...movie,
+                lastViewed: [],
+            });
             return item;
         })
         await MovieModel.collection.insertMany(movieList);
