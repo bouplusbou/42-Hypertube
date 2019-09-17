@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
+import cloudinary from 'cloudinary-core';
+import AppContext from '../../../contexts/AppContext';
+import { actionLogout } from '../../../actions/authActions';
+const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
-  background-color: ${props => props.theme.color.grey};
-  height: 100vh;
+  min-height: 100vh;
+  background: url('https://res.cloudinary.com/dif6rqidm/image/upload/v1568709608/wallpaper_clear_dark.jpg') no-repeat center center fixed;
+  background-size: cover;
+  overflow: hidden;
 `;
 const ProfileSection = styled.section`
   display: flex;
@@ -63,65 +69,80 @@ const Value = styled.p`
   color: ${props => props.theme.color.white};
   word-break: break-word;
 `;
+const AvatarContainer = styled.section`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+`;
+const Avatar = styled.img`
+  height: 200px;
+  width: 150px;
+  object-fit:cover;
+  border-radius: ${props => props.theme.borderRadius};
+  margin: 0 auto;
+  background-color: black;
+`;
 
-export default function PageMyProfile(props) {
+export default function PageMyProfile() {
 
+  const { t, toggleConnected } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
   const [user, setUser] = useState({
     username: '',
     email: '',
     firstName: '',
     lastName: '',
+    avatarPublicId: '',
   });
 
   useEffect(() => {
     let isSubscribed = true;
     async function fetchData() {
-      const res = await axios.get(`/users?authToken=${authToken}`);
-      const { username, email, firstName, lastName } = res.data.user;
-      if (isSubscribed) {
-        setUser({ username, email, firstName, lastName })
+      try{
+        const res = await axios.get(`/users?authToken=${authToken}`);
+        const { username, email, firstName, lastName, avatarPublicId } = res.data.user;
+        if (isSubscribed) {
+          setUser({ username, email, firstName, lastName, avatarPublicId })
+        }
+      } catch(err) {
+        console.log(err);
+        if (err.response && err.response.status === 401) actionLogout(toggleConnected);
       }
     };
     if (authToken) fetchData();
     return () => isSubscribed = false;
-  }, [authToken]);
+  }, [authToken, toggleConnected]);
 
   return (
     <Hero>
       <ProfileSection>
         <Container>
           <Link to="/myProfileEdit">
-            <Edit>Edit</Edit>
+            <Edit>{t.myProfile.edit}</Edit>
           </Link>
-          <h1>Profile</h1>
+          <h1>{t.myProfile.profile}</h1>
+          <AvatarContainer>
+            <Avatar src={cloudinaryCore.url(user.avatarPublicId)}/>
+          </AvatarContainer>
           <Field>
-            <Title>Username</Title>
+            <Title>{t.myProfile.username}</Title>
             <Value>{user.username}</Value>
           </Field>
           <LineBreak></LineBreak>
           <Field>
-            <Title>Email</Title>
+            <Title>{t.myProfile.email}</Title>
             <Value>{user.email}</Value>
           </Field>
           <LineBreak></LineBreak>
           <Field>
-            <Title>First Name</Title>
+            <Title>{t.myProfile.firstName}</Title>
             <Value>{user.firstName}</Value>
           </Field>
           <LineBreak></LineBreak>
           <Field>
-            <Title>Last Name</Title>
+            <Title>{t.myProfile.lastName}</Title>
             <Value>{user.lastName}</Value>
           </Field>
-          {/* <LineBreak></LineBreak>
-          <Field>
-            <Title>Password</Title>
-            <Value>********</Value>
-            <ChangePasswordButton>
-              <p><FontAwesomeIcon  style={{fontSize: '15px', color: 'white'}} icon={faLock}/> Change Password</p>
-            </ChangePasswordButton>
-          </Field> */}
         </Container>
       </ProfileSection>
     </Hero>

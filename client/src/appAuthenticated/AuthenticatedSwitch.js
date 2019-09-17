@@ -1,21 +1,22 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 import PageMyProfile from './pages/PageMyProfile/PageMyProfile';
 import PageMyProfileEdit from './pages/PageMyProfileEdit/PageMyProfileEdit';
-import Page404Auth from './pages/Page404Auth/Page404Auth';
-import TestHome from './TestHome';
+import PageProfile from './pages/PageProfile/PageProfile';
+import PageLanguage from './pages/PageLanguage/PageLanguage';
+import PageMovie from './pages/PageMovie/PageMovie';
+import PageSearch from './pages/PageSearch/PageSearch';
 
 const AuthenticatedSwitch = () => (
-    <BrowserRouter>
-        <Switch>
-            <Route exact path='/home' component={TestHome}/>
-            <Route exact path='/myProfile' component={PageMyProfile}/>
-            <Route exact path='/myProfileEdit' component={PageMyProfileEdit}/>
-            <Route exact path='/login' component={TestHome}/>
-            <Route exact path='/signup' component={TestHome}/>
-            <Route component={Page404Auth}/>
-        </Switch>
-    </BrowserRouter>
+    <Switch>
+        <Route exact path='/myProfile' component={PageMyProfile}/>
+        <Route exact path='/myProfileEdit' component={PageMyProfileEdit}/>
+        <Route exact path='/language' component={PageLanguage}/>
+        <Route exact path='/users/:username' component={PageProfile}/>
+        <Route exact path='/movies/:imdbId' component={PageMovie}/>
+        <Route exact path='/search' component={PageSearch}/>
+        <Route component={PageSearch}/>
+    </Switch>
 );
 
 export default AuthenticatedSwitch;

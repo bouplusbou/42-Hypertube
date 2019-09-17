@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 
-export default function TestHome(props) {
+export default function TestHome() {
 
   useEffect(() => {
 
