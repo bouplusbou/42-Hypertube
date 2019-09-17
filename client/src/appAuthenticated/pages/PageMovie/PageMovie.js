@@ -295,7 +295,7 @@ const NotFoundText = styled.p`
 
 export default function TestMovie(props) {
 
-  const { toggleConnected } = useContext(AppContext);
+  const { t, toggleConnected } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
   const [comments, setComments] = useState(null);
   const [movieInfo, setMovieInfo] = useState(null);
@@ -399,7 +399,7 @@ export default function TestMovie(props) {
               {movieInfo.runtime !== 0 &&
                 <Fragment>
                   <Separator></Separator>
-                  <Runtime>{movieInfo.runtime} min</Runtime>
+                  <Runtime>{movieInfo.runtime} {t.movie.minutes}</Runtime>
                 </Fragment>
               }
               <Separator></Separator>
@@ -449,7 +449,7 @@ export default function TestMovie(props) {
               }
             </TorrentSection>
             <CommentsContainer>
-              <CommentsTitle>Comments</CommentsTitle>
+              <CommentsTitle>{t.movie.comments}</CommentsTitle>
               {comments && comments.map(comment => 
                 <Comment key={comment.date}>
                   <AvatarThumb src={cloudinaryCore.url(comment.user.avatarPublicId)}></AvatarThumb>
@@ -463,7 +463,7 @@ export default function TestMovie(props) {
               <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
                 <StyledTextField
                   id="standard-comment"
-                  label="Comment"
+                  label={t.movie.comment}
                   onBlur={handleBlur('comment')}
                   onChange={handleChange('comment')}
                   error={commentError}
@@ -472,7 +472,7 @@ export default function TestMovie(props) {
                   value={comment || ''}
                 />
                 <SubmitButton type="submit">
-                  <p>Post</p>
+                  <p>{t.movie.post}</p>
                 </SubmitButton>
               </Form>
             </FormContainer>
