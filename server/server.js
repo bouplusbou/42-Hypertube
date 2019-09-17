@@ -163,7 +163,6 @@ const deleteUnseenMovies = async () => {
       })
     }
   })
-  fs.unlink('./test.txt', () => console.log('Unseen movies since 1 month have been deleted'))
 };
 
 schedule.scheduleJob('* * 23 * * *', () => {
