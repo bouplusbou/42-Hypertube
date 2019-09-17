@@ -16,12 +16,19 @@ import Modal from '@material-ui/core/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { actionLogin } from '../../../actions/authActions';
+import HypertubeLogo from '../../../Logo';
 
 const Hero = styled.section`
   min-height: 100vh;
   background: url('https://res.cloudinary.com/dif6rqidm/image/upload/v1568709608/wallpaper_clear_dark.jpg') no-repeat center center fixed;
   background-size: cover;
   overflow: hidden;
+  position: relative;
+`;
+const LogoContainer = styled.div`
+  position: absolute;
+  top: 20px;
+  left: 20px;
 `;
 const LoginSection = styled.section`
   display: flex;
@@ -320,6 +327,9 @@ export default function PageLogin(props) {
 
   return (
     <Hero>
+      <LogoContainer>
+        <HypertubeLogo />
+      </LogoContainer>
       <Modal
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
