@@ -3,6 +3,7 @@ import { Switch, Route } from 'react-router-dom';
 import PageLogin from './pages/PageLogin/PageLogin';
 import PageSignup from './pages/PageSignup/PageSignup';
 import Page404Unauth from './pages/Page404Unauth/Page404Unauth';
+import PagePlayer from './pages/PagePlayer/PagePlayer';
 import PageResetPassword from './pages/PageResetPassword/PageResetPassword';
 import PageConfirmAccount from './pages/PageConfirmAccount/PageConfirmAccount';
 
@@ -13,6 +14,7 @@ const UnauthenticatedSwitch = () => (
         <Route exact path='/signup' component={PageSignup}/>
         <Route exact path='/resetPassword/:emailHash' component={PageResetPassword}/>
         <Route exact path='/confirm/:emailHash' component={PageConfirmAccount}/>
+        <Route exact path='/stream' component={PagePlayer}/>
         <Route component={Page404Unauth}/>
     </Switch>
 );
