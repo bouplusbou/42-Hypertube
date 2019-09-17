@@ -13,6 +13,12 @@
         "language": "Sprache",
         "logout": "Ausloggen"
     },
+    "movie": {
+        "minutes": "min",
+        "comments": "Kommentare",
+        "comment": "Kommentar einfügen",
+        "post": "Senden"
+    },
     "myProfile": {
         "edit": "Bearbeiten",
         "profile": "Profil",
