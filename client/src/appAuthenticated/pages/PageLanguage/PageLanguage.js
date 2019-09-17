@@ -5,8 +5,10 @@ import AppContext from '../../../contexts/AppContext';
 import { actionLogout } from '../../../actions/authActions';
 
 const Hero = styled.section`
-  background-color: ${props => props.theme.color.grey};
-  height: 100vh;
+  min-height: 100vh;
+  background: url('https://res.cloudinary.com/dif6rqidm/image/upload/v1568709608/wallpaper_clear_dark.jpg') no-repeat center center fixed;
+  background-size: cover;
+  overflow: hidden;
 `;
 const LoginSection = styled.section`
   display: flex;
