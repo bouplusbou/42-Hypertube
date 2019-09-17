@@ -18,6 +18,7 @@
     "cloudinary": "^1.15.0",
     "concurrently": "^4.1.2",
     "cookie-parser": "^1.4.4",
+    "cron": "^1.7.2",
     "express": "^4.17.1",
     "express-session": "^1.16.2",
     "googleapis": "^42.0.0",
