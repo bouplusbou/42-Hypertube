@@ -12,6 +12,9 @@ const cloudinary = require(`./Tools/Cloudinary`);
 const uuidv1 = require('uuid/v1');
 const session = require('express-session');
 const io = require('socket.io').listen(server);
+const schedule = require('node-schedule');
+const MovieModel = require('./models/MovieModel');
+const fs = require('fs-extra');
 
 app.use(bodyParser.json({limit: '10mb', extended: true}))
 app.use(bodyParser.urlencoded({limit: '10mb', extended: true}))
@@ -147,6 +150,25 @@ passport.use(
       } catch(err) { console.log(err); }
     }
 ));
+
+const deleteUnseenMovies = async () => {
+  const oneMonthAgo = new Date()
+  oneMonthAgo.setMonth( oneMonthAgo.getMonth() - 1 );
+  const moviesToDel = await MovieModel.find({ lastViewed: {$gt : oneMonthAgo} });
+  moviesToDel.forEach(movie => {
+    const tmpPath = `/tmp/movies/${movie.imdbId}`
+    if (fs.existsSync(tmpPath)){
+      fs.remove(tmpPath, err => {
+        console.error(err)
+      })
+    }
+  })
+  fs.unlink('./test.txt', () => console.log('Unseen movies since 1 month have been deleted'))
+};
+
+schedule.scheduleJob('* * 23 * * *', () => {
+  deleteUnseenMovies(); 
+});
 
 async function connectMongo() {
   try {
