@@ -28,7 +28,7 @@ async function connectMongo() {
     const mongoose = require("mongoose");
     mongoose.set('useFindAndModify', false);
     await mongoose.connect(MONGO_URI, { useNewUrlParser: true });
-    await mongoose.connection.dropCollection("movies")
+    // await mongoose.connection.dropCollection("movies")
     log("MongoDB successfully connected", 'green');
 }
 
@@ -36,7 +36,7 @@ const scrapPopcorn = async () => {
     log("***** POPCORN TIME API *****", 'cyan');
     const pageCount = await axios.get('https://tv-v2.api-fetch.website/movies');
     const rawResults = [];
-    for (let i = 1; i < pageCount.data.length - 1; i++) {
+    for (let i = 1; i < 101; i++) {
         try {
             const res = await axios.get(`https://tv-v2.api-fetch.website/movies/${i}`);
             log(`${res.data.length} movie(s) found on page ${i}.`);
@@ -65,13 +65,13 @@ const scrapPopcorn = async () => {
         }
         const infos = {
             imdbId: movie.imdb_id,
-            title: movie.title,
+            title: movie.title.toLowerCase(),
             year: movie.year,
             plot: movie.synopsis,
             runtime: parseInt(movie.runtime),
             trailer: movie.trailer,
             poster: movie.images.poster,
-            genres: movie.genres ? movie.genres : null,
+            genres: movie.genres ? movie.genres.map(genre => genre.toLowerCase()) : null,
             certification: movie.certification,
             rating: (movie.rating.percentage / 10) / 2,
             torrents: torrents,
@@ -108,11 +108,11 @@ const scrapYTS = async () => {
         }
         const infos = {
             imdbId: movie.imdb_code,
-            title: movie.title,
+            title: movie.title.toLowerCase(),
             year: movie.year,
             plot: movie.synopsis,
             runtime: movie.runtime,
-            genres: movie.genres ? movie.genres : null,
+            genres: movie.genres ? movie.genres.map(genre => genre.toLowerCase()) : null,
             trailer: movie.yt_trailer_code ? `http://youtube.com/watch?v=${movie.yt_trailer_code}` : null,
             poster: movie.large_cover_image,
             certification: movie.mpa_rating,
