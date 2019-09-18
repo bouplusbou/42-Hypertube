@@ -10,7 +10,7 @@ const search = async (req, res) => {
         const skip = limit * (page - 1);
         const count = limit * page;
         sorting[sort] = parseInt(order);
-        sorting["title"] = 1;
+        if (sort !== "rating" && keywords === "" ) sorting['rating'] = -1
         const queryTerms = [
             {$match: { 
             year: { $gte: years[0], $lte: years[1]},
