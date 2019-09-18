@@ -124,11 +124,11 @@ const downloadTorrent = async (movieFile, magnet, options, req, res) => {
         //   const size = fs.statSync(path).size;
         //   streamTorrent(path, size, res, req.headers.range);
         // } else {
-          file.select();
-          movieFile.file = file;
-          if (mainExtensions.includes(extension))
-            streamTorrent(file, file.length, res, req.headers.range);
-          else convertStreamTorrent(file, res, options.path);
+        file.select();
+        movieFile.file = file;
+        if (mainExtensions.includes(extension))
+          streamTorrent(file, file.length, res, req.headers.range);
+        else convertStreamTorrent(file, res, options.path);
         // }
       } else {
         file.deselect();
@@ -145,10 +145,10 @@ const downloadTorrent = async (movieFile, magnet, options, req, res) => {
       ).toPrecision(4)}%`
     );
   });
-  engine.on('idle', () => {
-    console.log('[ DL COMPLETED ]')
+  engine.on("idle", () => {
+    console.log("[ DL COMPLETED ]");
     console.log(`Filename : ${movieFile.file.name}`);
-  })
+  });
 };
 
 const handleTorrent = async (req, res) => {
@@ -183,7 +183,7 @@ const handleSubs = async (req, res) => {
   const arr = [];
   const idIMDB = req.query.id;
   let dir = `/tmp/movies/${idIMDB}`;
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir + "/subs", { recursive: true });
+  if (fs.existsSync(dir)) fs.mkdirSync(dir + "/subs", { recursive: true });
   yifysubtitles(idIMDB, {
     path: dir + "/subs",
     langs: langs
@@ -192,11 +192,13 @@ const handleSubs = async (req, res) => {
       await Promise.all(
         data.map(e => {
           return (async () => {
-            arr.push({
-              lang: e.langShort,
-              path: e.path
-            });
-            return Promise.resolve();
+            if (/\s/.test(e.path)) {
+              arr.push({
+                lang: e.langShort,
+                path: e.path
+              });
+              return Promise.resolve();
+            }
           })();
         })
       );

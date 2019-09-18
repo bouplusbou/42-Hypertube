@@ -22,7 +22,6 @@ export default () => {
   const { magnet } = useContext(AppContext);
   const [subs, setSubs] = useState([]);
   const [player, setPlayer] = useState(false);
-  const [setup, setSetup] = useState(false);
   const authToken = localStorage.getItem('authToken');
 
   // useEffect(() => {
@@ -55,7 +54,7 @@ export default () => {
   return (
     <Global>
       <Video controls>
-          <source src={`http://localhost:5000/api/player/stream?provider=${magnet.magnet.source}&id=${magnet.imdbId}&magnet=${magnet.magnet.magnet}`} type="video/mp4" />
+          { (magnet && magnet.magnet.source) && (<source src={`http://localhost:5000/api/player/stream?provider=${magnet.magnet.source}&id=${magnet.imdbId}&magnet=${magnet.magnet.magnet}`} type="video/mp4" />)}
           {player && subs}
       </Video>
     </Global>
