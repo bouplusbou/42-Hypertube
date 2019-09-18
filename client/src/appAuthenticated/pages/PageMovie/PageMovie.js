@@ -374,8 +374,14 @@ export default function TestMovie(props) {
     }
   };
   const launchStream = magnet => {
-    setCurrentMovieInfo({magnet, imdbId: props.match.params.imdbId});
-    props.history.push(`/${props.match.params.imdbId}/stream`);
+     try {
+      setCurrentMovieInfo({magnet, imdbId: props.match.params.imdbId});
+      props.history.push(`/${props.match.params.imdbId}/stream`);
+      const viewedPayload = { imdbId: props.match.params.imdbId };
+      await axios.post(`/viewed?authToken=${authToken}`, viewedPayload);
+    } catch(err) {
+      console.log(err);
+    }
   }
 
   return (
