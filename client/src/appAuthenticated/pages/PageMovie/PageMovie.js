@@ -123,7 +123,7 @@ const ProviderLogo = styled.img`
   width: 50px;
   margin: 50px 0 10px 0;
 `;
-const Magnet = styled(Link)`
+const Magnet = styled.div`
   margin-bottom: 5px;
   background-color: #353535;
   border-radius: 3px;

@@ -70,7 +70,6 @@ const langs = [
 ];
 
 const convertStreamTorrent = async (file, res, path) => {
-  // change path
   const stream = file.createReadStream();
   ffmpeg(stream)
     .format("webm")
@@ -118,12 +117,6 @@ const downloadTorrent = async (movieFile, magnet, options, req, res) => {
         mainExtensions.includes(extension) ||
         otherExtensions.includes(extension)
       ) {
-        // const path = `${options.path}/${file.path}`
-        // if (fs.existsSync(path)) {
-        //   console.log('bitch')
-        //   const size = fs.statSync(path).size;
-        //   streamTorrent(path, size, res, req.headers.range);
-        // } else {
         file.select();
         movieFile.file = file;
         if (mainExtensions.includes(extension))
@@ -159,14 +152,9 @@ const handleTorrent = async (req, res) => {
     tmp: "/tmp",
     path: `/tmp/movies/${id}`
   };
-
-  // if (fs.existsSync(path)) {
-  //   const size = fs.statSync(path).size;
-  //   streamTorrent(path, size, res, req.headers.range);
-  // } else {
   if (provider === "YTS") {
     torrentToMagnet(magnet, (err, uri) => {
-      if (err) res.status(400).json({ message: "Torrent not found" });
+      if (err) return res.status(400).json({ message: "Torrent not found" });
       downloadTorrent(movieFile, uri, options, req, res);
     });
   } else {

@@ -319,7 +319,6 @@ export default function PageSearch() {
     }
 
     const handleSearchInput = event => {
-        console.log(event.target.value);
         setSearchResult({movies: []})
         setSearchTerms({
             ...searchTerms,
@@ -349,17 +348,21 @@ export default function PageSearch() {
         }
     `
 
-    window.onscroll = () => {
-        if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
-            setSearchTerms(p => {
-                const terms = {
-                    ...p,
-                    page: p.page + 1
-                }
-                return terms
-            })
-        }
-    };
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+    
+    const handleScroll = () => {
+        if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
+        setSearchTerms(p => {
+            const terms = {
+                ...p,
+                page: p.page + 1
+            }
+            return terms
+        })
+    }
 
     return (
         <MainSection>
