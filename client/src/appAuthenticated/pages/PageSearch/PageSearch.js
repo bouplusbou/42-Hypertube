@@ -457,8 +457,8 @@ export default function PageSearch() {
             </TermsContainer>
             <StyledH2>{t.search[searchTerms.genre.toLocaleLowerCase()]}</StyledH2>
             <MoviesContainer>
-                {searchResult.movies.map(movie => 
-                    <Link to={`/movies/${movie.imdbId}`} style={{textDecoration:'none'}} key={movie.imdbId}>
+                {searchResult.movies.map((movie, index) => 
+                    <Link to={`/movies/${movie.imdbId}`} style={{textDecoration:'none'}} key={index}>
                         <MovieThumbnail movie={movie} viewed={viewedList.list.includes(movie.imdbId)}/>
                     </Link>
                 )}
