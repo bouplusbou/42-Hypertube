@@ -37,7 +37,8 @@ const genreList = [
 
 const sortingList = [
     'rating',
-    'year'
+    'year',
+    'title'
 ]
 
 const MainSection = styled.section `
@@ -234,7 +235,7 @@ const MovieThumbnail = props => {
 
 export default function PageSearch() {
 
-    const { toggleConnected } = useContext(AppContext);
+    const {t,  toggleConnected } = useContext(AppContext);
     const [viewedList, setViewedList] = useState({list: []});
     const [searchTerms, setSearchTerms] = useState({
         genre: "All",
@@ -299,7 +300,8 @@ export default function PageSearch() {
             sort: "year",
             ratings: [0, 5],
             years: [1915, 2019],
-            limit: 50
+            limit: 50,
+            keywords:""
         })
     }
     const handleRatingsChanges = value => {
@@ -323,7 +325,7 @@ export default function PageSearch() {
         setSearchTerms({
             ...searchTerms,
             sort:'title',
-            order: -1,
+            order: 1,
             page: 1,
             ratings: [0, 5],
             years: [1915, 2019],
@@ -362,13 +364,14 @@ export default function PageSearch() {
             }
             return terms
         })
+        return
     }
 
     return (
         <MainSection>
             <TermsContainer>
                 <StyledSearchInput
-                    label="Search a title"
+                    label={t.search.searchTitle}
                     value={searchTerms.keywords}
                     onChange={handleSearchInput}
                     variant="outlined"
@@ -379,7 +382,7 @@ export default function PageSearch() {
                 />
                 <GenreSelect
                     select
-                    label="Genre"
+                    label={t.search.genre}
                     name="genre"
                     value={searchTerms.genre}
                     onChange={handleGenreChanges}
@@ -390,13 +393,13 @@ export default function PageSearch() {
                     >
                     {genreList.map(genre => (
                         <option key={genre} value={genre}>
-                            {genre}
+                            {t.search[genre.toLowerCase()]}
                         </option>
                     ))}
                 </GenreSelect>
                 <SortSelect
                     select
-                    label="Sort by"
+                    label={t.search.sort}
                     name="sort"
                     value={searchTerms.sort}
                     onChange={handleTermsChange}
@@ -407,13 +410,13 @@ export default function PageSearch() {
                     >
                     {sortingList.map(sorting => (
                         <option key={sorting} value={sorting.toLowerCase()}>
-                            {sorting.charAt(0).toUpperCase() + sorting.slice(1)}
+                            {t.search[sorting].charAt(0).toUpperCase() + t.search[sorting].slice(1)}
                         </option>
                     ))}
                 </SortSelect>
                 <OrderSelect
                     select
-                    label="Order"
+                    label={t.search.order}
                     name="order"
                     value={searchTerms.order}
                     onChange={handleTermsChange}
@@ -422,12 +425,12 @@ export default function PageSearch() {
                     }}
                     variant="outlined"
                     >
-                    <option value={-1}>Desc</option>
-                    <option value={1}>Asc</option>
+                    <option value={-1}>{t.search.desc}</option>
+                    <option value={1}>{t.search.asc}</option>
                 </OrderSelect>
                 <RatingRangeContainer>
                     <StyledLabel>
-                        Ratings ({searchTerms.ratings[0]} - {searchTerms.ratings[1]})
+                        {t.search.rating.charAt(0).toUpperCase() + t.search.rating.slice(1)} ({searchTerms.ratings[0]} - {searchTerms.ratings[1]})
                     </StyledLabel>
                     <StyledRange 
                         onAfterChange={handleRatingsChanges}
@@ -440,7 +443,7 @@ export default function PageSearch() {
                 </RatingRangeContainer>
                 <YearRangeContainer>
                     <StyledLabel>
-                        Years ({searchTerms.years[0]} - {searchTerms.years[1]})
+                        {t.search.year} ({searchTerms.years[0]} - {searchTerms.years[1]})
                     </StyledLabel>
                     <StyledRange 
                         onAfterChange={handleYearsChanges}
@@ -452,7 +455,7 @@ export default function PageSearch() {
                     />
                 </YearRangeContainer>
             </TermsContainer>
-            <StyledH2>{searchTerms.genre} Movies</StyledH2>
+            <StyledH2>{t.search[searchTerms.genre.toLocaleLowerCase()]}</StyledH2>
             <MoviesContainer>
                 {searchResult.movies.map(movie => 
                     <Link to={`/movies/${movie.imdbId}`} style={{textDecoration:'none'}} key={movie.imdbId}>

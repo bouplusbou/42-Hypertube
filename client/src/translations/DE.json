@@ -17,7 +17,7 @@
         "genre": "Genre",
         "sortBy": "Sortieren",
         "order": "Anordnen",
-        "year": "Jahr",
+        "year": "Jahre",
         "rating": "Wertung",
         "desc": "ab",
         "asc": "auf",
@@ -37,11 +37,14 @@
         "musical": "Musical",
         "mystery": "Geheimnis",
         "romance": "Romantik",
-        "sci-Fi": "Sci-Fi",
+        "sci-fi": "Sci-Fi",
         "sport": "Sport",
         "thriller": "Thriller",
         "war": "Krieg",
-        "western": "Western"
+        "western": "Western",
+        "sort": "Sortieren",
+        "searchTitle": "Suchen Sie einen Titel",
+        "title": "Titel"
     },
     "movie": {
         "minutes": "min",
