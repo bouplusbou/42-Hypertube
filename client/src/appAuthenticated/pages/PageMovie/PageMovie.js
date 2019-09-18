@@ -295,7 +295,7 @@ const NotFoundText = styled.p`
 
 export default function TestMovie(props) {
 
-  const { t, toggleConnected, setMagnet } = useContext(AppContext);
+  const { t, toggleConnected, setCurrentMovieInfo } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
   const [comments, setComments] = useState(null);
   const [movieInfo, setMovieInfo] = useState(null);
@@ -374,8 +374,8 @@ export default function TestMovie(props) {
     }
   };
   const launchStream = magnet => {
-    setMagnet({magnet, imdbId: props.match.params.imdbId});
-    props.history.push('/stream');
+    setCurrentMovieInfo({magnet, imdbId: props.match.params.imdbId});
+    props.history.push(`/${props.match.params.imdbId}/stream`);
   }
 
   return (

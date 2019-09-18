@@ -18,7 +18,7 @@ const Header = styled.header`
     grid-template-columns: 8fr 2fr 2fr;
     align-content: center;
 `;
-const LogoContainer = styled.div`
+const LogoContainer = styled(Link)`
     margin-left: 20px;
     display: flex;
     align-items: center;
@@ -106,7 +106,7 @@ export default function HeaderComp() {
 
     return (
         <Header>
-            <LogoContainer>
+            <LogoContainer to="/search">
                 <HypertubeLogo />
             </LogoContainer>
             <Account onClick={toggleDropdown}>
@@ -126,5 +126,3 @@ export default function HeaderComp() {
         </Header>
     )
 }
-
-
