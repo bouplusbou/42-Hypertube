@@ -145,10 +145,6 @@ const downloadTorrent = async (movieFile, magnet, options, req, res) => {
       ).toPrecision(4)}%`
     );
   });
-  engine.on("idle", () => {
-    console.log("[ DL COMPLETED ]");
-    console.log(`Filename : ${movieFile.file.name}`);
-  });
 };
 
 const handleTorrent = async (req, res) => {
@@ -182,20 +178,26 @@ const handleTorrent = async (req, res) => {
 const handleSubs = async (req, res) => {
   const arr = [];
   const idIMDB = req.query.id;
-  let dir = `/tmp/movies/${idIMDB}`;
-  if (fs.existsSync(dir)) fs.mkdirSync(dir + "/subs", { recursive: true });
+  const dir = `/tmp/subs/${idIMDB}`;
+  if (!fs.existsSync(dir)) {
+    if (!fs.existsSync(`/tmp/subs`)) fs.mkdirSync(`/tmp/subs`);
+    if (!fs.existsSync(`/tmp/subs/${idIMDB}`))
+      fs.mkdirSync(`/tmp/subs/${idIMDB}`);
+  }
   yifysubtitles(idIMDB, {
-    path: dir + "/subs",
+    path: dir,
     langs: langs
   })
     .then(async data => {
       await Promise.all(
         data.map(e => {
           return (async () => {
-            if (/\s/.test(e.path)) {
+            if (fs.existsSync(e.path)) {
+              const newPath = e.path.split(' ').join('+')
+              fs.rename(e.path, newPath)
               arr.push({
                 lang: e.langShort,
-                path: e.path
+                path: newPath
               });
               return Promise.resolve();
             }
@@ -205,7 +207,7 @@ const handleSubs = async (req, res) => {
       res.status(200).send(arr);
     })
     .catch(err => {
-      console.log(err);
+      console.log(err)
       res.status(400).send({ message: "Subtitles not found" });
     });
 };
