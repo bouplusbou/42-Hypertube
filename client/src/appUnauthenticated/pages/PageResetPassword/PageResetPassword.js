@@ -10,10 +10,19 @@ import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import HypertubeLogo from '../../../Logo';
 
 const Hero = styled.section`
-  background-color: gray;
-  height: 100vh;
+  min-height: 100vh;
+  background: url('https://res.cloudinary.com/dif6rqidm/image/upload/v1568709608/wallpaper_clear_dark.jpg') no-repeat center center fixed;
+  background-size: cover;
+  overflow: hidden;
+  position: relative;
+`;
+const LogoContainer = styled.div`
+  position: absolute;
+  top: 20px;
+  left: 20px;
 `;
 const Section = styled.section`
   display: flex;
@@ -151,6 +160,9 @@ export default function PageResetPassword(props) {
 
   return (
     <Hero>
+      <LogoContainer>
+        <HypertubeLogo />
+      </LogoContainer>
       <Section>
         <Container>
         {!isLoading && isError && 

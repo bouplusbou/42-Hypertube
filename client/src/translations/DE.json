@@ -8,9 +8,46 @@
         "russian": "Russisch"
     },
     "header": {
+        "search": "Suche",
         "profile": "Profil",
         "language": "Sprache",
         "logout": "Ausloggen"
+    },
+    "search": {
+        "genre": "Genre",
+        "sortBy": "Sortieren",
+        "order": "Anordnen",
+        "year": "Jahr",
+        "rating": "Wertung",
+        "desc": "ab",
+        "asc": "auf",
+        "all": "Alle",
+        "action": "Aktion",
+        "adventure": "Abenteuer",
+        "animation": "Animation",
+        "comedy": "Komödie",
+        "crime": "Verbrechen",
+        "documentary": "DokumentarFilm",
+        "drama": "Drama",
+        "family": "Familie",
+        "fantasy": "Fantasie",
+        "history": "Geschichte",
+        "horror": "Horror",
+        "music": "Musik",
+        "musical": "Musical",
+        "mystery": "Geheimnis",
+        "romance": "Romantik",
+        "sci-Fi": "Sci-Fi",
+        "sport": "Sport",
+        "thriller": "Thriller",
+        "war": "Krieg",
+        "western": "Western"
+    },
+    "movie": {
+        "minutes": "min",
+        "comments": "Kommentare",
+        "comment": "Kommentar einfügen",
+        "post": "Senden"
     },
     "myProfile": {
         "edit": "Bearbeiten",

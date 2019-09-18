@@ -8,6 +8,7 @@ import LogoutButton from './LogoutButton';
 import AppContext from '../../contexts/AppContext';
 import cloudinary from 'cloudinary-core';
 import { actionLogout } from '../../actions/authActions';
+import HypertubeLogo from '../../Logo';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Header = styled.header`
@@ -17,7 +18,10 @@ const Header = styled.header`
     grid-template-columns: 8fr 2fr 2fr;
     align-content: center;
 `;
-const Search = styled.section`
+const LogoContainer = styled(Link)`
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
 `;
 const Account = styled.section`
     display: flex;
@@ -102,12 +106,15 @@ export default function HeaderComp() {
 
     return (
         <Header>
-            <Search></Search>
+            <LogoContainer to="/search">
+                <HypertubeLogo />
+            </LogoContainer>
             <Account onClick={toggleDropdown}>
                 <Avatar src={cloudinaryCore.url(avatar)}/>
                 <FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white', cursor: 'pointer'}} icon={faChevronDown}/>
                 { dropdownOpen &&
                     <DropDown ref={node}>
+                        <p><StyledLink to="/search">{t.header.search}</StyledLink></p>
                         <p><StyledLink to="/myProfile">{t.header.profile}</StyledLink></p>
                         <p><StyledLink to="/language">{t.header.language}</StyledLink></p>
                     </DropDown>
@@ -119,5 +126,3 @@ export default function HeaderComp() {
         </Header>
     )
 }
-
-

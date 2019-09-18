@@ -5,19 +5,19 @@ import PageMyProfileEdit from './pages/PageMyProfileEdit/PageMyProfileEdit';
 import PageProfile from './pages/PageProfile/PageProfile';
 import PageLanguage from './pages/PageLanguage/PageLanguage';
 import PageMovie from './pages/PageMovie/PageMovie';
-import TestHome from './TestHome';
 import PageSearch from './pages/PageSearch/PageSearch';
+import PagePlayer from './pages/PagePlayer/PagePlayer';
 
 const AuthenticatedSwitch = () => (
     <Switch>
-        <Route exact path='/home' component={TestHome}/>
         <Route exact path='/myProfile' component={PageMyProfile}/>
         <Route exact path='/myProfileEdit' component={PageMyProfileEdit}/>
         <Route exact path='/language' component={PageLanguage}/>
         <Route exact path='/users/:username' component={PageProfile}/>
         <Route exact path='/movies/:imdbId' component={PageMovie}/>
         <Route exact path='/search' component={PageSearch}/>
-        <Route component={TestHome}/>
+        <Route exact path='/:imdbId/stream' component={PagePlayer}/>
+        <Route component={PageSearch}/>
     </Switch>
 );
 

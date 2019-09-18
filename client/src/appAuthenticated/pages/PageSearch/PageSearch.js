@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
@@ -9,16 +9,20 @@ import Slider from 'rc-slider';
 
 const MainSection = styled.section `
     background-color:#141414;
-    padding:1rem 2.5rem;
+    padding:1rem;
     min-height:100vh;
 `
 
-const GenresContainer = styled.section `
+const TermsContainer = styled.section `
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 0 15vw;
 `
 
 const StyledTextField = styled(TextField) `
     label {
-        color:white;
+        color:#C50C15;
         font-size:1.25rem;
         font-weight:bold;
     }
@@ -32,13 +36,16 @@ const StyledTextField = styled(TextField) `
     }
     svg { color: white}
     p { color: white;}
+    select { border-color: #C50C15; }
 `
+
 const MoviesContainer = styled.section `
     margin:3rem 0;
     display:grid;
     grid-template-columns: repeat( auto-fill, 225px );
     grid-column-gap:5px;
     grid-row-gap:1rem;
+    justify-content:center;
 `
 
 const MovieThumbnail = props => {
@@ -96,6 +103,11 @@ const MovieThumbnail = props => {
     )
 }
 
+const StyledSearchInput = styled(StyledTextField) `
+    div {
+        color:white;
+    }
+`
 export default function PageSearch() {
 
     const [searchTerms, setSearchTerms] = useState({
@@ -106,7 +118,7 @@ export default function PageSearch() {
         ratings: [0, 5],
         years: [1915, 2019],
         keywords: "",
-        limit:50
+        limit: 50
     })
     const [searchResult, setSearchResult] = useState({movies: []});
     const genreList = [
@@ -121,32 +133,33 @@ export default function PageSearch() {
         'Family',
         'Fantasy',
         'History',
-        'Holiday',
         'Horror',
         'Music',
+        'Musical',
         'Mystery',
         'Romance',
-        'Science-fiction',
-        'Short',
-        'Suspense',
+        'Sci-Fi',
+        'Sport',
         'Thriller',
-        'Tv-movie',
         'War',
         'Western'
     ]
 
     const sortingList = [
         'rating',
-        'title',
         'year'
     ]
 
     useEffect(() => {
         const fetchMovies = async () => {
+            console.table({...searchTerms});
             const res = await axios.post("/search/genre", searchTerms);
-            console.log(res.data)
             const test = res.data;
-            if (res.data.length !== 0) setSearchResult({ movies: [...test] })
+            console.log(test.length);
+            if (res.data.length !== 0) {
+                if (searchTerms.page === 1) setSearchResult({ movies: [...test] })
+                else setSearchResult({ movies: searchResult.movies.concat(test)})
+            }
         }
         fetchMovies();
     }, [searchTerms])
@@ -154,13 +167,27 @@ export default function PageSearch() {
     const handleTermsChange = event => {
         setSearchTerms({
             ...searchTerms,
+            page: 1,
             [event.target.name]: event.target.value,
         })
     }
 
+    const handleGenreChanges = event => {
+        setSearchTerms({
+            ...searchTerms,
+            genre: event.target.value,
+            page: 1,
+            order:  -1,
+            sort: "year",
+            ratings: [0, 5],
+            years: [1915, 2019],
+            limit: 50
+        })
+    }
     const handleRatingsChanges = value => {
         setSearchTerms({
             ...searchTerms,
+            page: 1,
             ratings: value
         })
     }
@@ -168,22 +195,55 @@ export default function PageSearch() {
     const handleYearsChanges = value => {
         setSearchTerms({
             ...searchTerms,
+            page: 1,
             years: value
+        })
+    }
+
+    const handleSearchInput = event => {
+        setSearchResult({movies: []})
+        setSearchTerms({
+            ...searchTerms,
+            page: 1,
+            ratings: [0, 5],
+            years: [1915, 2019],
+            keywords: event.target.value,
+            limit: 50
+        })
+    }
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+    
+    const handleScroll = () => {
+        if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
+        setSearchTerms(p => {
+            const terms = {
+                ...p,
+                page: p.page + 1
+            }
+            return terms
         })
     }
 
     const createSliderWithTooltip = Slider.createSliderWithTooltip;
     const Range = createSliderWithTooltip(Slider.Range);
 
+    const StyledRange = styled(Range) `
+        max-width: 10rem;
+    `
+
     return (
         <MainSection>
-            <GenresContainer>
+            <TermsContainer>
                 <StyledTextField
                     select
                     label="Genre"
                     name="genre"
                     value={searchTerms.genre}
-                    onChange={handleTermsChange}
+                    onChange={handleGenreChanges}
                     SelectProps={{
                       native: true,
                     }}
@@ -210,7 +270,7 @@ export default function PageSearch() {
                     >
                     {sortingList.map(sorting => (
                         <option key={sorting} value={sorting.toLowerCase()}>
-                            {sorting}
+                            {sorting.charAt(0).toUpperCase() + sorting.slice(1)}
                         </option>
                     ))}
                 </StyledTextField>
@@ -232,7 +292,7 @@ export default function PageSearch() {
                 <Typography gutterBottom>
                     Ratings
                 </Typography>
-                <Range 
+                <StyledRange 
                     onAfterChange={handleRatingsChanges}
                     min={0}
                     max={5}
@@ -243,7 +303,7 @@ export default function PageSearch() {
                 <Typography gutterBottom>
                     Years
                 </Typography>
-                <Range 
+                <StyledRange 
                     onAfterChange={handleYearsChanges}
                     min={1915}
                     max={2019}
@@ -251,7 +311,13 @@ export default function PageSearch() {
                     defaultValue={searchTerms.years}
                     tipFormatter={value => `${value}`} 
                 />
-            </GenresContainer>
+                <StyledSearchInput
+                    label="Search"
+                    value={searchTerms.keywords}
+                    onChange={handleSearchInput}
+                    variant="outlined"
+                />
+            </TermsContainer>
             <MoviesContainer>
                 {searchResult.movies.map(movie => <Link to={`/movies/${movie.imdbId}`}><MovieThumbnail movie={movie}/></Link>)}
             </MoviesContainer>

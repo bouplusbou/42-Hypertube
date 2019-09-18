@@ -13,18 +13,26 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faImage } from '@fortawesome/free-solid-svg-icons';
-import cloudinary from 'cloudinary-core';
+import HypertubeLogo from '../../../Logo';
 import AppContext from '../../../contexts/AppContext';
+import cloudinary from 'cloudinary-core';
 const cloudinaryCore = new cloudinary.Cloudinary({cloud_name: 'dif6rqidm'});
 
 const Hero = styled.section`
-  background-color: ${props => props.theme.color.grey};
-  height: 100vh;
+  min-height: 100vh;
+  background: url('https://res.cloudinary.com/dif6rqidm/image/upload/v1568709608/wallpaper_clear_dark.jpg') no-repeat center center fixed;
+  background-size: cover;
+  overflow: hidden;
 `;
-const LoginSection = styled.section`
+const LogoContainer = styled.div`
+  position: absolute;
+  top: 20px;
+  left: 20px;
+`;
+const SignupSection = styled.section`
   display: flex;
   justify-content: center;
-  padding-top: 10%;
+  padding: 10% 0;
 `;
 const FormContainer = styled.section`
   flex-basis: 400px;
@@ -386,7 +394,10 @@ export default function PageSignup(props) {
 
   return (
     <Hero>
-      <LoginSection>
+      <LogoContainer>
+        <HypertubeLogo />
+      </LogoContainer>
+      <SignupSection>
         <FormContainer>
           <h1>Signup</h1>
           <AvatarContainer>
@@ -478,7 +489,7 @@ export default function PageSignup(props) {
             <p>Already a member ? <Link to="/login">Login here</Link></p>
           </Redirect>
         </FormContainer>
-      </LoginSection>
+      </SignupSection>
     </Hero>
   );
 }
