@@ -403,7 +403,7 @@ export default function TestMovie(props) {
             <Poster src={movieInfo.poster}></Poster>
           </PosterSection>
           <InfoSection>
-            <Title>{movieInfo.title}</Title>
+            <Title>{movieInfo.title.toLowerCase().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')}</Title>
             <Info>
               <Year>{movieInfo.year}</Year>
               {movieInfo.runtime !== 0 &&
