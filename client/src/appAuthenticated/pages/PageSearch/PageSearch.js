@@ -1,46 +1,115 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import AppContext from '../../../contexts/AppContext';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
-import { TextField, Typography } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
 import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
 import Slider from 'rc-slider';
+import { faStar, faEye } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { actionLogout } from '../../../actions/authActions';
+
+const testViewedList = ['tt8242160', 'tt4461676'];
+const genreList = [
+    'All',
+    'Action',
+    'Adventure',
+    'Animation',
+    'Comedy',
+    'Crime',
+    'Documentary',
+    'Drama',
+    'Family',
+    'Fantasy',
+    'History',
+    'Horror',
+    'Music',
+    'Musical',
+    'Mystery',
+    'Romance',
+    'Sci-Fi',
+    'Sport',
+    'Thriller',
+    'War',
+    'Western'
+]
+
+const sortingList = [
+    'rating',
+    'year'
+]
 
 const MainSection = styled.section `
-    background-color:#141414;
-    padding:1rem;
+    background-color:#202020;
+    padding:1.5rem;
     min-height:100vh;
 `
 
 const TermsContainer = styled.section `
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding: 0 15vw;
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    grid-template-rows:auto auto;
+    grid-column-gap:1.5rem;
+    grid-row-gap:1.5rem;
+    grid-template-areas:
+    'search search search genre order sort'
+    'rating rating rating year year year';
+    @media (max-width: 1000px) {
+        grid-template-columns:auto;
+        grid-template-rows:auto;
+        grid-template-areas:
+        'search'
+        'genre'
+        'order'
+        'sort'
+        'rating'
+        'year'
+    }
+    padding: 0 1.5rem;
+`
+
+const StyledLabel = styled.label `
+    color:#C50C15;
+    font-weight:bold;
+    margin-right:1.5rem;
+    font-size:1.5rem;
 `
 
 const StyledTextField = styled(TextField) `
     label {
         color:#C50C15;
-        font-size:1.25rem;
+        font-size:1.75rem;
         font-weight:bold;
     }
     div {
         color:white;
-        height:100%;
-        option {
-            color:#2b2c2e;
-            background-color:black;
-        }
+        option { color:#202020; }
     }
-    svg { color: white}
-    p { color: white;}
-    select { border-color: #C50C15; }
+    svg { color: #C50C15; }
+    select { font-weight:bold; }
+`
+
+const GenreSelect = styled(StyledTextField) ` grid-area:genre; `
+const SortSelect = styled(StyledTextField) ` grid-area:sort; `
+const OrderSelect = styled(StyledTextField) ` grid-area:order; `
+const YearRangeContainer = styled.div ` grid-area:year; padding:0 0.75rem; `
+const RatingRangeContainer = styled.div ` grid-area:rating; padding:0 0.75rem; `
+
+const StyledSearchInput = styled(StyledTextField) `
+    grid-area: search;
+    div { color:white; }
+`
+
+const StyledH2 = styled.h2 `
+    text-align:center;
+    color:white;
+    font-size:3rem;
 `
 
 const MoviesContainer = styled.section `
-    margin:3rem 0;
+    margin:0.5rem 0 3rem 0;
     display:grid;
     grid-template-columns: repeat( auto-fill, 225px );
     grid-column-gap:5px;
@@ -50,17 +119,25 @@ const MoviesContainer = styled.section `
 
 const MovieThumbnail = props => {
 
-    const [hover, setHover] = useState();
+    const title = props.movie.title.toLowerCase()
+                    .split(' ')
+                    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+                    .join(' ');
 
     const Thumbnail = styled.div `
         background-image:url(${props => props.cover});
         height:338px;
         width:225px;
         background-size:cover;
-        :hover { cursor:pointer }
+        position:relative;
+        :hover { 
+            cursor:pointer
+            .hover { visibility:visible; }
+            .viewed { display:none; }
+        }
     `
 
-    const Mask = styled.div `
+    const HoverMask = styled.div `
         height:100%;
         width:100%;
         background-color: rgba(0, 0, 0, 0.75);
@@ -68,48 +145,97 @@ const MovieThumbnail = props => {
         box-sizing:border-box;
         display:flex;
         flex-direction:column;
+        visibility:hidden;
         align-items:center;
+        justify-content:center;
+    `
+
+    const ViewedMask = styled.div `
+        position:relative;
+        height:100%;
+        width:100%;
+        background-color: rgba(0, 0, 0, 0.75);
+        padding:1rem;
+        box-sizing:border-box;
     `
 
     const Title = styled.h3 `
         font-size:1.5rem;
         color:white;
         margin:0;
+        text-align:center;
     `
 
-    const Year = styled.p `
+    const Year = styled.span `
         color:white;
         margin:0;
         font-weight:bold;
+        text-decoration:none;
+        padding: 0.25rem 0.5rem;
+        :not(:last-child) { 
+            border-right:1px solid white;
+        }
     `
-    const handleHover = () => {
-        setHover(p => !p)
-    }
+
+    const Rating = styled.p`
+        position: relative;
+        ::before, ::after {
+          position: absolute;
+          left: 20%;
+          opacity: 0;
+          background-color: dimgray;
+          border-radius: 5px;
+          padding: 4px;
+          text-align: center;
+        }
+        :hover::before, :hover::after {
+          opacity: 1;
+        }
+        ::after {
+          content: attr(data-tooltip);
+          transform: translateY(-120%);
+        }
+    `;
+
+    const FullStar = styled(FontAwesomeIcon)`
+      color: #E8BB1A;
+    `;
+    const EmptyStar = styled(FontAwesomeIcon)`
+      color: dimgray;
+    `;
+
+    const StyledIcon = styled(FontAwesomeIcon) `
+        color:#C50C15;
+        position:absolute;
+        right:15px;
+        top:15px;
+        z-index:1000;
+    `
     return (
-        <Thumbnail 
-            cover={props.movie.poster}
-            onMouseEnter={handleHover}
-            onMouseLeave={handleHover}
-        >
-            {hover && 
-                <Mask>
-                    <Title>{props.movie.title}</Title>
-                    <Year>({props.movie.year})</Year>
-                    <Year>({props.movie.runtime} minutes)</Year>
-                    <Year>({props.movie.rating})</Year>
-                </Mask>
-            }
+        <Thumbnail cover={props.movie.poster}>
+                {props.viewed && <StyledIcon icon={faEye} size={'lg'}/>}
+                {props.viewed && <ViewedMask className="viewed"></ViewedMask>}
+                <HoverMask className="hover">
+                    <Title>{title}</Title>
+                    <Rating data-tooltip={`${props.movie.rating}/5`}>
+                      {props.movie.rating > 0.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                      {props.movie.rating > 1.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                      {props.movie.rating > 2.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                      {props.movie.rating > 3.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                      {props.movie.rating > 4.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                    </Rating>
+                    <div>
+                        <Year>{props.movie.year}</Year>
+                        {props.movie.runtime !== 0 && <Year>{props.movie.runtime} minutes</Year>}
+                    </div>
+                </HoverMask>
         </Thumbnail>
     )
 }
 
-const StyledSearchInput = styled(StyledTextField) `
-    div {
-        color:white;
-    }
-`
 export default function PageSearch() {
 
+    const { toggleConnected } = useContext(AppContext);
     const [searchTerms, setSearchTerms] = useState({
         genre: "All",
         page: 1,
@@ -121,48 +247,40 @@ export default function PageSearch() {
         limit: 50
     })
     const [searchResult, setSearchResult] = useState({movies: []});
-    const genreList = [
-        'All',
-        'Action',
-        'Adventure',
-        'Animation',
-        'Comedy',
-        'Crime',
-        'Documentary',
-        'Drama',
-        'Family',
-        'Fantasy',
-        'History',
-        'Horror',
-        'Music',
-        'Musical',
-        'Mystery',
-        'Romance',
-        'Sci-Fi',
-        'Sport',
-        'Thriller',
-        'War',
-        'Western'
-    ]
+    // const authToken = localStorage.getItem('authToken');
 
-    const sortingList = [
-        'rating',
-        'year'
-    ]
+    // useEffect(() => {
+    //     let isSubscribed = true;
+    //     const fetchUserdata = async () => {
+    //         try {
+    //             const res = await axios.get(`/users?authToken=${authToken}`);
+    //             console.log(res.data);
+    //         } catch(err) {
+    //             console.log(err);
+    //             if (err.response && err.response.status === 401) actionLogout(toggleConnected);
+    //         }
+    //     };
+    //     if (authToken) fetchUserdata();
+    //     return () => isSubscribed = false;
+    // }, [])
 
     useEffect(() => {
+        let isSubscribed = true;
         const fetchMovies = async () => {
-            console.table({...searchTerms});
-            const res = await axios.post("/search/genre", searchTerms);
-            const test = res.data;
-            console.log(test.length);
-            if (res.data.length !== 0) {
-                if (searchTerms.page === 1) setSearchResult({ movies: [...test] })
-                else setSearchResult({ movies: searchResult.movies.concat(test)})
+            try {
+                const res = await axios.post("/search/genre", searchTerms);
+                const test = res.data;
+                if (isSubscribed && res.data.length !== 0) {
+                    if (searchTerms.page === 1) setSearchResult({ movies: [...test] })
+                    else setSearchResult(prev => ({movies: prev.movies.concat(test)}))
+                }
+            } catch(err) {
+                if (err.response && err.response.status === 401) actionLogout(toggleConnected);
             }
         }
         fetchMovies();
-    }, [searchTerms])
+        return () => isSubscribed = false;
+    }, [searchTerms, toggleConnected])
 
     const handleTermsChange = event => {
         setSearchTerms({
@@ -201,9 +319,12 @@ export default function PageSearch() {
     }
 
     const handleSearchInput = event => {
+        console.log(event.target.value);
         setSearchResult({movies: []})
         setSearchTerms({
             ...searchTerms,
+            sort:'title',
+            order: -1,
             page: 1,
             ratings: [0, 5],
             years: [1915, 2019],
@@ -212,33 +333,48 @@ export default function PageSearch() {
         })
     }
 
-    useEffect(() => {
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-    
-    const handleScroll = () => {
-        if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
-        setSearchTerms(p => {
-            const terms = {
-                ...p,
-                page: p.page + 1
-            }
-            return terms
-        })
-    }
-
     const createSliderWithTooltip = Slider.createSliderWithTooltip;
     const Range = createSliderWithTooltip(Slider.Range);
 
     const StyledRange = styled(Range) `
-        max-width: 10rem;
+        margin-top:1rem;
+        .rc-slider-track { background-color: #bd4b51; }
+        .rc-slider-handle { 
+            border-color:white;
+            :hover { border-color:#C50C15; }
+            :active { 
+                box-shadow:0 0 5px #C50C15;
+                border-color:#C50C15;
+            }
+        }
     `
+
+    window.onscroll = () => {
+        if (window.innerHeight + document.documentElement.scrollTop === document.documentElement.offsetHeight) {
+            setSearchTerms(p => {
+                const terms = {
+                    ...p,
+                    page: p.page + 1
+                }
+                return terms
+            })
+        }
+    };
 
     return (
         <MainSection>
             <TermsContainer>
-                <StyledTextField
+                <StyledSearchInput
+                    label="Search a title"
+                    value={searchTerms.keywords}
+                    onChange={handleSearchInput}
+                    variant="outlined"
+                    placeholder="10 Cloverfield Lanes, Hereditary, ..."
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                />
+                <GenreSelect
                     select
                     label="Genre"
                     name="genre"
@@ -247,7 +383,6 @@ export default function PageSearch() {
                     SelectProps={{
                       native: true,
                     }}
-                    margin="normal"
                     variant="outlined"
                     >
                     {genreList.map(genre => (
@@ -255,8 +390,8 @@ export default function PageSearch() {
                             {genre}
                         </option>
                     ))}
-                </StyledTextField>
-                <StyledTextField
+                </GenreSelect>
+                <SortSelect
                     select
                     label="Sort by"
                     name="sort"
@@ -265,7 +400,6 @@ export default function PageSearch() {
                     SelectProps={{
                       native: true,
                     }}
-                    margin="normal"
                     variant="outlined"
                     >
                     {sortingList.map(sorting => (
@@ -273,8 +407,8 @@ export default function PageSearch() {
                             {sorting.charAt(0).toUpperCase() + sorting.slice(1)}
                         </option>
                     ))}
-                </StyledTextField>
-                <StyledTextField
+                </SortSelect>
+                <OrderSelect
                     select
                     label="Order"
                     name="order"
@@ -283,43 +417,41 @@ export default function PageSearch() {
                     SelectProps={{
                       native: true,
                     }}
-                    margin="normal"
                     variant="outlined"
                     >
                     <option value={-1}>Desc</option>
                     <option value={1}>Asc</option>
-                </StyledTextField>
-                <Typography gutterBottom>
-                    Ratings
-                </Typography>
-                <StyledRange 
-                    onAfterChange={handleRatingsChanges}
-                    min={0}
-                    max={5}
-                    allowCross={false}
-                    defaultValue={searchTerms.ratings}
-                    tipFormatter={value => `${value}`} 
-                />
-                <Typography gutterBottom>
-                    Years
-                </Typography>
-                <StyledRange 
-                    onAfterChange={handleYearsChanges}
-                    min={1915}
-                    max={2019}
-                    allowCross={false}
-                    defaultValue={searchTerms.years}
-                    tipFormatter={value => `${value}`} 
-                />
-                <StyledSearchInput
-                    label="Search"
-                    value={searchTerms.keywords}
-                    onChange={handleSearchInput}
-                    variant="outlined"
-                />
+                </OrderSelect>
+                <RatingRangeContainer>
+                    <StyledLabel>
+                        Ratings ({searchTerms.ratings[0]} - {searchTerms.ratings[1]})
+                    </StyledLabel>
+                    <StyledRange 
+                        onAfterChange={handleRatingsChanges}
+                        min={0}
+                        max={5}
+                        allowCross={false}
+                        defaultValue={searchTerms.ratings}
+                        tipFormatter={value => `${value}`} 
+                    />
+                </RatingRangeContainer>
+                <YearRangeContainer>
+                    <StyledLabel>
+                        Years ({searchTerms.years[0]} - {searchTerms.years[1]})
+                    </StyledLabel>
+                    <StyledRange 
+                        onAfterChange={handleYearsChanges}
+                        min={1915}
+                        max={2019}
+                        allowCross={false}
+                        defaultValue={searchTerms.years}
+                        tipFormatter={value => `${value}`} 
+                    />
+                </YearRangeContainer>
             </TermsContainer>
+            <StyledH2>{searchTerms.genre} Movies</StyledH2>
             <MoviesContainer>
-                {searchResult.movies.map(movie => <Link to={`/movies/${movie.imdbId}`}><MovieThumbnail movie={movie}/></Link>)}
+                {searchResult.movies.map(movie => <Link to={`/movies/${movie.imdbId}`} style={{textDecoration:'none'}} key={movie.imdbId}><MovieThumbnail movie={movie} viewed={testViewedList.includes(movie.imdbId)}/></Link>)}
             </MoviesContainer>
         </MainSection>
     )
