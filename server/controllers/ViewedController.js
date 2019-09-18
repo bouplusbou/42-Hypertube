@@ -1,24 +1,31 @@
-const ViewedModel = require('../models/CommentModel');
 const UserModel = require('../models/UserModel');
+const MovieModel = require('../models/MovieModel');
 const jwt = require('jsonwebtoken');
 const keys = require('../config/keys');
+const schedule = require('node-schedule');
 
-const SetViewed = async (req, res) => {
+const setViewed = async (req, res) => {
     try {
-        const { authToken, imdbId } = req.query;
+        const { authToken } = req.query;
         const decoded = await jwt.verify(authToken, keys.JWT_SECRET);
         const _id = decoded.mongoId;
-        await UserModel.findById(_id);
-        const query = { "user" : _id, "imdbId" : imdbId}
-        const options = { upsert: true };
-        const update = { viewDate: new Date() }
-        await ViewedModel.findOneAndUpdate(query, update, options)
+        const imdbId = req.body.imdbId;
+        const query = { "imdbId" : imdbId };
+        const date = new Date()
+        const update = { lastViewed: date }
+        await MovieModel.updateOne(query, update)
+        await UserModel.updateOne(
+            { "_id" : _id},
+            { $push: {
+                viewedList: {
+                    $each: [imdbId],
+                    $position : 0
+                }}
+            })
     } catch(err) {
         console.log(err);
         res.status(500).json({ error: err});
     }
 }
 
-module.export = {
-    SetViewed
-}
+module.exports = { setViewed }

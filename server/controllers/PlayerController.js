@@ -6,8 +6,6 @@ ffmpeg.setFfmpegPath("/Users/glavigno/.brew/Cellar/ffmpeg/4.1.4_2/bin/ffmpeg");
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const srt2vtt = require("srt-to-vtt");
-const openSubs = require("opensubtitles-api");
 const yifysubtitles = require("yifysubtitles");
 
 const mainExtensions = [".mp4", "webm"];
@@ -120,12 +118,18 @@ const downloadTorrent = async (movieFile, magnet, options, req, res) => {
         mainExtensions.includes(extension) ||
         otherExtensions.includes(extension)
       ) {
+        // const path = `${options.path}/${file.path}`
+        // if (fs.existsSync(path)) {
+        //   console.log('bitch')
+        //   const size = fs.statSync(path).size;
+        //   streamTorrent(path, size, res, req.headers.range);
+        // } else {
         file.select();
         movieFile.file = file;
-        console.log(extension);
         if (mainExtensions.includes(extension))
           streamTorrent(file, file.length, res, req.headers.range);
         else convertStreamTorrent(file, res, options.path);
+        // }
       } else {
         file.deselect();
       }
@@ -144,10 +148,8 @@ const downloadTorrent = async (movieFile, magnet, options, req, res) => {
 };
 
 const handleTorrent = async (req, res) => {
-  // const { hash, path (if exists) } = req
-
+  const { provider, id, magnet } = req.query;
   const movieFile = { file: {}, path: "" };
-  const idIMDB = "tt0133093";
   const options = {
     connections: 100,
     uploads: 10,
@@ -155,42 +157,51 @@ const handleTorrent = async (req, res) => {
     dht: true,
     tracker: true,
     tmp: "/tmp",
-    path: `/tmp/movies/${idIMDB}`
+    path: `/tmp/movies/${id}`
   };
 
-  if (fs.existsSync(path)) {
-    const size = fs.statSync(path).size;
-    streamTorrent(path, size, res, req.headers.range);
+  // if (fs.existsSync(path)) {
+  //   const size = fs.statSync(path).size;
+  //   streamTorrent(path, size, res, req.headers.range);
+  // } else {
+  if (provider === "YTS") {
+    torrentToMagnet(magnet, (err, uri) => {
+      if (err) res.status(400).json({ message: "Torrent not found" });
+      downloadTorrent(movieFile, uri, options, req, res);
+    });
   } else {
-    torrentToMagnet(
-      "https://yts.lt/torrent/download/363BC6C534B1430C6758318D196CCD61DB61B647",
-      (err, uri) => {
-        if (err) res.status(400).json({ message: "Torrent not found" });
-        downloadTorrent(movieFile, uri, options, req, res);
-      }
-    );
+    downloadTorrent(movieFile, magnet, options, req, res);
   }
+  // }
 };
 
 const handleSubs = async (req, res) => {
-  // const { idIMDB } = req
   const arr = [];
-  const idIMDB = "tt0133093"; // hash
-  let dir = `/tmp/movies/${idIMDB}`;
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir + "/subs", { recursive: true });
+  const idIMDB = req.query.id;
+  const dir = `/tmp/subs/${idIMDB}`;
+  if (!fs.existsSync(dir)) {
+    if (!fs.existsSync(`/tmp/subs`)) fs.mkdirSync(`/tmp/subs`);
+    if (!fs.existsSync(`/tmp/subs/${idIMDB}`))
+      fs.mkdirSync(`/tmp/subs/${idIMDB}`);
+  }
   yifysubtitles(idIMDB, {
-    path: dir + "/subs",
+    path: dir,
     langs: langs
   })
     .then(async data => {
       await Promise.all(
         data.map(e => {
           return (async () => {
-            arr.push({
-              lang: e.langShort,
-              path: e.path
-            });
-            return Promise.resolve();
+            let newPath
+              if (/\s/.test(e.path)) {
+                newPath = e.path.split(' ').join('+')
+                fs.rename(e.path, newPath, err => console.log(err))
+              }
+              arr.push({
+                lang: e.langShort,
+                path: newPath ? newPath : e.path
+              });
+              return Promise.resolve();
           })();
         })
       );
@@ -198,7 +209,7 @@ const handleSubs = async (req, res) => {
     })
     .catch(err => {
       console.log(err)
-      res.status(400).send({message: 'Subtitles not found'});
+      res.status(400).send({ message: "Subtitles not found" });
     });
 };
 

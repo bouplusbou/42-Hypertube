@@ -22,7 +22,7 @@ const Header = styled.header`
         padding:0;
     }
 `;
-const LogoContainer = styled.div`
+const LogoContainer = styled(Link)`
     margin-left: 20px;
     display: flex;
     align-items: center;
@@ -121,7 +121,7 @@ export default function HeaderComp() {
 
     return (
         <Header>
-            <LogoContainer>
+            <LogoContainer to="/search">
                 <HypertubeLogo />
             </LogoContainer>
             <Account onClick={toggleDropdown}>
@@ -141,5 +141,3 @@ export default function HeaderComp() {
         </Header>
     )
 }
-
-
