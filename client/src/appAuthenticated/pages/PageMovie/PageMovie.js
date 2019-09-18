@@ -373,7 +373,7 @@ export default function TestMovie(props) {
       if (err.response && err.response.status === 401) actionLogout(toggleConnected);
     }
   };
-  const launchStream = magnet => {
+  const launchStream = async magnet => {
      try {
       setCurrentMovieInfo({magnet, imdbId: props.match.params.imdbId});
       props.history.push(`/${props.match.params.imdbId}/stream`);

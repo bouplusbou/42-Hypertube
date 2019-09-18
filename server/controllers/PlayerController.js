@@ -192,15 +192,16 @@ const handleSubs = async (req, res) => {
       await Promise.all(
         data.map(e => {
           return (async () => {
-            if (fs.existsSync(e.path)) {
-              const newPath = e.path.split(' ').join('+')
-              fs.rename(e.path, newPath)
+            let newPath
+              if (/\s/.test(e.path)) {
+                newPath = e.path.split(' ').join('+')
+                fs.rename(e.path, newPath, err => console.log(err))
+              }
               arr.push({
                 lang: e.langShort,
-                path: newPath
+                path: newPath ? newPath : e.path
               });
               return Promise.resolve();
-            }
           })();
         })
       );

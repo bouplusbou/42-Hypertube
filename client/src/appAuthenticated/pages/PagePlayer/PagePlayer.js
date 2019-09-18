@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import axios from "axios";
 import AppContext from '../../../contexts/AppContext';
 import styled from 'styled-components';
-import { getThemeProps } from "@material-ui/styles";
 
 const Global = styled.section`
   background-color: black;
@@ -53,10 +52,10 @@ export default (props) => {
 
   return (
     <Global>
-      {(currentMovieInfo && currentMovieInfo.magnet.source && player) ? 
+      {(currentMovieInfo && currentMovieInfo.magnet.source) ? 
         <Video controls>
           <source src={`http://localhost:5000/api/player/stream?provider=${currentMovieInfo.magnet.source}&id=${currentMovieInfo.imdbId}&magnet=${currentMovieInfo.magnet.magnet}`} type="video/mp4" />
-          {subs}
+          {player && subs}
         </Video>
         :
         <LinkBack to={`/movies/${props.match.params.imdbId}`}>Go back to the movie page</LinkBack>
