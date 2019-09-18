@@ -4,7 +4,8 @@ const PlayerController = require("../controllers/PlayerController");
 
 router
   .route("/stream")
-  .get(async (req, res) => PlayerController.handleTorrent(req, res));
+    .get(async (req, res) => PlayerController.handleTorrent(req, res))
+  // .post(async (req, res) => PlayerController.handleMagnet(req, res));
 
 router
   .route("/subs")

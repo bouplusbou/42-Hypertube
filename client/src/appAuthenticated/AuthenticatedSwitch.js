@@ -6,6 +6,7 @@ import PageProfile from './pages/PageProfile/PageProfile';
 import PageLanguage from './pages/PageLanguage/PageLanguage';
 import PageMovie from './pages/PageMovie/PageMovie';
 import PageSearch from './pages/PageSearch/PageSearch';
+import PagePlayer from './pages/PagePlayer/PagePlayer';
 
 const AuthenticatedSwitch = () => (
     <Switch>
@@ -15,6 +16,7 @@ const AuthenticatedSwitch = () => (
         <Route exact path='/users/:username' component={PageProfile}/>
         <Route exact path='/movies/:imdbId' component={PageMovie}/>
         <Route exact path='/search' component={PageSearch}/>
+        <Route exact path='/stream' component={PagePlayer}/>
         <Route component={PageSearch}/>
     </Switch>
 );

@@ -123,7 +123,7 @@ const ProviderLogo = styled.img`
   width: 50px;
   margin: 50px 0 10px 0;
 `;
-const Magnet = styled.div`
+const Magnet = styled(Link)`
   margin-bottom: 5px;
   background-color: #353535;
   border-radius: 3px;
@@ -295,7 +295,7 @@ const NotFoundText = styled.p`
 
 export default function TestMovie(props) {
 
-  const { t, toggleConnected } = useContext(AppContext);
+  const { t, toggleConnected, setMagnet } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
   const [comments, setComments] = useState(null);
   const [movieInfo, setMovieInfo] = useState(null);
@@ -373,6 +373,10 @@ export default function TestMovie(props) {
       if (err.response && err.response.status === 401) actionLogout(toggleConnected);
     }
   };
+  const launchStream = magnet => {
+    setMagnet({magnet, imdbId: props.match.params.imdbId});
+    props.history.push('/stream');
+  }
 
   return (
     <Hero>
@@ -423,7 +427,7 @@ export default function TestMovie(props) {
                 <Fragment>
                   <ProviderLogo src={cloudinaryCore.url('popcornTime_logo')}></ProviderLogo>
                   {movieInfo.torrents.filter(magnet => magnet.source === 'Popcorn Time').map((magnet, index) => 
-                    <Magnet key={index}>
+                    <Magnet key={index} onClick={() => launchStream(magnet)}>
                       <Seeds>Seeds: <span style={{color: '#51C148'}}>{magnet.seed}</span></Seeds>
                       <Peers>Peers: <span style={{color: '#D33838'}}>{magnet.peer}</span></Peers>
                       <Size>{magnet.fileSize}</Size>
@@ -437,7 +441,7 @@ export default function TestMovie(props) {
               <Fragment>
                 <ProviderLogo src={cloudinaryCore.url('yts_logo')}></ProviderLogo>
                 {movieInfo.torrents.filter(magnet => magnet.source === 'YTS').map((magnet, index) => 
-                  <Magnet key={index}>
+                  <Magnet key={index} onClick={() => launchStream(magnet)}>
                     <Seeds>Seeds: <span style={{color: '#51C148'}}>{magnet.seed}</span></Seeds>
                     <Peers>Peers: <span style={{color: '#D33838'}}>{magnet.peer}</span></Peers>
                     <Size>{magnet.fileSize}</Size>
