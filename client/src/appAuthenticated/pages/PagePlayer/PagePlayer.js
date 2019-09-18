@@ -46,7 +46,7 @@ export default () => {
             <track key={index} kind="subtitles" srcLang={e.lang} src={e.path} />
           ))
         );
-        setPlayer(true);
+        if (res.status === 200) setPlayer(true);
       })
       .catch(err => console.log(err));
   }, []);
