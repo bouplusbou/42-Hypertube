@@ -18,6 +18,9 @@ const Header = styled.header`
     grid-template-columns: 8fr 2fr 2fr;
     align-content: center;
     padding: 0 1.5rem;
+    @media (max-width: 1000px) {
+        padding:0;
+    }
 `;
 const LogoContainer = styled.div`
     margin-left: 20px;
@@ -37,6 +40,9 @@ const Avatar = styled.img`
   border-radius: ${props => props.theme.borderRadius};
   background-color: black;
   cursor: pointer;
+  @media (max-width: 1000px) {
+      margin-right:0.5rem;
+  }
 `;
 const DropDown = styled.div`
   width: 100px;
@@ -63,9 +69,17 @@ const StyledLink = styled(Link)`
 const LogoutSection = styled.section`
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+  @media (max-width: 1000px) {
+      margin-right:0.5rem;
+  }
 `;
 
+const StyledIcon = styled(FontAwesomeIcon) `
+@media (max-width: 1000px) {
+      display:none;
+  }
+`
 export default function HeaderComp() {
 
     const { t, toggleConnected } = useContext(AppContext);
@@ -112,7 +126,7 @@ export default function HeaderComp() {
             </LogoContainer>
             <Account onClick={toggleDropdown}>
                 <Avatar src={cloudinaryCore.url(avatar)}/>
-                <FontAwesomeIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white', cursor: 'pointer'}} icon={faChevronDown}/>
+                <StyledIcon style={{marginLeft: '10px', fontSize: '15px', color: 'white', cursor: 'pointer'}} icon={faChevronDown}/>
                 { dropdownOpen &&
                     <DropDown ref={node}>
                         <p><StyledLink to="/search">{t.header.search}</StyledLink></p>
