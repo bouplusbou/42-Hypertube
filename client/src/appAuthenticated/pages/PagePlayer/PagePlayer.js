@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import axios from "axios";
 import AppContext from '../../../contexts/AppContext';
 import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
 const Global = styled.section`
   background-color: black;
@@ -10,6 +12,7 @@ const Global = styled.section`
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  position: relative;
 `;
 
 const Video = styled.video`
@@ -18,7 +21,18 @@ const Video = styled.video`
     outline: none;
   }
 `;
-
+const CloseIcon = styled(FontAwesomeIcon)`
+  font-size: 30px;
+  color: gray;
+  &:hover {
+    color: ${props => props.theme.color.red};
+  }
+`;
+const CloseLink = styled(Link)`
+  position: absolute;
+  top: 20px;
+  right: 30px;
+`;
 const LinkBack = styled(Link)`
   font-size: 1.3rem;
   font-weight: 700;
@@ -52,6 +66,9 @@ export default (props) => {
 
   return (
     <Global>
+      <CloseLink to={`/movies/${props.match.params.imdbId}`}>
+        <CloseIcon icon={faTimes}></CloseIcon>
+      </CloseLink>
       {(currentMovieInfo && currentMovieInfo.magnet.source) ? 
         <Video controls>
           <source src={`http://localhost:5000/api/player/stream?provider=${currentMovieInfo.magnet.source}&id=${currentMovieInfo.imdbId}&magnet=${currentMovieInfo.magnet.magnet}`} type="video/mp4" />
