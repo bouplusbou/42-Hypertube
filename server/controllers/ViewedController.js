@@ -22,6 +22,7 @@ const setViewed = async (req, res) => {
                     $position : 0
                 }}
             })
+        res.status(200).send('ok')
     } catch(err) {
         console.log(err);
         res.status(500).json({ error: err});
