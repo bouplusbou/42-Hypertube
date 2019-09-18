@@ -7,9 +7,38 @@ import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
 import Slider from 'rc-slider';
 
+const genreList = [
+    'All',
+    'Action',
+    'Adventure',
+    'Animation',
+    'Comedy',
+    'Crime',
+    'Documentary',
+    'Drama',
+    'Family',
+    'Fantasy',
+    'History',
+    'Horror',
+    'Music',
+    'Musical',
+    'Mystery',
+    'Romance',
+    'Sci-Fi',
+    'Sport',
+    'Thriller',
+    'War',
+    'Western'
+]
+
+const sortingList = [
+    'rating',
+    'year'
+]
+
 const MainSection = styled.section `
-    background-color:#141414;
-    padding:1rem;
+    background-color:#202020;
+    padding:1.5rem;
     min-height:100vh;
 `
 
@@ -17,13 +46,21 @@ const TermsContainer = styled.section `
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding: 0 15vw;
+    justify-items:center;
+    padding:0 1.5rem;
+`
+
+const StyledLabel = styled.label `
+    color:#C50C15;
+    font-weight:bold;
+    margin-right:1.5rem;
+    font-size:1.5rem;
 `
 
 const StyledTextField = styled(TextField) `
     label {
         color:#C50C15;
-        font-size:1.25rem;
+        font-size:1.5rem;
         font-weight:bold;
     }
     div {
@@ -36,16 +73,34 @@ const StyledTextField = styled(TextField) `
     }
     svg { color: white}
     p { color: white;}
-    select { border-color: #C50C15; }
+    select { font-weight:bold; }
+`
+
+const StyledH2 = styled.h2 `
+    color:white;
+    font-size:3rem;
+    margin:1.5rem 0 0 4rem;
 `
 
 const MoviesContainer = styled.section `
-    margin:3rem 0;
+    margin:0.5rem 0 3rem 0;
     display:grid;
     grid-template-columns: repeat( auto-fill, 225px );
     grid-column-gap:5px;
     grid-row-gap:1rem;
     justify-content:center;
+`
+
+const StyledSearchInput = styled(StyledTextField) `
+    width:40rem;
+    div { 
+        color:white;
+    }
+`
+
+const RangeContainer = styled.div `
+    flex:1;
+    margin: 1rem;
 `
 
 const MovieThumbnail = props => {
@@ -57,7 +112,10 @@ const MovieThumbnail = props => {
         height:338px;
         width:225px;
         background-size:cover;
-        :hover { cursor:pointer }
+        :hover { cursor:pointer
+            div {
+                visibility:visible;
+            } }
     `
 
     const Mask = styled.div `
@@ -68,6 +126,7 @@ const MovieThumbnail = props => {
         box-sizing:border-box;
         display:flex;
         flex-direction:column;
+        visibility:hidden;
         align-items:center;
     `
 
@@ -75,12 +134,14 @@ const MovieThumbnail = props => {
         font-size:1.5rem;
         color:white;
         margin:0;
+        text-decoration:none;
     `
 
     const Year = styled.p `
         color:white;
         margin:0;
         font-weight:bold;
+        text-decoration:none;
     `
     const handleHover = () => {
         setHover(p => !p)
@@ -91,23 +152,16 @@ const MovieThumbnail = props => {
             onMouseEnter={handleHover}
             onMouseLeave={handleHover}
         >
-            {hover && 
                 <Mask>
                     <Title>{props.movie.title}</Title>
                     <Year>({props.movie.year})</Year>
                     <Year>({props.movie.runtime} minutes)</Year>
                     <Year>({props.movie.rating})</Year>
                 </Mask>
-            }
         </Thumbnail>
     )
 }
 
-const StyledSearchInput = styled(StyledTextField) `
-    div {
-        color:white;
-    }
-`
 export default function PageSearch() {
 
     const [searchTerms, setSearchTerms] = useState({
@@ -121,34 +175,7 @@ export default function PageSearch() {
         limit: 50
     })
     const [searchResult, setSearchResult] = useState({movies: []});
-    const genreList = [
-        'All',
-        'Action',
-        'Adventure',
-        'Animation',
-        'Comedy',
-        'Crime',
-        'Documentary',
-        'Drama',
-        'Family',
-        'Fantasy',
-        'History',
-        'Horror',
-        'Music',
-        'Musical',
-        'Mystery',
-        'Romance',
-        'Sci-Fi',
-        'Sport',
-        'Thriller',
-        'War',
-        'Western'
-    ]
 
-    const sortingList = [
-        'rating',
-        'year'
-    ]
 
     useEffect(() => {
         const fetchMovies = async () => {
@@ -201,6 +228,7 @@ export default function PageSearch() {
     }
 
     const handleSearchInput = event => {
+        console.log(event.target.value);
         setSearchResult({movies: []})
         setSearchTerms({
             ...searchTerms,
@@ -232,12 +260,22 @@ export default function PageSearch() {
     const Range = createSliderWithTooltip(Slider.Range);
 
     const StyledRange = styled(Range) `
-        max-width: 10rem;
+        margin-top:1rem;
     `
 
     return (
         <MainSection>
             <TermsContainer>
+                <StyledSearchInput
+                    label="Search a title"
+                    value={searchTerms.keywords}
+                    onChange={handleSearchInput}
+                    variant="outlined"
+                    placeholder="10 Cloverfield Lanes, Hereditary, ..."
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                />
                 <StyledTextField
                     select
                     label="Genre"
@@ -247,7 +285,6 @@ export default function PageSearch() {
                     SelectProps={{
                       native: true,
                     }}
-                    margin="normal"
                     variant="outlined"
                     >
                     {genreList.map(genre => (
@@ -265,7 +302,6 @@ export default function PageSearch() {
                     SelectProps={{
                       native: true,
                     }}
-                    margin="normal"
                     variant="outlined"
                     >
                     {sortingList.map(sorting => (
@@ -283,41 +319,41 @@ export default function PageSearch() {
                     SelectProps={{
                       native: true,
                     }}
-                    margin="normal"
                     variant="outlined"
                     >
                     <option value={-1}>Desc</option>
                     <option value={1}>Asc</option>
                 </StyledTextField>
-                <Typography gutterBottom>
-                    Ratings
-                </Typography>
-                <StyledRange 
-                    onAfterChange={handleRatingsChanges}
-                    min={0}
-                    max={5}
-                    allowCross={false}
-                    defaultValue={searchTerms.ratings}
-                    tipFormatter={value => `${value}`} 
-                />
-                <Typography gutterBottom>
-                    Years
-                </Typography>
-                <StyledRange 
-                    onAfterChange={handleYearsChanges}
-                    min={1915}
-                    max={2019}
-                    allowCross={false}
-                    defaultValue={searchTerms.years}
-                    tipFormatter={value => `${value}`} 
-                />
-                <StyledSearchInput
-                    label="Search"
-                    value={searchTerms.keywords}
-                    onChange={handleSearchInput}
-                    variant="outlined"
-                />
             </TermsContainer>
+            <TermsContainer>
+                <RangeContainer>
+                    <StyledLabel>
+                        Ratings
+                    </StyledLabel>
+                    <StyledRange 
+                        onAfterChange={handleRatingsChanges}
+                        min={0}
+                        max={5}
+                        allowCross={false}
+                        defaultValue={searchTerms.ratings}
+                        tipFormatter={value => `${value}`} 
+                    />
+                </RangeContainer>
+                <RangeContainer>
+                    <StyledLabel>
+                        Years
+                    </StyledLabel>
+                    <StyledRange 
+                        onAfterChange={handleYearsChanges}
+                        min={1915}
+                        max={2019}
+                        allowCross={false}
+                        defaultValue={searchTerms.years}
+                        tipFormatter={value => `${value}`} 
+                    />
+                </RangeContainer>
+            </TermsContainer>
+            <StyledH2>{searchTerms.genre}</StyledH2>
             <MoviesContainer>
                 {searchResult.movies.map(movie => <Link to={`/movies/${movie.imdbId}`}><MovieThumbnail movie={movie}/></Link>)}
             </MoviesContainer>

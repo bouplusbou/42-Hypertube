@@ -17,6 +17,7 @@ const Header = styled.header`
     display: grid;
     grid-template-columns: 8fr 2fr 2fr;
     align-content: center;
+    padding: 0 1.5rem;
 `;
 const LogoContainer = styled.div`
     margin-left: 20px;
