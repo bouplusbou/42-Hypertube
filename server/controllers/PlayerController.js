@@ -159,7 +159,6 @@ const handleTorrent = async (req, res) => {
   } else {
     downloadTorrent(movieFile, magnet, options, req, res);
   }
-  // }
 };
 
 const handleSubs = async (req, res) => {
@@ -167,9 +166,7 @@ const handleSubs = async (req, res) => {
   const idIMDB = req.query.id;
   const dir = `/tmp/subs/${idIMDB}`;
   if (!fs.existsSync(dir)) {
-    if (!fs.existsSync(`/tmp/subs`)) fs.mkdirSync(`/tmp/subs`);
-    if (!fs.existsSync(`/tmp/subs/${idIMDB}`))
-      fs.mkdirSync(`/tmp/subs/${idIMDB}`);
+    fs.mkdirSync(`/tmp/subs/${idIMDB}`, { recursive: true });
   }
   yifysubtitles(idIMDB, {
     path: dir,
@@ -177,25 +174,24 @@ const handleSubs = async (req, res) => {
   })
     .then(async data => {
       await Promise.all(
-        data.map(e => {
-          return (async () => {
-            let newPath
-              if (/\s/.test(e.path)) {
-                newPath = e.path.split(' ').join('+')
-                fs.rename(e.path, newPath, err => console.log(err))
-              }
+        data.map(async e => {
+          return await (async () => {
+            let newPath =  `${dir}/${e.langShort}.vtt`;
+            if (fs.existsSync(e.path)) {
+              fs.rename(e.path, newPath, () => {});
               arr.push({
                 lang: e.langShort,
-                path: newPath ? newPath : e.path
+                path: newPath
               });
               return Promise.resolve();
+            }
           })();
         })
       );
       res.status(200).send(arr);
     })
     .catch(err => {
-      console.log(err)
+      console.log(err);
       res.status(400).send({ message: "Subtitles not found" });
     });
 };
