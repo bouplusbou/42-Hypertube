@@ -11,7 +11,6 @@ import { faStar, faEye } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { actionLogout } from '../../../actions/authActions';
 
-const testViewedList = ['tt8242160', 'tt4461676'];
 const genreList = [
     'All',
     'Action',
@@ -236,6 +235,7 @@ const MovieThumbnail = props => {
 export default function PageSearch() {
 
     const { toggleConnected } = useContext(AppContext);
+    const [viewedList, setViewedList] = useState({list: []});
     const [searchTerms, setSearchTerms] = useState({
         genre: "All",
         page: 1,
@@ -247,22 +247,22 @@ export default function PageSearch() {
         limit: 50
     })
     const [searchResult, setSearchResult] = useState({movies: []});
-    // const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('authToken');
 
-    // useEffect(() => {
-    //     let isSubscribed = true;
-    //     const fetchUserdata = async () => {
-    //         try {
-    //             const res = await axios.get(`/users?authToken=${authToken}`);
-    //             console.log(res.data);
-    //         } catch(err) {
-    //             console.log(err);
-    //             if (err.response && err.response.status === 401) actionLogout(toggleConnected);
-    //         }
-    //     };
-    //     if (authToken) fetchUserdata();
-    //     return () => isSubscribed = false;
-    // }, [])
+    useEffect(() => {
+        let isSubscribed = true;
+        const fetchUserdata = async () => {
+            try {
+                const res = await axios.get(`/users?authToken=${authToken}`);
+                if (isSubscribed) setViewedList({ list: [...res.data.user.viewedList]});
+            } catch(err) {
+                console.log(err);
+                if (err.response && err.response.status === 401) actionLogout(toggleConnected);
+            }
+        };
+        if (authToken) fetchUserdata();
+        return () => isSubscribed = false;
+    }, [authToken, toggleConnected])
 
     useEffect(() => {
         let isSubscribed = true;
@@ -352,7 +352,7 @@ export default function PageSearch() {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-    
+
     const handleScroll = () => {
         if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
         setSearchTerms(p => {
@@ -454,7 +454,11 @@ export default function PageSearch() {
             </TermsContainer>
             <StyledH2>{searchTerms.genre} Movies</StyledH2>
             <MoviesContainer>
-                {searchResult.movies.map(movie => <Link to={`/movies/${movie.imdbId}`} style={{textDecoration:'none'}} key={movie.imdbId}><MovieThumbnail movie={movie} viewed={testViewedList.includes(movie.imdbId)}/></Link>)}
+                {searchResult.movies.map(movie => 
+                    <Link to={`/movies/${movie.imdbId}`} style={{textDecoration:'none'}} key={movie.imdbId}>
+                        <MovieThumbnail movie={movie} viewed={viewedList.list.includes(movie.imdbId)}/>
+                    </Link>
+                )}
             </MoviesContainer>
         </MainSection>
     )
