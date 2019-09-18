@@ -297,6 +297,7 @@ export default function TestMovie(props) {
 
   const { t, toggleConnected, setCurrentMovieInfo } = useContext(AppContext);
   const authToken = localStorage.getItem('authToken');
+  const [isLoading, setIsLoading] = useState(true);
   const [comments, setComments] = useState(null);
   const [movieInfo, setMovieInfo] = useState(null);
   const [comment, setComment] = useState(null);
@@ -323,8 +324,10 @@ export default function TestMovie(props) {
     const fetchData = async () => {
       try {
         const res = await axios.get(`/movies/${props.match.params.imdbId}?authToken=${authToken}`);
-        // console.log(res.data.movieInfo[0]);
-        if (isSubscribed) setMovieInfo(res.data.movieInfo[0]);
+        if (isSubscribed) {
+          setMovieInfo(res.data.movieInfo[0]);
+          setIsLoading(false);
+        }
       } catch(err) {
         console.log(err);
         if (err.response && err.response.status === 401) actionLogout(toggleConnected);
@@ -386,53 +389,69 @@ export default function TestMovie(props) {
 
   return (
     <Hero>
-      <CloseLink to="/search">
-        <CloseIcon icon={faTimes}></CloseIcon>
-      </CloseLink>
-      {!movieInfo &&
-        <NotFoundSection>
-          <NotFoundContainer>
-              <NotFoundTitle>404</NotFoundTitle>  
-              <NotFoundText>Sorry but this film does not exist in our database</NotFoundText>  
-          </NotFoundContainer>
-        </NotFoundSection>
-      }
-      {movieInfo && 
-        <Fragment>
-          <PosterSection>
-            <Poster src={movieInfo.poster}></Poster>
-          </PosterSection>
-          <InfoSection>
-            <Title>{movieInfo.title.toLowerCase().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')}</Title>
-            <Info>
-              <Year>{movieInfo.year}</Year>
-              {movieInfo.runtime !== 0 &&
+      {!isLoading &&
+      <Fragment>
+        <CloseLink to="/search">
+          <CloseIcon icon={faTimes}></CloseIcon>
+        </CloseLink>
+        {!movieInfo &&
+          <NotFoundSection>
+            <NotFoundContainer>
+                <NotFoundTitle>404</NotFoundTitle>  
+                <NotFoundText>Sorry but this film does not exist in our database</NotFoundText>  
+            </NotFoundContainer>
+          </NotFoundSection>
+        }
+        {movieInfo && 
+          <Fragment>
+            <PosterSection>
+              <Poster src={movieInfo.poster}></Poster>
+            </PosterSection>
+            <InfoSection>
+              <Title>{movieInfo.title.toLowerCase().split(' ').map((s) => s.charAt(0).toUpperCase() + s.substring(1)).join(' ')}</Title>
+              <Info>
+                <Year>{movieInfo.year}</Year>
+                {movieInfo.runtime !== 0 &&
+                  <Fragment>
+                    <Separator></Separator>
+                    <Runtime>{movieInfo.runtime} {t.movie.minutes}</Runtime>
+                  </Fragment>
+                }
+                <Separator></Separator>
+                <Genre>{movieInfo.genres.join(' / ')}</Genre>
+                <Separator></Separator>
+                <ImdbLink target="_blank" href={`https://www.imdb.com/title/${props.match.params.imdbId}`}>
+                  <ImdbLogo src={cloudinaryCore.url('imdb_logo')}></ImdbLogo>
+                </ImdbLink>
+                <Separator></Separator>
+                <Rating data-tooltip={`${movieInfo.rating}/5`}>
+                  {movieInfo.rating > 0.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                  {movieInfo.rating > 1.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                  {movieInfo.rating > 2.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                  {movieInfo.rating > 3.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                  {movieInfo.rating > 4.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
+                </Rating>
+              </Info>
+              <Plot>{movieInfo.plot}</Plot>
+              <TorrentSection>
+                {movieInfo.torrents.filter(magnet => magnet.source === 'Popcorn Time').length > 0 && 
+                  <Fragment>
+                    <ProviderLogo src={cloudinaryCore.url('popcornTime_logo')}></ProviderLogo>
+                    {movieInfo.torrents.filter(magnet => magnet.source === 'Popcorn Time').map((magnet, index) => 
+                      <Magnet key={index} onClick={() => launchStream(magnet)}>
+                        <Seeds>Seeds: <span style={{color: '#51C148'}}>{magnet.seed}</span></Seeds>
+                        <Peers>Peers: <span style={{color: '#D33838'}}>{magnet.peer}</span></Peers>
+                        <Size>{magnet.fileSize}</Size>
+                        <Quality>{magnet.quality}</Quality>
+                        <PlayButton icon={faPlay}></PlayButton>
+                      </Magnet>
+                    )}
+                  </Fragment>              
+                }
+                {movieInfo.torrents.filter(magnet => magnet.source === 'YTS').length > 0 &&
                 <Fragment>
-                  <Separator></Separator>
-                  <Runtime>{movieInfo.runtime} {t.movie.minutes}</Runtime>
-                </Fragment>
-              }
-              <Separator></Separator>
-              <Genre>{movieInfo.genres.join(' / ')}</Genre>
-              <Separator></Separator>
-              <ImdbLink target="_blank" href={`https://www.imdb.com/title/${props.match.params.imdbId}`}>
-                <ImdbLogo src={cloudinaryCore.url('imdb_logo')}></ImdbLogo>
-              </ImdbLink>
-              <Separator></Separator>
-              <Rating data-tooltip={`${movieInfo.rating}/5`}>
-                {movieInfo.rating > 0.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
-                {movieInfo.rating > 1.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
-                {movieInfo.rating > 2.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
-                {movieInfo.rating > 3.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
-                {movieInfo.rating > 4.5 ? <FullStar icon={faStar}></FullStar> : <EmptyStar icon={faStar}></EmptyStar>}
-              </Rating>
-            </Info>
-            <Plot>{movieInfo.plot}</Plot>
-            <TorrentSection>
-              {movieInfo.torrents.filter(magnet => magnet.source === 'Popcorn Time').length > 0 && 
-                <Fragment>
-                  <ProviderLogo src={cloudinaryCore.url('popcornTime_logo')}></ProviderLogo>
-                  {movieInfo.torrents.filter(magnet => magnet.source === 'Popcorn Time').map((magnet, index) => 
+                  <ProviderLogo src={cloudinaryCore.url('yts_logo')}></ProviderLogo>
+                  {movieInfo.torrents.filter(magnet => magnet.source === 'YTS').map((magnet, index) => 
                     <Magnet key={index} onClick={() => launchStream(magnet)}>
                       <Seeds>Seeds: <span style={{color: '#51C148'}}>{magnet.seed}</span></Seeds>
                       <Peers>Peers: <span style={{color: '#D33838'}}>{magnet.peer}</span></Peers>
@@ -441,53 +460,41 @@ export default function TestMovie(props) {
                       <PlayButton icon={faPlay}></PlayButton>
                     </Magnet>
                   )}
-                </Fragment>              
-              }
-              {movieInfo.torrents.filter(magnet => magnet.source === 'YTS').length > 0 &&
-              <Fragment>
-                <ProviderLogo src={cloudinaryCore.url('yts_logo')}></ProviderLogo>
-                {movieInfo.torrents.filter(magnet => magnet.source === 'YTS').map((magnet, index) => 
-                  <Magnet key={index} onClick={() => launchStream(magnet)}>
-                    <Seeds>Seeds: <span style={{color: '#51C148'}}>{magnet.seed}</span></Seeds>
-                    <Peers>Peers: <span style={{color: '#D33838'}}>{magnet.peer}</span></Peers>
-                    <Size>{magnet.fileSize}</Size>
-                    <Quality>{magnet.quality}</Quality>
-                    <PlayButton icon={faPlay}></PlayButton>
-                  </Magnet>
+                </Fragment>
+                }
+              </TorrentSection>
+              <CommentsContainer>
+                <CommentsTitle>{t.movie.comments}</CommentsTitle>
+                {comments && comments.map(comment => 
+                  <Comment key={comment.date}>
+                    <AvatarThumb src={cloudinaryCore.url(comment.user.avatarPublicId)}></AvatarThumb>
+                    <Username to={`/users/${comment.user.username}`}>{comment.user.username}</Username>
+                    <Date></Date>
+                    <CommentText>{comment.comment}</CommentText>
+                  </Comment>
                 )}
-              </Fragment>
-              }
-            </TorrentSection>
-            <CommentsContainer>
-              <CommentsTitle>{t.movie.comments}</CommentsTitle>
-              {comments && comments.map(comment => 
-                <Comment key={comment.date}>
-                  <AvatarThumb src={cloudinaryCore.url(comment.user.avatarPublicId)}></AvatarThumb>
-                  <Username to={`/users/${comment.user.username}`}>{comment.user.username}</Username>
-                  <Date></Date>
-                  <CommentText>{comment.comment}</CommentText>
-                </Comment>
-              )}
-            </CommentsContainer>
-            <FormContainer>
-              <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
-                <StyledTextField
-                  id="standard-comment"
-                  label={t.movie.comment}
-                  onBlur={handleBlur('comment')}
-                  onChange={handleChange('comment')}
-                  error={commentError}
-                  helperText={commentHelper}
-                  margin="normal"
-                  value={comment || ''}
-                />
-                <SubmitButton type="submit">
-                  <p>{t.movie.post}</p>
-                </SubmitButton>
-              </Form>
-            </FormContainer>
-          </InfoSection>
-        </Fragment>
+              </CommentsContainer>
+              <FormContainer>
+                <Form noValidate autoComplete="off" onSubmit={handleSubmit}>
+                  <StyledTextField
+                    id="standard-comment"
+                    label={t.movie.comment}
+                    onBlur={handleBlur('comment')}
+                    onChange={handleChange('comment')}
+                    error={commentError}
+                    helperText={commentHelper}
+                    margin="normal"
+                    value={comment || ''}
+                  />
+                  <SubmitButton type="submit">
+                    <p>{t.movie.post}</p>
+                  </SubmitButton>
+                </Form>
+              </FormContainer>
+            </InfoSection>
+          </Fragment>
+        }
+      </Fragment>
       }
     </Hero>
   );
