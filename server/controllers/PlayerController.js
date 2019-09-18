@@ -122,7 +122,6 @@ const downloadTorrent = async (movieFile, magnet, options, req, res) => {
         if (mainExtensions.includes(extension))
           streamTorrent(file, file.length, res, req.headers.range);
         else convertStreamTorrent(file, res, options.path);
-        // }
       } else {
         file.deselect();
       }
