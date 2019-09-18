@@ -16,7 +16,7 @@ const AuthenticatedSwitch = () => (
         <Route exact path='/users/:username' component={PageProfile}/>
         <Route exact path='/movies/:imdbId' component={PageMovie}/>
         <Route exact path='/search' component={PageSearch}/>
-        <Route exact path='/stream' component={PagePlayer}/>
+        <Route exact path='/:imdbId/stream' component={PagePlayer}/>
         <Route component={PageSearch}/>
     </Switch>
 );

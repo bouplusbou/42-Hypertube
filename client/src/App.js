@@ -25,7 +25,7 @@ const GlobalStyles = createGlobalStyle`
 
 function App(props) {
   const [connected, setConnected] = useState(false);
-  const [magnet, setMagnet] = useState(false);
+  const [currentMovieInfo, setCurrentMovieInfo] = useState(false);
   const [socket, setSocket] = useState(null);
   const [locale, setLocale] = useState('EN');
   const [t, setT] = useState(EN);
@@ -45,8 +45,8 @@ function App(props) {
     locale,
     setLocale,
     socket,
-    magnet,
-    setMagnet
+    currentMovieInfo,
+    setCurrentMovieInfo
   };
 
   useEffect(() => {
