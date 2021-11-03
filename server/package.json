@@ -41,7 +41,7 @@
     "torrent-to-magnet": "^1.0.1",
     "socket.io": "^2.2.0",
     "uuid": "^3.3.3",
-    "validator": "^11.1.0",
+    "validator": "^13.7.0",
     "yifysubtitles": "^2.1.2"
   },
   "devDependencies": {
